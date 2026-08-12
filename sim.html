@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>RP Visual Field Prototype</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="panel">
+  <header id="panelHead">Simulation <span class="chev">−</span></header>
+  <div class="body">
+    <label>Degeneration of central field</label>
+    <input type="range" id="sDegen" min="0" max="1" step="0.01" value="0.55">
+    <label>Density of flashing net</label>
+    <input type="range" id="sNet" min="0" max="1" step="0.01" value="0.40">
+    <label>Periphery transparency</label>
+    <input type="range" id="sThru" min="0" max="1" step="0.01" value="0.75">
+    <label>Background</label>
+    <div class="seg">
+      <button id="bgCam" class="on">Camera</button>
+      <button id="bgVid">Video</button>
+    </div>
+    <label>View</label>
+    <div class="seg">
+      <button id="vwImm" class="on">Immersive</button>
+      <button id="vwSbs">Side-by-side</button>
+    </div>
+  </div>
+</div>
+<div id="note">starting…</div>
+<video id="cam" autoplay playsinline muted style="display:none"></video>
+<!-- openly licensed footage, self-hosted: see assets/CREDITS.md -->
+<video id="vid" src="assets/shanghai-walk.mp4" loop muted playsinline
+       preload="metadata" style="display:none"></video>
+<script type="module" src="renderer.js"></script>
+</body>
+</html>

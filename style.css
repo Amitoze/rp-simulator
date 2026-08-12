@@ -1,0 +1,34 @@
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; z-index: 1; }
+#note {
+  position: fixed; bottom: 10px; left: 10px; color: #888;
+  font: 13px -apple-system, sans-serif; background: rgba(0,0,0,.55);
+  padding: 6px 10px; border-radius: 6px; pointer-events: none; z-index: 2;
+}
+#panel {
+  z-index: 2;
+  position: fixed; top: 10px; left: 10px; width: 230px;
+  background: rgba(12, 14, 18, .82); color: #cfd4dc;
+  font: 13px -apple-system, sans-serif;
+  border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
+  user-select: none;
+}
+#panel header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px; cursor: pointer; font-weight: 600;
+}
+#panel header span.chev { color: #8a93a3; font-weight: 400; }
+#panel .body { padding: 2px 12px 12px; }
+#panel.min .body { display: none; }
+#panel label { display: block; margin: 10px 0 4px; color: #aeb6c4; }
+#panel input[type=range] { width: 100%; }
+#panel .seg { display: flex; gap: 6px; }
+#panel .seg button { flex: 1; }
+#panel .seg button.on {
+  background: #2b62c9; border-color: #2b62c9; color: #fff;
+}
+#panel button {
+  background: rgba(255,255,255,.12); color: #dfe3ea; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.18); border-radius: 4px;
+  padding: 4px 12px; font: 12px -apple-system, sans-serif;
+}
