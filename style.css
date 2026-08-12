@@ -6,7 +6,8 @@ canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
   padding: 6px 10px; border-radius: 6px; pointer-events: none; z-index: 2;
 }
 #panel {
-  z-index: 2;
+  /* above the canvas and the #note credit line */
+  z-index: 10;
   position: fixed; top: 10px; left: 10px; width: 230px;
   background: rgba(12, 14, 18, .82); color: #cfd4dc;
   font: 13px -apple-system, sans-serif;
@@ -15,19 +16,39 @@ canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
 }
 #panel header {
   display: flex; justify-content: space-between; align-items: center;
+  gap: 10px;
   padding: 12px 14px; cursor: pointer; font-weight: 600; font-size: 15px;
   border-radius: 8px;
 }
 #panel header:hover { background: rgba(255,255,255,.06); }
-#panel header span.chev {
-  color: #dfe3ea; font-weight: 400; font-size: 18px; line-height: 1;
-  width: 30px; height: 30px;
-  display: flex; align-items: center; justify-content: center;
+#panel header .chev {
+  color: #dfe3ea; font: 600 13px -apple-system, sans-serif;
+  padding: 6px 14px; cursor: pointer;
   background: rgba(255,255,255,.10);
   border: 1px solid rgba(255,255,255,.18); border-radius: 6px;
 }
-#panel .body { padding: 2px 12px 12px; }
+#panel .body {
+  padding: 2px 12px 12px;
+  /* never taller than the viewport (dvh tracks mobile browser chrome);
+     the offset covers the panel's top inset, header, and body padding */
+  max-height: calc(100vh - 100px);
+  max-height: calc(100dvh - 100px);
+  overflow-y: auto;
+}
 #panel.min .body { display: none; }
+/* collapsed: shrink to a lone semi-transparent hamburger button */
+#panel.min {
+  width: auto; background: transparent; border-color: transparent;
+}
+#panel.min header, #panel.min header:hover { padding: 0; background: transparent; }
+#panel.min .title { display: none; }
+#panel.min .chev {
+  width: 40px; height: 40px; padding: 0;
+  font-size: 18px; font-weight: 400; line-height: 40px; text-align: center;
+  background: rgba(12, 14, 18, .45);
+  border-color: rgba(255,255,255,.15);
+  color: rgba(223, 227, 234, .85);
+}
 #panel label { display: block; margin: 10px 0 4px; color: #aeb6c4; }
 #panel input[type=range] { width: 100%; }
 #panel .seg { display: flex; gap: 6px; }
@@ -46,9 +67,16 @@ canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
 /* touch devices: bigger panel, 44px-class touch targets */
 @media (pointer: coarse) {
   #panel { width: min(320px, calc(100vw - 24px)); font-size: 15px; }
+  #panel.min { width: auto; }
   #panel header { padding: 14px 16px; }
-  #panel header span.chev { width: 36px; height: 36px; font-size: 20px; }
+  #panel header .chev { padding: 10px 16px; font-size: 14px; }
+  #panel.min header { padding: 0; }
+  #panel.min .chev { width: 48px; height: 48px; padding: 0; font-size: 20px; line-height: 48px; }
   #panel .body { padding: 4px 16px 16px; }
+  #panel .body {
+    max-height: calc(100vh - 130px);
+    max-height: calc(100dvh - 130px);
+  }
   #panel label { font-size: 14px; margin: 12px 0 6px; }
   #panel button { padding: 12px 14px; font-size: 15px; }
   #panel input[type=range] { height: 40px; }

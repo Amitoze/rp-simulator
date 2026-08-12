@@ -9,14 +9,17 @@
 <body>
 <canvas id="gl"></canvas>
 <div id="panel">
-  <header id="panelHead">Simulation <span class="chev">−</span></header>
+  <header id="panelHead">
+    <span class="title">Simulation</span>
+    <button class="chev" aria-label="Toggle settings">Done</button>
+  </header>
   <div class="body">
     <label>Degeneration of central field</label>
-    <input type="range" id="sDegen" min="0" max="1" step="0.01" value="0.55">
+    <input type="range" id="sDegen" min="0" max="1" step="0.01">
     <label>Density of flashing net</label>
-    <input type="range" id="sNet" min="0" max="1" step="0.01" value="0.40">
+    <input type="range" id="sNet" min="0" max="1" step="0.01">
     <label>Periphery transparency</label>
-    <input type="range" id="sThru" min="0" max="1" step="0.01" value="0.75">
+    <input type="range" id="sThru" min="0" max="1" step="0.01">
     <label>Background</label>
     <div class="seg">
       <button id="bgCam" class="on">Camera</button>

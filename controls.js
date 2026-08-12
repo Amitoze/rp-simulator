@@ -1,5 +1,7 @@
 // Panel UI, background sources (camera / local video), and shared state.
 
+import { DEFAULTS } from './config.js';
+
 export const state = {
   hasCam: false,      // camera stream is live
   mirror: false,      // mirror the camera image (front camera only)
@@ -64,6 +66,15 @@ function bindToggle(idA, idB, setState) {
   });
 }
 
+function applyDefaults() {
+  sliders.degen.value = DEFAULTS.degeneration;
+  sliders.net.value = DEFAULTS.netDensity;
+  sliders.thru.value = DEFAULTS.transparency;
+  if (DEFAULTS.background === 'video') document.getElementById('bgVid').click();
+  if (DEFAULTS.view === 'sideBySide') document.getElementById('vwSbs').click();
+  if (DEFAULTS.menuCollapsed) document.getElementById('panelHead').click();
+}
+
 export function initControls() {
   bindToggle('bgCam', 'bgVid', v => {
     state.videoMode = v;
@@ -77,8 +88,10 @@ export function initControls() {
     const panel = document.getElementById('panel');
     panel.classList.toggle('min');
     panel.querySelector('.chev').textContent =
-      panel.classList.contains('min') ? '+' : '−';
+      panel.classList.contains('min') ? '☰' : 'Done';
   });
+
+  applyDefaults();
 
   document.getElementById('camFlip').addEventListener('click', () => {
     const other = facing === 'user' ? 'environment' : 'user';
