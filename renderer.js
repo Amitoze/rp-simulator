@@ -1,6 +1,6 @@
 // WebGL setup and the per-frame render loop.
 
-import { state, video, fileVideo, sliders, initControls } from './controls.js';
+import { state, video, fileVideo, sliders, initControls, IS_TOUCH } from './controls.js';
 
 const canvas = document.getElementById('gl');
 const gl = canvas.getContext('webgl');
@@ -39,7 +39,7 @@ async function main() {
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
   const U = {};
-  for (const name of ['uTex', 'uSrc', 'uTime', 'uRes', 'uEdgeBase',
+  for (const name of ['uTex', 'uSrc', 'uMirror', 'uTime', 'uRes', 'uEdgeBase',
                       'uNetDensity', 'uSeeThru', 'uSplit', 'uAspect']) {
     U[name] = gl.getUniformLocation(prog, name);
   }
@@ -56,9 +56,11 @@ async function main() {
   initControls();
 
   function resize() {
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = innerWidth * dpr;
-    canvas.height = innerHeight * dpr;
+    // cap the render resolution: full retina is wasted through the
+    // smoke/flicker and runs hot on phones
+    const dpr = Math.min(window.devicePixelRatio || 1, 2) * (IS_TOUCH ? 0.75 : 1);
+    canvas.width = Math.round(innerWidth * dpr);
+    canvas.height = Math.round(innerHeight * dpr);
     gl.viewport(0, 0, canvas.width, canvas.height);
   }
   addEventListener('resize', resize);
@@ -76,13 +78,17 @@ async function main() {
     }
     gl.uniform1i(U.uTex, 0);
     gl.uniform1f(U.uSrc, useVid ? 2 : (state.hasCam ? 1 : 0));
+    gl.uniform1f(U.uMirror, !useVid && state.mirror ? 1 : 0);
     gl.uniform1f(U.uTime, (performance.now() - t0) / 1000);
     gl.uniform2f(U.uRes, canvas.width, canvas.height);
     // degeneration 0..1 maps to island radius 0.45 (mild) .. 0.07 (late)
     gl.uniform1f(U.uEdgeBase, 0.45 - 0.38 * parseFloat(sliders.degen.value));
     gl.uniform1f(U.uNetDensity, parseFloat(sliders.net.value));
     gl.uniform1f(U.uSeeThru, parseFloat(sliders.thru.value));
-    gl.uniform1f(U.uSplit, state.splitMode ? 1 : 0);
+    // comparison layout follows orientation: side-by-side in landscape,
+    // stacked in portrait
+    gl.uniform1f(U.uSplit,
+      state.splitMode ? (canvas.width >= canvas.height ? 1 : 2) : 0);
     gl.uniform1f(U.uAspect,
       srcEl && srcEl.videoWidth ? srcEl.videoWidth / srcEl.videoHeight : 16 / 9);
     gl.drawArrays(gl.TRIANGLES, 0, 3);

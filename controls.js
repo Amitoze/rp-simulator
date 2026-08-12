@@ -2,9 +2,12 @@
 
 export const state = {
   hasCam: false,      // camera stream is live
+  mirror: false,      // mirror the camera image (front camera only)
   videoMode: false,   // self-hosted video file as the background
-  splitMode: false,   // side-by-side comparison view
+  splitMode: false,   // comparison view (side-by-side / stacked)
 };
+
+export const IS_TOUCH = matchMedia('(pointer: coarse)').matches;
 
 const note = document.getElementById('note');
 export const video = document.getElementById('cam');
@@ -20,7 +23,33 @@ function updateNote() {
   const bg = state.videoMode ? 'video: Shanghai city walk, LOVE SHANGHAI, CC BY 4.0'
     : (state.hasCam ? 'live camera' : 'no camera — showing sample scene');
   note.textContent = bg + ' · simulated RP visual field' +
-    (state.splitMode ? ' · left: normal vision, right: RP' : '');
+    (state.splitMode ? ' · comparison (left/top: normal vision)' : '');
+  const flip = document.getElementById('camFlip');
+  flip.hidden = state.videoMode || !state.hasCam;
+}
+
+// --- camera ---------------------------------------------------------
+// touch devices default to the rear camera (the simulator is about
+// looking at the world); desktops have front-facing webcams only
+let facing = IS_TOUCH ? 'environment' : 'user';
+let camStream = null;
+
+function startCamera(mode) {
+  if (camStream) camStream.getTracks().forEach(t => t.stop());
+  camStream = null;
+  state.hasCam = false;
+  return navigator.mediaDevices.getUserMedia({ video: { facingMode: mode } })
+    .then(stream => {
+      camStream = stream;
+      video.srcObject = stream;
+      return video.play();
+    })
+    .then(() => {
+      facing = mode;
+      state.hasCam = true;
+      state.mirror = mode === 'user'; // selfie view reads naturally mirrored
+      updateNote();
+    });
 }
 
 function bindToggle(idA, idB, setState) {
@@ -51,11 +80,13 @@ export function initControls() {
       panel.classList.contains('min') ? '+' : '−';
   });
 
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => {
-      video.srcObject = stream;
-      return video.play();
-    })
-    .then(() => { state.hasCam = true; updateNote(); })
-    .catch(() => { updateNote(); });
+  document.getElementById('camFlip').addEventListener('click', () => {
+    const other = facing === 'user' ? 'environment' : 'user';
+    startCamera(other).catch(() => startCamera(facing)); // revert on failure
+  });
+
+  // preferred camera first, then the other, then the fallback scene
+  startCamera(facing)
+    .catch(() => startCamera(facing === 'user' ? 'environment' : 'user'))
+    .catch(() => updateNote());
 }

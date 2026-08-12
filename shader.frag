@@ -1,13 +1,14 @@
 precision highp float;
 varying vec2 vUV;
 uniform sampler2D uTex;
-uniform float uSrc;         // 0 = sample scene, 1 = camera (mirrored), 2 = video file
+uniform float uSrc;         // 0 = procedural scene, >0 = texture (camera/video)
+uniform float uMirror;      // 1 = mirror horizontally (front camera)
 uniform float uTime;
 uniform vec2 uRes;
 uniform float uEdgeBase;    // radius of surviving central field
 uniform float uNetDensity;  // 0..1 density of the flashing net
 uniform float uSeeThru;     // 0..1 periphery transparency
-uniform float uSplit;       // 1 = side-by-side comparison view
+uniform float uSplit;       // 0 = immersive, 1 = side-by-side, 2 = stacked
 uniform float uAspect;      // aspect ratio of the content (video/camera)
 
 // -- small value-noise helpers ------------------------------------
@@ -45,39 +46,55 @@ vec3 fallbackScene(vec2 uv) {
 }
 
 vec3 getScene(vec2 uv) {
-  if (uSrc > 1.5) {
-    return texture2D(uTex, vec2(uv.x, 1.0 - uv.y)).rgb;       // video: flip only
-  }
   if (uSrc > 0.5) {
-    return texture2D(uTex, vec2(1.0 - uv.x, 1.0 - uv.y)).rgb; // camera: mirror + flip
+    float x = uMirror > 0.5 ? 1.0 - uv.x : uv.x;
+    return texture2D(uTex, vec2(x, 1.0 - uv.y)).rgb;
   }
   return fallbackScene(uv);
 }
 
 void main() {
   vec2 uv = vUV;
-  // side-by-side: both halves show the same content, aspect-fitted
-  // (letterboxed, never stretched); suv is the coordinate within the
-  // content rectangle of the current half
-  vec2 suv = uv;
-  float contAsp = uRes.x / uRes.y;
-  float bars = 0.0;                        // 1 = letterbox bar
-  if (uSplit > 0.5) {
-    vec2 halfPx = vec2(uRes.x * 0.5, uRes.y);
-    vec2 p = vec2(fract(uv.x * 2.0), uv.y) * halfPx;
+  float screenAsp = uRes.x / uRes.y;
+  vec2 suv;              // where in the content to sample
+  vec2 cuv;              // 0..1 coords the field geometry lives in
+  float contAsp;         // aspect of that geometry space
+  float bars = 0.0;      // 1 = letterbox bar
+
+  if (uSplit < 0.5) {
+    // immersive: cover-fit — content fills the screen undistorted,
+    // overflow is cropped (never stretched)
+    vec2 frac = vec2(min(1.0, screenAsp / uAspect),
+                     min(1.0, uAspect / screenAsp));
+    suv = 0.5 + (uv - 0.5) * frac;
+    cuv = uv;
+    contAsp = screenAsp;
+  } else {
+    // comparison: two halves — side by side (uSplit=1, landscape) or
+    // stacked (uSplit=2, portrait) — each contain-fit (letterboxed,
+    // never stretched)
+    vec2 halfPx, p;
+    if (uSplit < 1.5) {
+      halfPx = vec2(uRes.x * 0.5, uRes.y);
+      p = vec2(fract(uv.x * 2.0), uv.y) * halfPx;
+    } else {
+      halfPx = vec2(uRes.x, uRes.y * 0.5);
+      p = vec2(uv.x, fract(uv.y * 2.0)) * halfPx;
+    }
     float cw = min(halfPx.x, halfPx.y * uAspect);
     float ch = cw / uAspect;
     vec2 o = (halfPx - vec2(cw, ch)) * 0.5; // centered content rect
     suv = (p - o) / vec2(cw, ch);
     if (suv.x < 0.0 || suv.x > 1.0 || suv.y < 0.0 || suv.y > 1.0) bars = 1.0;
     suv = clamp(suv, 0.0, 1.0);
+    cuv = suv;
     contAsp = uAspect;
   }
   vec3 scene = getScene(suv);
   vec3 rawScene = scene;   // pristine copy for the comparison view
 
   // ---- tunnel-vision field mask ----------------------------------
-  vec2 centered = suv - 0.5;
+  vec2 centered = cuv - 0.5;
   centered.x *= contAsp;                   // aspect-correct so island is round
   float r = length(centered);
   float ang = atan(centered.y, centered.x);
@@ -147,8 +164,10 @@ void main() {
   vec3 ringGlow = vec3(0.85, 0.9, 1.0) * band * gaps * (0.25 + rim) * flickR * 0.5;
   col += ringGlow;
 
-  if (uSplit > 0.5 && uv.x < 0.5) {
-    col = rawScene;               // left half of comparison: unfiltered
+  // unfiltered half of the comparison: left (side-by-side) or top (stacked)
+  if ((uSplit > 0.5 && uSplit < 1.5 && uv.x < 0.5) ||
+      (uSplit > 1.5 && uv.y > 0.5)) {
+    col = rawScene;
   }
   if (bars > 0.5) col = vec3(0.0); // letterbox
   gl_FragColor = vec4(col, 1.0);
