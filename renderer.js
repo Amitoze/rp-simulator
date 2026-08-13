@@ -1,7 +1,7 @@
 // WebGL setup and the per-frame render loop.
 
 import { state, video, fileVideo, sliders, initControls, IS_TOUCH } from './controls.js';
-import { NET } from './config.js';
+import { NET, FIELD } from './config.js';
 
 const canvas = document.getElementById('gl');
 const gl = canvas.getContext('webgl');
@@ -44,7 +44,8 @@ async function main() {
   const U = {};
   for (const name of ['uTex', 'uSrc', 'uMirror', 'uTime', 'uRes', 'uEdgeBase',
                       'uNetDensity', 'uSeeThru', 'uSplit', 'uAspect',
-                      'uNetScale', 'uNetWarp', 'uNetFlicker']) {
+                      'uNetScale', 'uNetWarp', 'uNetFlicker',
+                      'uOuterEdge', 'uOuterCover', 'uIslandSeed']) {
     U[name] = gl.getUniformLocation(prog, name);
   }
 
@@ -52,6 +53,9 @@ async function main() {
   gl.uniform1f(U.uNetScale, NET.scale);
   gl.uniform1f(U.uNetWarp, NET.messiness);
   gl.uniform1f(U.uNetFlicker, 2 * Math.PI * NET.flickerHz);
+
+  // fixed island geography from config.js — set once, not per frame
+  gl.uniform1f(U.uIslandSeed, FIELD.islandSeed);
 
   const tex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -90,8 +94,16 @@ async function main() {
     gl.uniform1f(U.uMirror, !useVid && state.mirror ? 1 : 0);
     gl.uniform1f(U.uTime, (performance.now() - t0) / 1000);
     gl.uniform2f(U.uRes, canvas.width, canvas.height);
-    // degeneration 0..1 maps to island radius 0.45 (mild) .. 0.07 (late)
-    gl.uniform1f(U.uEdgeBase, 0.45 - 0.38 * parseFloat(sliders.degen.value));
+    // field geometry from config: degrees → screen units (edge ≈ 90°,
+    // so r = deg/180). The slider blends mild → late for both radii and
+    // erodes the outer islands' coverage.
+    const degen = parseFloat(sliders.degen.value);
+    const d2r = deg => deg / 180;
+    const lerp = (a, b, t) => a + (b - a) * t;
+    gl.uniform1f(U.uEdgeBase, d2r(lerp(FIELD.inner.mild, FIELD.inner.late, degen)));
+    gl.uniform1f(U.uOuterEdge, d2r(lerp(FIELD.outer.mild, FIELD.outer.late, degen)));
+    gl.uniform1f(U.uOuterCover,
+      FIELD.outerCoverage * (1 - FIELD.erosion * degen));
     gl.uniform1f(U.uNetDensity, parseFloat(sliders.net.value));
     gl.uniform1f(U.uSeeThru, parseFloat(sliders.thru.value));
     // comparison layout follows orientation: side-by-side in landscape,

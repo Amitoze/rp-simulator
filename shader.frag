@@ -13,6 +13,9 @@ uniform float uAspect;      // aspect ratio of the content (video/camera)
 uniform float uNetScale;    // fineness of the net (1 = coarse, higher = tighter)
 uniform float uNetWarp;     // strand messiness (0 = straight, ~0.5 = tangled)
 uniform float uNetFlicker;  // flicker angular speed (2*pi*Hz)
+uniform float uOuterEdge;   // radius where far-peripheral islands begin
+uniform float uOuterCover;  // 0..1 how much of the outer field survives
+uniform float uIslandSeed;  // picks the personal geography of the islands
 
 // -- small value-noise helpers ------------------------------------
 float hash(vec2 p) {
@@ -108,8 +111,33 @@ void main() {
                + noise(vec2(ang * 5.0, uTime * 0.03)) * 0.025;
   float edge = uEdgeBase + wobble;
 
-  // survival: 1 inside the central island, 0 in the dead periphery
-  float survival = 1.0 - smoothstep(edge - 0.05, edge + 0.06, r);
+  // survival: 1 where vision works, 0 in the dead ring.
+  // central island — preserved centre (as before)
+  float central = 1.0 - smoothstep(edge - 0.05, edge + 0.06, r);
+
+  // outer islands — far-peripheral vision that survives beyond the dead
+  // ring. STATIC geography: no uTime anywhere here — islands are places,
+  // not weather. Noise is sampled in position space (not angle) to avoid
+  // the wrap-around seam at the left horizontal.
+  float geo = fbm(centered * 3.0 + uIslandSeed);
+
+  // inferotemporal bias: the lower-lateral field survives longest, so
+  // those pixels get a bonus toward passing the gate (lateral = both
+  // screen edges — one binocular view)
+  float lower   = smoothstep(0.05, -0.25, centered.y);
+  float lateral = smoothstep(0.10, 0.45, abs(centered.x));
+  float bias = 0.35 * lower * lateral;
+
+  // coverage sets the bar the noise must clear: full coverage = low bar
+  float bar = mix(0.78, 0.38, clamp(uOuterCover, 0.0, 1.0));
+  float gate = smoothstep(bar - 0.07, bar + 0.07, geo + bias);
+
+  // the ring's far side gets its own irregular, slowly-creeping edge
+  float wobble2 = noise(vec2(ang * 2.1 + 33.0, uTime * 0.04)) * 0.05;
+  float oEdge = uOuterEdge + wobble2;
+  float outer = smoothstep(oEdge - 0.06, oEdge + 0.05, r) * gate;
+
+  float survival = max(central, outer);
 
   // periphery: patches of murky see-through vision ("smokey water")
   // between opaque smoke, with a persistent flashing net laid over it
@@ -153,11 +181,13 @@ void main() {
                * 0.55 * smoothstep(0.0, 0.08, uNetDensity);
   periphery += netGlow;
 
-  // transition ring: slight desaturation + dimming before full loss
+  // transition bands: slight desaturation + dimming before full loss,
+  // on BOTH boundaries of the dead ring (central edge and island rims)
   float gray = dot(scene, vec3(0.299, 0.587, 0.114));
   vec3 degraded = mix(vec3(gray), scene, 0.4) * 0.55;
-  float ring = smoothstep(edge - 0.10, edge - 0.02, r);
-  scene = mix(scene, degraded, ring);
+  float ringC = smoothstep(edge - 0.10, edge - 0.02, r);            // centre side
+  float ringO = 1.0 - smoothstep(oEdge + 0.02, oEdge + 0.10, r);    // island side
+  scene = mix(scene, degraded, max(ringC * central, ringO * outer));
 
   vec3 col = mix(periphery, scene, survival);
 
