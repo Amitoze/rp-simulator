@@ -1,6 +1,7 @@
 // WebGL setup and the per-frame render loop.
 
 import { state, video, fileVideo, sliders, initControls, IS_TOUCH } from './controls.js';
+import { NET } from './config.js';
 
 const canvas = document.getElementById('gl');
 const gl = canvas.getContext('webgl');
@@ -23,7 +24,9 @@ function compile(type, src) {
 }
 
 async function main() {
-  const fsSrc = await (await fetch('shader.frag')).text();
+  // no-store: python http.server sends no cache headers, and a stale
+  // cached shader silently ignores config/shader edits
+  const fsSrc = await (await fetch('shader.frag', { cache: 'no-store' })).text();
 
   const prog = gl.createProgram();
   gl.attachShader(prog, compile(gl.VERTEX_SHADER, vsSrc));
@@ -40,9 +43,15 @@ async function main() {
 
   const U = {};
   for (const name of ['uTex', 'uSrc', 'uMirror', 'uTime', 'uRes', 'uEdgeBase',
-                      'uNetDensity', 'uSeeThru', 'uSplit', 'uAspect']) {
+                      'uNetDensity', 'uSeeThru', 'uSplit', 'uAspect',
+                      'uNetScale', 'uNetWarp', 'uNetFlicker']) {
     U[name] = gl.getUniformLocation(prog, name);
   }
+
+  // fixed net look from config.js — set once, not per frame
+  gl.uniform1f(U.uNetScale, NET.scale);
+  gl.uniform1f(U.uNetWarp, NET.messiness);
+  gl.uniform1f(U.uNetFlicker, 2 * Math.PI * NET.flickerHz);
 
   const tex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, tex);

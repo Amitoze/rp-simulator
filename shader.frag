@@ -10,6 +10,9 @@ uniform float uNetDensity;  // 0..1 density of the flashing net
 uniform float uSeeThru;     // 0..1 periphery transparency
 uniform float uSplit;       // 0 = immersive, 1 = side-by-side, 2 = stacked
 uniform float uAspect;      // aspect ratio of the content (video/camera)
+uniform float uNetScale;    // fineness of the net (1 = coarse, higher = tighter)
+uniform float uNetWarp;     // strand messiness (0 = straight, ~0.5 = tangled)
+uniform float uNetFlicker;  // flicker angular speed (2*pi*Hz)
 
 // -- small value-noise helpers ------------------------------------
 float hash(vec2 p) {
@@ -131,13 +134,20 @@ void main() {
 
   // photopsia: a messy net of continuous rapid flashes — curved,
   // interconnected filaments (noise ridges at two scales), each strand
-  // flickering ~9 Hz with its own phase, in varying shades of light
-  float n1 = noise(sp * (1.5 + 5.0 * uNetDensity) + drift * 2.0);
-  float n2 = noise(sp * (3.0 + 11.0 * uNetDensity) - drift * 1.5);
+  // flickering with its own phase, in varying shades of light.
+  // value noise rides a square lattice, which makes its ridges run
+  // straight along rows/columns; warping the coordinates with a second
+  // noise field first bends the strands into tangled filaments
+  vec2 np = sp * uNetScale;
+  vec2 bend = (vec2(fbm(np * 0.9 + drift),
+                    fbm(np * 0.9 + 4.7 - drift)) - 0.5) * 2.0 * uNetWarp;
+  np += bend;
+  float n1 = noise(np * (1.5 + 5.0 * uNetDensity) + drift * 2.0);
+  float n2 = noise(np * (3.0 + 11.0 * uNetDensity) - drift * 1.5);
   float net = pow(1.0 - abs(2.0 * n1 - 1.0), 5.0)
             + 0.7 * pow(1.0 - abs(2.0 * n2 - 1.0), 5.0);
-  float shade = 0.25 + 0.75 * noise(sp * 1.4 + vec2(7.0, 3.0));
-  float flick = 0.55 + 0.45 * sin(uTime * 56.5 + n1 * 14.0 + n2 * 9.0);
+  float shade = 0.25 + 0.75 * noise(np * 1.4 + vec2(7.0, 3.0));
+  float flick = 0.55 + 0.45 * sin(uTime * uNetFlicker + n1 * 14.0 + n2 * 9.0);
   // SAFETY: amplitude capped so the net stays well below full white
   vec3 netGlow = vec3(0.8, 0.87, 1.0) * net * shade * flick
                * 0.55 * smoothstep(0.0, 0.08, uNetDensity);
