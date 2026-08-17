@@ -11,12 +11,14 @@ are the task breakdown:
 |---|---|---|---|
 | [01-foundation.md](01-foundation.md) | A — landing page, WebGL sim, camera/video, mobile, config | — | ✅ done 2026-08-13 (built 2026-08-12/13, pre-plan) |
 | [02-donut-field.md](02-donut-field.md) | B — messy-donut field geometry | 0.5 day | ✅ done 2026-08-18 (gate passed by eye) |
-| [03-fill-in.md](03-fill-in.md) | C — fill-in replaces transparency; photopsias confined to the scotoma | 0.5 day | **next up** |
+| [06-qualia-refactor.md](06-qualia-refactor.md) | Q — qualia refactor: toggleable qualia over fixed field geometry, preset files, per-pane configs | 1–1.5 days | **next up** |
+| [03-fill-in.md](03-fill-in.md) | C — fill-in replaces transparency; photopsias confined to the scotoma | 0.5 day | |
 | [04-peripheral-rendering.md](04-peripheral-rendering.md) | D — how the preserved outer islands look | 0.5–1 day | |
 | [05-fast-follow.md](05-fast-follow.md) | Register of work deferred off the critical path | deferred | FF1–FF6 registered |
 
-Phases run in order — C depends on B's survival mask, D renders into regions
-B defines. Research notes live in [research/](research/) — one file per
+Phases run in order — Q modularises the shader before C and D add to it;
+C depends on B's survival mask, D renders into regions B defines (C and D
+land as new qualia chunks under Q's structure). Research notes live in [research/](research/) — one file per
 question, with citations (first one:
 [research/peripheral-perception.md](research/peripheral-perception.md), the
 iteration-2 evidence base).

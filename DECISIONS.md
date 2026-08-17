@@ -3,6 +3,46 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-18 — Phase Q planned: qualia architecture
+
+- **Two-tier split: field geometry is not a quale.** The survival mask
+  (the "where") is always-on and configurable; qualia (smoke, photopsia
+  net, edge sparkle, fill-in, blur — the "what it's like") are each
+  toggleable and render into regions tier 1 defines. Compositing order
+  is fixed (fill → additive → composite → post-additive); toggling
+  changes slot membership, never order.
+- **Compile-time stitching over uniform branches.** Disabled qualia are
+  excluded when the shader is stitched and compiled, so "off" costs
+  zero on old phones; the ~tens-of-ms recompile happens once per
+  settings click. The stitcher is a PURE function (config → program) —
+  the per-pane feature depends on that and retrofitting would force a
+  rework `[my-synthesis]`.
+- **Safety becomes structural.** Per-quale caps stay AND a global
+  brightness clamp lands in the compositor, verified against the
+  all-on/all-max configuration — user-stackable qualia must never
+  exceed today's photosensitivity envelope. Net effect of the refactor
+  can only be darker than today, never brighter.
+- **Presets: schema in code, values in files.** Preset JSONs are sparse
+  value-overrides only (never structure, ranges, or caps); unknown keys
+  warned and ignored; values clamped to schema ranges. Export
+  ("save as preset") is REQUIRED — the tune → save → compare loop does
+  not close without it. A "none" preset (all qualia off) replaces the
+  hardcoded unfiltered-half override.
+- **Per-pane configs via two draw calls** (scissor/viewport), not
+  doubled uniforms in one program — perf-neutral, and split-layout
+  math leaves the shader. Reference pane frozen at its preset; sliders
+  edit the active pane.
+- **Q slots before C** so C and D land as new chunks instead of further
+  entangling a monolith; scope guard: Q1 must be by-eye identical to
+  pre-refactor output before anything new builds on it.
+- **Perimetry-driven geometry deferred.** Reopens when an actual visual
+  field test result is in hand; first step is a coverage check —
+  routine 24-2/30-2 perimetry maps only the central 24–30°, not the
+  50–80° island zone; Goldmann kinetic / wide-field protocols do
+  `[factual-source]` (confidence medium-high — verify against the real
+  paperwork). Prep paid in Q1: survival stays one substitutable
+  function, so a mask-texture path is a one-function swap.
+
 ## 2026-08-18 — Rendering stack re-affirmed
 
 - **Raw WebGL stays; no wrapper library.** Assessed three.js, pixi.js,
