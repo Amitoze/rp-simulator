@@ -3,6 +3,21 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-18 — Rendering stack re-affirmed
+
+- **Raw WebGL stays; no wrapper library.** Assessed three.js, pixi.js,
+  regl, twgl, p5, and CSS/Canvas after Phase B: the project's complexity
+  lives in `shader.frag` (the per-pixel symptom math), which every
+  library still requires as hand-written GLSL — a wrapper could only
+  replace the ~120 lines of already-working plumbing in `renderer.js`,
+  while adding load weight on phones. Raw WebGL is the performance
+  ceiling (one draw call, one shader; nothing between them to optimise)
+  `[my-synthesis]`; symptom configurability is the uniform/config.js
+  pattern and is library-agnostic. **Reopens if** Phase D's peripheral
+  blur proves in-shader taps insufficient and needs multi-pass
+  (render-to-texture) — that is where boilerplate balloons and
+  three.js/regl start paying rent; same trigger as FF3.
+
 ## 2026-08-18 — Phase B built and gated
 
 - **FIELD geometry that passed the gate** (by-eye, all four items,
