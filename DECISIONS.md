@@ -3,6 +3,27 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-18 — Phase B built and gated
+
+- **FIELD geometry that passed the gate** (by-eye, all four items,
+  2026-08-18): `inner {mild 81°, late 13°}`, `outer {mild 65°, late 85°}`,
+  `outerCoverage 0.65`, `erosion 0.9`, `islandSeed 7.0`. Radii use the
+  **{mild, late} pair pattern** — the value at degeneration slider 0 and 1,
+  straight blend between — replacing renderer.js's hardcoded
+  `0.45 - 0.38 * slider` mapping.
+- **Island noise sampled in position space, not polar.** The plan sketched
+  `fbm(vec2(ang*k, r*m) + seed)`; built as `fbm(centered*3 + seed)` because
+  angle-based sampling produces a visible wrap-around seam where the angle
+  jumps at the left horizontal.
+- **Inferotemporal-last via fixed bias + rising threshold**, not the
+  planned slider-scaled bias: biased (lower-lateral) pixels clear the
+  rising coverage bar longest, giving the same erosion order with less
+  machinery. Verified by eye at the gate.
+- **"No uTime" is scoped to island geography.** The patch gate is fully
+  static; the dead ring's far edge keeps a small uTime boundary wobble
+  (amplitude 0.05 — the same idiom as the inner edge), which reads as edge
+  breathing, not island drift.
+
 ## 2026-08-13 — Iteration 2 planning
 
 - **Donut geometry adopted (Phase B).** The field is a preserved centre +

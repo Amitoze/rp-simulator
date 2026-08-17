@@ -21,22 +21,24 @@ and peripheral islands at once (IOVS 2022; Grover & Fishman 1998 Pattern III).
 ## B1. Two-zone survival mask (`shader.frag`)
 
 ```
-[ ] central = 1.0 - smoothstep(innerEdge - w, innerEdge + w, r)
+[x] central = 1.0 - smoothstep(innerEdge - w, innerEdge + w, r)
       — exactly the existing mask (uEdgeBase + wobble)
-[ ] outer = smoothstep(outerEdge - w, outerEdge + w, r) * patchGate
+[x] outer = smoothstep(outerEdge - w, outerEdge + w, r) * patchGate
       — vision returns beyond a second, larger radius, where the gate allows
-[ ] survival = max(central, outer)
-[ ] outerEdge gets its own boundary wobble (reuse the noise-wobble idiom)
-[ ] transition band (desaturate + dim) on BOTH boundaries of the dead ring
+[x] survival = max(central, outer)
+[x] outerEdge gets its own boundary wobble (reuse the noise-wobble idiom)
+[x] transition band (desaturate + dim) on BOTH boundaries of the dead ring
 ```
 
 ## B2. The patch gate — what makes the donut messy
 
 ```
-[ ] patchGate = smoothstep(threshold - s, threshold + s,
+[x] patchGate = smoothstep(threshold - s, threshold + s,
                            fbm(vec2(ang * k, r * m) + islandSeed))
-[ ] FIXED seed, NO uTime — islands are places, not weather
-[ ] Directional bias folded into the threshold: survival more likely in the
+      (built: noise sampled in position space, fbm(centered*3 + seed), to
+      avoid the wrap-around seam at the left horizontal)
+[x] FIXED seed, NO uTime — islands are places, not weather
+[x] Directional bias folded into the threshold: survival more likely in the
     lower-lateral parts of the screen (inferotemporal field; lateral means
     BOTH left and right edges — single binocular view)
 ```
@@ -49,34 +51,42 @@ to match their own (FF6 is the interactive version).
 ## B3. Progression wiring (`renderer.js`)
 
 ```
-[ ] Degeneration slider drives BOTH ends:
-      [ ] inner island shrinks (existing mapping)
-      [ ] patchGate threshold rises + outerEdge pushes outward — outer
+[x] Degeneration slider drives BOTH ends:
+      [x] inner island shrinks (existing mapping, now via FIELD.inner)
+      [x] patchGate threshold rises + outerEdge pushes outward — outer
           islands erode and vanish
-[ ] Erosion order: inferotemporal islands die LAST (bias term scales with
-    the slider), matching the longitudinal data
+[x] Erosion order: inferotemporal islands die LAST, matching the
+    longitudinal data (built with a fixed bias + rising threshold — same
+    effect as a slider-scaled bias: biased pixels clear the rising bar
+    longest; verified by eye at the gate, 2026-08-18)
 ```
 
 ## B4. Config (`config.js`)
 
 ```
-[ ] FIELD block, same pattern as NET:
-      [ ] innerRadius        (degrees, per the screen-edge≈90° convention)
-      [ ] outerRadius
-      [ ] outerCoverage      0..1 — how much of the beyond-ring survives
-      [ ] islandSeed         change it, get a different personal geography
-[ ] Document the eccentricity convention in a comment
-[ ] Nothing hardcoded in the shader
+[x] FIELD block, same pattern as NET:
+      [x] innerRadius        (degrees, per the screen-edge≈90° convention)
+                             (built as inner: {mild, late} — value at
+                             slider 0 and 1, straight blend between)
+      [x] outerRadius        (built as outer: {mild, late}, same pattern)
+      [x] outerCoverage      0..1 — how much of the beyond-ring survives
+                             (plus erosion: how strongly the slider erodes)
+      [x] islandSeed         change it, get a different personal geography
+[x] Document the eccentricity convention in a comment
+[x] Nothing hardcoded in the shader
 ```
 
 ## GATE B (by-eye, the user's own field is ground truth)
 
 ```
-[ ] The user judges it a better match to their field than iteration 1
-[ ] Islands feel like stable places across a session (no drift)
-[ ] Progression slider: centre shrinks AND outer islands erode,
-    inferotemporal last
-[ ] SAFETY caps unchanged (no new bright area exceeds the existing net/ring
-    amplitudes)
-[ ] Runs at baseline fps on a phone
+[x] The user judges it a better match to their field than iteration 1
+    (confirmed 2026-08-18)
+[x] Islands feel like stable places across a session (no drift)
+    (confirmed 2026-08-18)
+[x] Progression slider: centre shrinks AND outer islands erode,
+    inferotemporal last (confirmed 2026-08-18)
+[x] SAFETY caps unchanged (no new bright area exceeds the existing net/ring
+    amplitudes) (verified 2026-08-18: diff from main touches no
+    netGlow/ringGlow/SAFETY line)
+[x] Runs at baseline fps on a phone (confirmed 2026-08-18)
 ```
