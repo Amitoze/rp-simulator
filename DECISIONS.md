@@ -3,6 +3,82 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-18 — Phase Q planned: qualia architecture
+
+- **Two-tier split: field geometry is not a quale.** The survival mask
+  (the "where") is always-on and configurable; qualia (smoke, photopsia
+  net, edge sparkle, fill-in, blur — the "what it's like") are each
+  toggleable and render into regions tier 1 defines. Compositing order
+  is fixed (fill → additive → composite → post-additive); toggling
+  changes slot membership, never order.
+- **Compile-time stitching over uniform branches.** Disabled qualia are
+  excluded when the shader is stitched and compiled, so "off" costs
+  zero on old phones; the ~tens-of-ms recompile happens once per
+  settings click. The stitcher is a PURE function (config → program) —
+  the per-pane feature depends on that and retrofitting would force a
+  rework `[my-synthesis]`.
+- **Safety becomes structural.** Per-quale caps stay AND a global
+  brightness clamp lands in the compositor, verified against the
+  all-on/all-max configuration — user-stackable qualia must never
+  exceed today's photosensitivity envelope. Net effect of the refactor
+  can only be darker than today, never brighter.
+- **Presets: schema in code, values in files.** Preset JSONs are sparse
+  value-overrides only (never structure, ranges, or caps); unknown keys
+  warned and ignored; values clamped to schema ranges. Export
+  ("save as preset") is REQUIRED — the tune → save → compare loop does
+  not close without it. A "none" preset (all qualia off) replaces the
+  hardcoded unfiltered-half override.
+- **Per-pane configs via two draw calls** (scissor/viewport), not
+  doubled uniforms in one program — perf-neutral, and split-layout
+  math leaves the shader. Reference pane frozen at its preset; sliders
+  edit the active pane.
+- **Q slots before C** so C and D land as new chunks instead of further
+  entangling a monolith; scope guard: Q1 must be by-eye identical to
+  pre-refactor output before anything new builds on it.
+- **Perimetry-driven geometry deferred.** Reopens when an actual visual
+  field test result is in hand; first step is a coverage check —
+  routine 24-2/30-2 perimetry maps only the central 24–30°, not the
+  50–80° island zone; Goldmann kinetic / wide-field protocols do
+  `[factual-source]` (confidence medium-high — verify against the real
+  paperwork). Prep paid in Q1: survival stays one substitutable
+  function, so a mask-texture path is a one-function swap.
+
+## 2026-08-18 — Rendering stack re-affirmed
+
+- **Raw WebGL stays; no wrapper library.** Assessed three.js, pixi.js,
+  regl, twgl, p5, and CSS/Canvas after Phase B: the project's complexity
+  lives in `shader.frag` (the per-pixel symptom math), which every
+  library still requires as hand-written GLSL — a wrapper could only
+  replace the ~120 lines of already-working plumbing in `renderer.js`,
+  while adding load weight on phones. Raw WebGL is the performance
+  ceiling (one draw call, one shader; nothing between them to optimise)
+  `[my-synthesis]`; symptom configurability is the uniform/config.js
+  pattern and is library-agnostic. **Reopens if** Phase D's peripheral
+  blur proves in-shader taps insufficient and needs multi-pass
+  (render-to-texture) — that is where boilerplate balloons and
+  three.js/regl start paying rent; same trigger as FF3.
+
+## 2026-08-18 — Phase B built and gated
+
+- **FIELD geometry that passed the gate** (by-eye, all four items,
+  2026-08-18): `inner {mild 81°, late 13°}`, `outer {mild 65°, late 85°}`,
+  `outerCoverage 0.65`, `erosion 0.9`, `islandSeed 7.0`. Radii use the
+  **{mild, late} pair pattern** — the value at degeneration slider 0 and 1,
+  straight blend between — replacing renderer.js's hardcoded
+  `0.45 - 0.38 * slider` mapping.
+- **Island noise sampled in position space, not polar.** The plan sketched
+  `fbm(vec2(ang*k, r*m) + seed)`; built as `fbm(centered*3 + seed)` because
+  angle-based sampling produces a visible wrap-around seam where the angle
+  jumps at the left horizontal.
+- **Inferotemporal-last via fixed bias + rising threshold**, not the
+  planned slider-scaled bias: biased (lower-lateral) pixels clear the
+  rising coverage bar longest, giving the same erosion order with less
+  machinery. Verified by eye at the gate.
+- **"No uTime" is scoped to island geography.** The patch gate is fully
+  static; the dead ring's far edge keeps a small uTime boundary wobble
+  (amplitude 0.05 — the same idiom as the inner edge), which reads as edge
+  breathing, not island drift.
+
 ## 2026-08-13 — Iteration 2 planning
 
 - **Donut geometry adopted (Phase B).** The field is a preserved centre +
