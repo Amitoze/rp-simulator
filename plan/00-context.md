@@ -54,6 +54,32 @@ the hole. A simulator that renders it perfectly communicates nothing. So
 defaults keep the loss slightly legible (washed-out low-contrast fill, the
 split comparison view), and faithfulness is recoverable via config.
 
+## Beyond the portrait — product horizon (noted 2026-08-18)
+
+Not on any phase's critical path, and deliberately not in the fast-follow
+register (it is a direction, not an evaluated build item). Recorded here
+so it can shape architecture choices as they arise — Phase Q's presets
+and per-pane configs, and FF6's island-seed editor, all point this way.
+
+**The direction:** expand the app into a general-purpose companion for
+someone diagnosed with retinitis pigmentosa, or with a family member
+diagnosed. The simulator becomes one component — communicating the
+experience to sighted family — surrounded by support and orientation
+content shaped by what people with RP say they actually needed.
+
+**Interview programme, two cohorts**, to ground that content:
+
+1. **People with RP, post-diagnosis:** what supports they were given,
+   what supports their *family* was given, and what they wished they had
+   more support with.
+2. **People with RP who have lost functional central vision:** what that
+   experience was like, what was the most difficult to adjust to, and
+   what they wished they had more help with.
+
+The interviews feed both the product (what to build beyond the sim) and
+the portraits themselves — other people's experiences becoming qualia
+presets, at which point FF6 stops being polish and becomes load-bearing.
+
 ## Architecture decisions already made
 
 | Layer | Choice | Reasoning |
