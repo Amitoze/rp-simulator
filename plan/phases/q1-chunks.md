@@ -16,7 +16,7 @@ pre-refactor output, desktop AND phone (GATE Q, staged).
       Check: smoke≈7 lines, murk≈17; with both on, math == today's.
 - [x] 4. `shader/21-photopsia.frag` — net as additive quale; SAFETY cap
       travels inside the function. Check: cap line present verbatim.
-- [ ] 5. `shader/22-sparkle.frag` — post-additive quale; hardcoded 60.0
+- [x] 5. `shader/22-sparkle.frag` — post-additive quale; hardcoded 60.0
       rate + band numbers become uSparkle* uniforms. Check: no numeric
       literals 60.0/.08/.01/.03/.10 in band/flick lines.
 - [ ] 6. `shader/24-transition.frag` — scene-modifying quale (added
