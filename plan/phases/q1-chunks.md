@@ -10,7 +10,7 @@ pre-refactor output, desktop AND phone (GATE Q, staged).
 - [x] 2. `shader/10-field.frag` — tier 1: survival mask as ONE
       substitutable function, out-params for edge/oEdge/central/outer.
       Check: ~45 lines, single function, math verbatim from monolith.
-- [ ] 3. `shader/20-smoke.frag` + `shader/23-murk.frag` — fill qualia
+- [x] 3. `shader/20-smoke.frag` + `shader/23-murk.frag` — fill qualia
       pulled apart; murk takes the running periphery as base (minimal
       extraction — Phase C deletes murk; do not polish).
       Check: smoke≈7 lines, murk≈17; with both on, math == today's.
