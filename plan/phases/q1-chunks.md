@@ -27,7 +27,7 @@ pre-refactor output, desktop AND phone (GATE Q, staged).
       scene-mod → fill → additive → mix → post-additive.
 - [x] 8. `config.js` — SPARKLE block (flickerHz = 60/(2π) exact) +
       QUALIA enabled map (all true). Check: values reproduce today's.
-- [ ] 9. `renderer.js` — fetch chunks, pure stitchShader(), makeProgram()
+- [x] 9. `renderer.js` — fetch chunks, pure stitchShader(), makeProgram()
       with pinned aPos + link check, 3 sparkle uniforms set once.
       Check: sim renders, console clean.
 - [ ] 10. Payoff: worktree of main on :8001, side-by-side vs :8000,
