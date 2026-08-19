@@ -25,7 +25,7 @@ pre-refactor output, desktop AND phone (GATE Q, staged).
 - [x] 7. `shader/90-composite.frag` — main(): layout code + fixed slots
       with #ifdef Q_* guards; Q2's clamp slot marked. Check: slot order
       scene-mod → fill → additive → mix → post-additive.
-- [ ] 8. `config.js` — SPARKLE block (flickerHz = 60/(2π) exact) +
+- [x] 8. `config.js` — SPARKLE block (flickerHz = 60/(2π) exact) +
       QUALIA enabled map (all true). Check: values reproduce today's.
 - [ ] 9. `renderer.js` — fetch chunks, pure stitchShader(), makeProgram()
       with pinned aPos + link check, 3 sparkle uniforms set once.
