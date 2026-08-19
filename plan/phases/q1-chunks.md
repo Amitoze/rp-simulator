@@ -19,7 +19,7 @@ pre-refactor output, desktop AND phone (GATE Q, staged).
 - [x] 5. `shader/22-sparkle.frag` — post-additive quale; hardcoded 60.0
       rate + band numbers become uSparkle* uniforms. Check: no numeric
       literals 60.0/.08/.01/.03/.10 in band/flick lines.
-- [ ] 6. `shader/24-transition.frag` — scene-modifying quale (added
+- [x] 6. `shader/24-transition.frag` — scene-modifying quale (added
       chunk; see DECISIONS 2026-08-19 diagram-vs-list call).
       Check: ~14 lines, math verbatim.
 - [ ] 7. `shader/90-composite.frag` — main(): layout code + fixed slots

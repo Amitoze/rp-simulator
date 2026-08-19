@@ -3,6 +3,21 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-19 — Q1 build calls (chunk split in progress)
+
+- **Transition greying is a seventh chunk** (`24-transition.frag`). The
+  Q1 checklist named six chunks and omitted it; the same plan file's
+  compositing diagram lists "transition greying" as a scene-modifying
+  quale. The diagram won: Q3's generated UI can only offer toggles for
+  things that are chunks, and the extraction cost ~15 lines. Confidence
+  high that the diagram reflected intent.
+- **Sparkle rate stated as `flickerHz = 60 / (2π)`** (≈9.55) in config
+  rather than a rounded 9.5 — the JS conversion `2π·flickerHz` must
+  reproduce the pre-refactor hardcoded `sin(uTime * 60.0)` exactly;
+  behaviour-identical beats a pretty number. Band widths move to config
+  as `[start, end]` pairs; the 0.5 amplitude multiplier stays hardcoded
+  in the chunk — it is a SAFETY cap, not a tunable.
+
 ## 2026-08-18 — Phase Q planned: qualia architecture
 
 - **Two-tier split: field geometry is not a quale.** The survival mask
