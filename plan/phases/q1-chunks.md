@@ -30,6 +30,12 @@ pre-refactor output, desktop AND phone (GATE Q, staged).
 - [x] 9. `renderer.js` — fetch chunks, pure stitchShader(), makeProgram()
       with pinned aPos + link check, 3 sparkle uniforms set once.
       Check: sim renders, console clean.
-- [ ] 10. Payoff: worktree of main on :8001, side-by-side vs :8000,
+- [x] 10. Payoff: worktree of main on :8001, side-by-side vs :8000,
       desktop + phone; toggle round-trip via QUALIA flags; then
       `git rm shader.frag`. GATE: user's call, results to DECISIONS.md.
+      PASSED 2026-08-19 (user by-eye; monolith retired in 474958c).
+- [ ] 11. `serve.py` — ThreadingHTTPServer + HTTP/1.1 keep-alive: the
+      8 chunk fetches stalled seconds on the single-threaded HTTP/1.0
+      dev server (measured: partial-overlap waterfall, long Stalled
+      bars). Dev-only; deployed hosts unaffected. Check: parallel
+      waterfall, load back to pre-refactor feel.
