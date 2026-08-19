@@ -22,7 +22,7 @@ pre-refactor output, desktop AND phone (GATE Q, staged).
 - [x] 6. `shader/24-transition.frag` — scene-modifying quale (added
       chunk; see DECISIONS 2026-08-19 diagram-vs-list call).
       Check: ~14 lines, math verbatim.
-- [ ] 7. `shader/90-composite.frag` — main(): layout code + fixed slots
+- [x] 7. `shader/90-composite.frag` — main(): layout code + fixed slots
       with #ifdef Q_* guards; Q2's clamp slot marked. Check: slot order
       scene-mod → fill → additive → mix → post-additive.
 - [ ] 8. `config.js` — SPARKLE block (flickerHz = 60/(2π) exact) +
