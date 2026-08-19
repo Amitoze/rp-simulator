@@ -14,7 +14,7 @@ pre-refactor output, desktop AND phone (GATE Q, staged).
       pulled apart; murk takes the running periphery as base (minimal
       extraction — Phase C deletes murk; do not polish).
       Check: smoke≈7 lines, murk≈17; with both on, math == today's.
-- [ ] 4. `shader/21-photopsia.frag` — net as additive quale; SAFETY cap
+- [x] 4. `shader/21-photopsia.frag` — net as additive quale; SAFETY cap
       travels inside the function. Check: cap line present verbatim.
 - [ ] 5. `shader/22-sparkle.frag` — post-additive quale; hardcoded 60.0
       rate + band numbers become uSparkle* uniforms. Check: no numeric
