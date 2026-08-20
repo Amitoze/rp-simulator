@@ -34,7 +34,7 @@ pre-refactor output, desktop AND phone (GATE Q, staged).
       desktop + phone; toggle round-trip via QUALIA flags; then
       `git rm shader.frag`. GATE: user's call, results to DECISIONS.md.
       PASSED 2026-08-19 (user by-eye; monolith retired in 474958c).
-- [ ] 11. `serve.py` — ThreadingHTTPServer + HTTP/1.1 keep-alive: the
+- [x] 11. `serve.py` — ThreadingHTTPServer + HTTP/1.1 keep-alive: the
       8 chunk fetches stalled seconds on the single-threaded HTTP/1.0
       dev server (measured: partial-overlap waterfall, long Stalled
       bars). Dev-only; deployed hosts unaffected. Check: parallel
