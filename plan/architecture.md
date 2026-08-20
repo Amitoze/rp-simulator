@@ -2,9 +2,10 @@
 
 Maintained by `/architecture`; derived from `plan/` + `DECISIONS.md` +
 the code — update it there, then regenerate here. **Last updated:
-2026-08-20** (Q2 complete, GATE Q2 passed by eye: QUALIA schema +
-clamp-on-load, addLight restructure, global SAFETY ceiling ADD_CAP =
-0.65 measured — all 🟩; Q3 generated panel is next).
+2026-08-20** (Q3 design ratified, see DECISIONS 2026-08-20 "Q3
+planned": schema becomes the live UI state, FIELD goes full
+schema-shape into the generated panel — Q3 marks updated with the
+ratified shapes, still 🟦 planned; Q2 remains the latest built 🟩).
 
 ---
 
@@ -55,9 +56,13 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │  QUALIA full schema {value,min,max,label}   │
 │    + clamp-to-range on load 🟩              │
 │    (Q2, GATE passed 2026-08-20)             │◀── 🟨 FF6 island-seed editor
+│  schema = LIVE state: UI writes values /    │
+│    enabled at runtime 🟦 (Q3)               │
+│  FIELD full schema-shape, same param        │
+│    pattern, still preset-proof 🟦 (Q3)      │
 │  preset files, sparse overrides 🟦 (Q4)     │
 └────────┬────────────────────────────────────┘
-         │ enabled-flags + param values (clamped)
+         │ enabled-flags + param values (clamped; live-edited from Q3)
          ▼
 ┌─────────────────────────────────────────────┐
 │ STITCH + COMPILE  renderer.js 🟩            │
@@ -71,6 +76,10 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │  uniforms each frame: time, sliders,        │
 │  field radii (degrees → screen units)       │
 │  reads quale params from schema 🟩 (Q2)     │
+│  ALL quale/field uniforms from schema each  │
+│  frame, via config-object functions;        │
+│  restitch() swaps programs, uniforms        │
+│  self-heal next frame 🟦 (Q3)               │
 │  two panes, two draw calls 🟦 (Q5)          │◀── 🟨 FF1 gaze tracking
 └────────┬────────────────────────────────────┘
          │ one fullscreen triangle
@@ -91,7 +100,9 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 ┌─────────────────────────────────────────────┐
 │ UI  controls.js 🟩  sliders, view toggles   │
 │  generated "Adjust Symptoms" panel from     │
-│  the schema 🟦 (Q3)                         │
+│  the schema 🟦 (Q3): FIELD faders first     │
+│  (no toggle), per-quale toggle → faders;    │
+│  sliders write schema, toggles restitch     │
 │  preset dropdown / file picker / export 🟦  │
 │  (Q4)                                       │
 └─────────────────────────────────────────────┘
@@ -135,14 +146,24 @@ identical at defaults; out-of-range 999 → warned and capped):
 config.js
   DEFAULTS ── UI state only (degeneration, view, camera, menu)
   FIELD ───── tier 1 geometry, faders only, NEVER toggleable
+              🟦 Q3: goes full schema-shape — every value
+              { value, min, max, label }, {mild,late} radii as
+              pair-values; still outside presets' reach
+              (DECISIONS 2026-08-20 "Q3 planned")
   QUALIA ──── per quale { enabled, params }
               each param { value, min, max, label }   ← schema IN CODE
         │
         ▼ loadQualia(): every value clamped into [min, max]
   clamped values ──▶ renderer (uniforms) + controls (slider positions)
 
+🟦 Q3: the schema is the LIVE state after load — sliders write
+       param values, toggles write enabled; one declared place always
+       holds "current settings" (what Q4 export serialises and Q5
+       panes read) (DECISIONS 2026-08-20 "Q3 planned")
+
 presets/*.json 🟦 (Q4) ── sparse VALUE overrides only; never structure,
-                          ranges, or caps; unknown keys warn + ignore
+                          ranges, or caps; unknown keys warn + ignore;
+                          FIELD excluded
 ```
 
 `NET` and `SPARKLE` blocks dissolve into `QUALIA[quale].params` — one
@@ -162,7 +183,7 @@ qualia config ─────────────────────┤
     recompile on toggle ≈ tens of ms, once per settings click)
 ```
 
-### Frame loop 🟩 → touched by Q2 (schema reads), Q5 (panes 🟦)
+### Frame loop 🟩 → touched by Q2 (schema reads), Q3 (live state 🟦), Q5 (panes 🟦)
 
 ```
 each frame: video pixels ──▶ texture upload
@@ -170,6 +191,12 @@ each frame: video pixels ──▶ texture upload
             degeneration ───▶ field radii, degrees → screen   from schema
                               units (edge ≈ 90°), mild→late blend
             clock ──────────▶ uTime
+🟦 Q3: set-once/per-frame split dies — ALL quale + field uniforms
+       written from the schema every frame (~12 floats, noise next to
+       the texture upload), via functions of a config OBJECT, never a
+       global read (Q5 depends on this); restitch() = makeProgram
+       again + program swap + delete old — uniforms self-heal on the
+       next frame (DECISIONS 2026-08-20 "Q3 planned")
 🟦 Q5: pane = (screen region, preset, compiled program);
        immersive = 1 pane, comparison = 2; two scissored draw calls,
        shared texture + clock; split math leaves the shader
@@ -227,10 +254,15 @@ business. Below the ceiling, output is identical to today.
 
 ```
 sliders / toggles ──▶ state + uniforms (live)
-🟦 Q3: "Adjust Symptoms" section generated FROM the schema —
-       FIELD first (faders only, no toggle), then one toggle per
-       quale, its sliders appear on enable; toggle → restitch,
-       slider → uniform
+🟦 Q3 (design ratified, DECISIONS 2026-08-20 "Q3 planned"):
+       "Adjust Symptoms" expandable section generated FROM the
+       schema, at the BOTTOM of the menu — FIELD first (faders only,
+       no toggle; tier 1 not removable), then one toggle per quale,
+       its faders appear on enable; zero per-quale UI code.
+       slider drag ──▶ writes schema value (frame loop picks it up)
+       toggle flip ──▶ writes enabled + calls restitch()
+       hardcoded net/transparency slider rows die (replaced by their
+       generated equivalents); degeneration stays top-level
 🟦 Q4: preset dropdown (presets/index.json manifest) + file picker
        + SAVE AS PRESET export (required — closes the tune→save→
        compare loop); "none" preset = unfiltered view (feeds Q5)
