@@ -3,14 +3,53 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-20 — Q2 planned: schema home and clamp mechanism ratified
+
+- **Schema home: full migration** (ratified). `NET`, `SPARKLE`, and the
+  two quale-owned slider defaults (`netDensity`, `transparency`)
+  dissolve into `QUALIA[quale].params`, each param
+  `{ value, min, max, label }` — one declared structure that Q3's
+  generated UI and Q4's sparse presets both consume. Rejected:
+  schema-points-at-blocks (two structures to keep aligned — the
+  retrofit-rework smell the Q1 pure-stitcher decision warned about) and
+  auto-build-at-load (ranges/labels get no declared home; violates
+  "schema lives in code"). `[my-synthesis]` — but the enforcement
+  argument is structural: value-only presets are only checkable against
+  a structure that visibly declares ranges.
+- **Global clamp acts on ADDED light only** (ratified). The compositor
+  accumulates all added flashing light — photopsia weighted by
+  (1 − survival), plus sparkle — into one `addLight` term and scales it
+  down when its luma exceeds a SAFETY ceiling. The restructure is
+  algebraically exact: `mix(p + a, s, k) = mix(p, s, k) + a·(1−k)`, so
+  below the ceiling the output is bit-comparable to today. Scene
+  brightness is never touched (a bright real-world wall stays the
+  world's business); hue preserved (uniform scale, not per-channel
+  clip). Future additive qualia (Phase C photopsias) inherit the cap by
+  accumulating into the same term. Rejected: hard `min()` on final
+  colour (greys the real scene or does nothing; per-channel clipping
+  shifts hue) and soft tone-mapping (alters today's defaults near the
+  threshold — breaks by-eye-identical). Ceiling value to be MEASURED
+  from today's worst case (sliders maxed) during the step, then
+  hardcoded in the chunk per the 2026-08-19 precedent — a SAFETY cap is
+  not a tunable and never enters the schema or presets. `[my-synthesis]`
+  mechanism, `[measured]` ceiling once the step lands.
+  - Ceiling measured 2026-08-20 (step 4, magenta-bisection at both
+    sliders maxed): addLight luma flecked at 0.55, none at 0.65 —
+    `ADD_CAP = 0.65`, the bracket's upper bound, so today's output is
+    untouched. Torture config (all params at schema max) observed
+    busier but not brighter `[measured — user by-eye]`.
+  - **GATE Q2 passed 2026-08-20** (user by-eye): all-on/all-max on the
+    branch vs main worktree sliders-maxed, side by side — within
+    today's brightness ceiling, clamp observed working. SAFETY gate
+    line passed for Q2; re-verify when Q3–Q5 touch the capped paths.
+
 ## 2026-08-20 — Q1 shipped: stitched chunks; two dev findings en route
 
 - **GATE Q1, desktop: passed by eye** (side-by-side worktree comparison
   vs main at fixed settings) `[measured — user by-eye]`; toggle
   round-trip clean via QUALIA flags; SAFETY caps verified inside their
-  chunks. Monolith `shader.frag` retired. **Phone item outstanding** —
-  see guard entry below; verify via LAN check or the deployed HTTPS
-  site before calling GATE Q1 fully closed.
+  chunks. Monolith `shader.frag` retired. Phone item confirmed passed
+  by the user 2026-08-20 (post-guard) — GATE Q1 fully closed.
 - **Dev server threaded** (`ThreadingHTTPServer` + HTTP/1.1
   keep-alive). The 8 parallel chunk fetches stalled for seconds on the
   single-threaded HTTP/1.0 server — Network waterfall showed

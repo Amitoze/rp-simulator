@@ -1,6 +1,6 @@
 // Panel UI, background sources (camera / local video), and shared state.
 
-import { DEFAULTS } from './config.js';
+import { DEFAULTS, QUALIA } from './config.js';
 
 export const state = {
   hasCam: false,      // camera stream is live
@@ -74,8 +74,11 @@ function bindToggle(idA, idB, setState) {
 
 function applyDefaults() {
   sliders.degen.value = DEFAULTS.degeneration;
-  sliders.net.value = DEFAULTS.netDensity;
-  sliders.thru.value = DEFAULTS.transparency;
+  // quale-owned sliders take their initial position from the schema;
+  // after load the slider is live and the schema value is only the
+  // default (Q3 rewires the UI to the schema itself)
+  sliders.net.value = QUALIA.photopsia.params.density.value;
+  sliders.thru.value = QUALIA.murk.params.transparency.value;
   if (DEFAULTS.background === 'video') document.getElementById('bgVid').click();
   if (DEFAULTS.view === 'sideBySide') document.getElementById('vwSbs').click();
   if (DEFAULTS.menuCollapsed) document.getElementById('panelHead').click();
