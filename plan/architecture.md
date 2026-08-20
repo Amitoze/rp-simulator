@@ -2,8 +2,9 @@
 
 Maintained by `/architecture`; derived from `plan/` + `DECISIONS.md` +
 the code — update it there, then regenerate here. **Last updated:
-2026-08-20** (Q2 planned: QUALIA schema + global addLight clamp ratified,
-DECISIONS 2026-08-20).
+2026-08-20** (Q2 step 1 landed: schema shape in config, NET/SPARKLE
+dissolved, renderer/controls read it — user by-eye pass; clamp-on-load
+and the compositor clamp still to come).
 
 ---
 
@@ -51,8 +52,10 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │ CONFIG  config.js                           │
 │  DEFAULTS (UI state) 🟩   FIELD (tier 1) 🟩 │
 │  QUALIA {enabled} flags 🟩                  │
-│  QUALIA full schema {value,min,max,label}   │
-│    + clamp-to-range on load 🟦 (Q2)         │◀── 🟨 FF6 island-seed editor
+│  QUALIA full schema {value,min,max,label} ◐ │
+│    (Q2 step 1: landed, by-eye pass; phase   │
+│    gate pending)                            │
+│  clamp-to-range on load 🟦 (Q2 step 2)      │◀── 🟨 FF6 island-seed editor
 │  preset files, sparse overrides 🟦 (Q4)     │
 └────────┬────────────────────────────────────┘
          │ enabled-flags + param values (clamped)
@@ -68,7 +71,7 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │ FRAME LOOP  renderer.js 🟩                  │
 │  uniforms each frame: time, sliders,        │
 │  field radii (degrees → screen units)       │
-│  reads quale params from schema 🟦 (Q2)     │
+│  reads quale params from schema ◐ (Q2 s1)   │
 │  two panes, two draw calls 🟦 (Q5)          │◀── 🟨 FF1 gaze tracking
 └────────┬────────────────────────────────────┘
          │ one fullscreen triangle
@@ -123,9 +126,9 @@ absent/denied ─────────────────┘    (fallbac
   origins get fallback, not a crash)
 ```
 
-### Config & schema 🟩 → 🟦 grows in Q2 (DECISIONS 2026-08-20)
+### Config & schema 🟧 in progress, Q2 (DECISIONS 2026-08-20)
 
-Intended shape — not built yet:
+Schema shape ◐ landed (step 1, by-eye pass); `loadQualia()` clamp 🟦:
 
 ```
 config.js

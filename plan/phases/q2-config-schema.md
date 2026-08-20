@@ -69,7 +69,7 @@ the intended shapes (🟦 planned).
 
 ## Steps
 
-- [ ] 1. `config.js` + `renderer.js` + `controls.js` — the schema
+- [x] 1. `config.js` + `renderer.js` + `controls.js` — the schema
       lands: QUALIA grows `params` per the trace; NET and SPARKLE
       blocks dissolve into it; DEFAULTS loses netDensity/transparency;
       renderer's set-once uniforms and controls' slider seeding

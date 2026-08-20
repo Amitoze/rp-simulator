@@ -1,7 +1,7 @@
 // WebGL setup and the per-frame render loop.
 
 import { state, video, fileVideo, sliders, initControls, IS_TOUCH } from './controls.js';
-import { NET, FIELD, SPARKLE, QUALIA } from './config.js';
+import { FIELD, QUALIA } from './config.js';
 
 const canvas = document.getElementById('gl');
 const gl = canvas.getContext('webgl');
@@ -97,18 +97,20 @@ async function main() {
   gl.enableVertexAttribArray(0);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
-  // fixed net look from config.js — set once, not per frame
-  gl.uniform1f(U.uNetScale, NET.scale);
-  gl.uniform1f(U.uNetWarp, NET.messiness);
-  gl.uniform1f(U.uNetFlicker, 2 * Math.PI * NET.flickerHz);
+  // quale params from the schema — set once, not per frame (sliders
+  // override density/transparency live in the frame loop until Q3)
+  const net = QUALIA.photopsia.params;
+  gl.uniform1f(U.uNetScale, net.scale.value);
+  gl.uniform1f(U.uNetWarp, net.messiness.value);
+  gl.uniform1f(U.uNetFlicker, 2 * Math.PI * net.flickerHz.value);
+
+  const spk = QUALIA.sparkle.params;
+  gl.uniform1f(U.uSparkleFlicker, 2 * Math.PI * spk.flickerHz.value);
+  gl.uniform2f(U.uSparkleBandIn, spk.bandIn.value[0], spk.bandIn.value[1]);
+  gl.uniform2f(U.uSparkleBandOut, spk.bandOut.value[0], spk.bandOut.value[1]);
 
   // fixed island geography from config.js — set once, not per frame
   gl.uniform1f(U.uIslandSeed, FIELD.islandSeed);
-
-  // fixed sparkle look from config.js — set once, not per frame
-  gl.uniform1f(U.uSparkleFlicker, 2 * Math.PI * SPARKLE.flickerHz);
-  gl.uniform2f(U.uSparkleBandIn, SPARKLE.bandIn[0], SPARKLE.bandIn[1]);
-  gl.uniform2f(U.uSparkleBandOut, SPARKLE.bandOut[0], SPARKLE.bandOut[1]);
 
   const tex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, tex);
