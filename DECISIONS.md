@@ -3,6 +3,40 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-20 — Q3 planned: live-state home and FIELD faders ratified
+
+- **The schema is the live UI state** (ratified). Slider drags write
+  into `QUALIA[quale].params[p].value`, toggles write `enabled`; the
+  frame loop re-writes all quale/field uniforms from the schema every
+  frame (~12 floats — noise next to the per-frame video texture
+  upload), via functions of a config OBJECT, not global reads (Q5
+  panes depend on that). Shader rebuilds self-heal: the next frame
+  repopulates the fresh program's uniforms, so restitching needs no
+  re-seeding code. This closes Q2's recorded "two owners of
+  density/transparency until Q3" risk — one declared place always
+  knows the current settings, which is what Q4's save-as-preset
+  serialises and Q5's per-pane rendering reads. Rejected: set-on-change
+  uniform pushes (every restitch must manually re-push every uniform —
+  a forgotten one is a stale-value bug class; state scattered across
+  GPU memory) and DOM-as-state, today's pattern (Q4 export and Q5
+  panes would scrape slider positions for "current state").
+  `[my-synthesis]` — but the Q4/Q5 dependency argument is structural.
+- **FIELD goes full schema-shape** (ratified). Every FIELD value
+  becomes `{ value, min, max, label }` ({mild, late} radii pairs via
+  the existing pair-value pattern), so the same generator renders the
+  FIELD group — listed FIRST, faders only, no toggle (tier 1 is not
+  removable, DECISIONS 2026-08-18). Whole geometry becomes
+  live-tunable for Phase C/D by-eye gates; the islandSeed fader is
+  proto-FF6 for free. Degeneration stays the top-level headline
+  slider, not duplicated in the group; FIELD stays outside presets'
+  reach regardless of shape (Q4 exclusion unchanged). Rejected:
+  curated fader subset (two categories of FIELD value to remember,
+  saves almost nothing — pair rendering must exist anyway for
+  sparkle's bands) and degeneration-only (barely honours the specced
+  UX; C/D geometry tuning would keep requiring file-edit + reload).
+  `[my-synthesis]`, confidence medium on the seed-as-fader feel —
+  reverts to file-only in one commit if it reads wrong.
+
 ## 2026-08-20 — Q2 planned: schema home and clamp mechanism ratified
 
 - **Schema home: full migration** (ratified). `NET`, `SPARKLE`, and the
