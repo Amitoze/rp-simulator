@@ -83,7 +83,7 @@ the intended shapes (🟦 planned).
       renderer/controls consume the clamped result. Check: temporarily
       set photopsia flickerHz to 999 → console warns, net flickers at
       the max instead; revert, console clean.
-- [ ] 3. `shader/90-composite.frag` — the exact restructure: photopsia
+- [x] 3. `shader/90-composite.frag` — the exact restructure: photopsia
       leaves the periphery relay, `addLight = photopsia × (1 −
       survival) + sparkle`, final colour = survival mix + addLight.
       Identity: `mix(p + a, s, k) = mix(p, s, k) + a·(1 − k)` — any

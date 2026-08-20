@@ -2,9 +2,9 @@
 
 Maintained by `/architecture`; derived from `plan/` + `DECISIONS.md` +
 the code — update it there, then regenerate here. **Last updated:
-2026-08-20** (Q2 steps 1–2 landed: schema shape + clamp-on-load in
-config.js, user pass both; compositor restructure and global clamp
-still to come).
+2026-08-20** (Q2 steps 1–3 landed: schema + clamp-on-load in config.js,
+addLight restructure in the compositor, user pass all; the global
+SAFETY ceiling itself — step 4 — still to come).
 
 ---
 
@@ -81,8 +81,10 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │  10-field: survival mask, ONE function 🟩   │◀── 🟨 perimetry import
 │  qualia chunks 20–24 🟩 (each SAFETY-capped)│◀── 🟨 FF2–FF5 (Phase D era)
 │  90-composite: fixed slots 🟩               │
-│    addLight accumulator + global SAFETY     │
-│    brightness clamp 🟦 (Q2)                 │
+│    addLight accumulator ◐ (Q2 step 3,       │
+│    user pass — by-eye identical)            │
+│    global SAFETY brightness clamp 🟦 (Q2    │
+│    step 4)                                  │
 │  fill-in quale replaces murk 🟦 (Phase C)   │
 │  peripheral look (blur/motion) 🟦 (Phase D) │
 └────────┬────────────────────────────────────┘
@@ -196,9 +198,11 @@ additive: 21-photopsia (flashing net, amplitude-capped)
 post-add: 22-sparkle (edge ring, amplitude-capped)
 ```
 
-### Compositor 🟩 → clamp lands in Q2 🟦 (DECISIONS 2026-08-20)
+### Compositor 🟩, addLight ◐, clamp 🟦 (DECISIONS 2026-08-20)
 
-Intended shape — restructure is algebraically exact, not built yet:
+The addLight restructure landed (Q2 step 3, user pass — by-eye
+identical, toggles round-trip clean); the SAFETY ceiling itself is
+step 4 and not built yet:
 
 ```
 view math (immersive cover-fit / split contain-fit)

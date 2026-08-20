@@ -71,19 +71,26 @@ void main() {
 #endif
 
   // ---- slot: additive qualia (each capped) -----------------------
+  // All ADDED flashing light accumulates in addLight; the global
+  // SAFETY clamp (Q2) acts on this term alone — the scene is never
+  // clamped. Photopsia's (1 - survival) weight is exactly what the
+  // mix applied to it when it rode the periphery:
+  // mix(p + a, s, k) == mix(p, s, k) + a * (1 - k).
+  vec3 addLight = vec3(0.0);
 #ifdef Q_PHOTOPSIA
-  periphery += photopsiaQuale(sp, drift);
+  addLight += photopsiaQuale(sp, drift) * (1.0 - survival);
 #endif
 
   // ---- the mix: periphery where dead, scene where vision survives -
   vec3 col = mix(periphery, scene, survival);
 
-  // ---- slot: post-additive qualia --------------------------------
+  // ---- slot: post-additive qualia (also added light) -------------
 #ifdef Q_SPARKLE
-  col += sparkleQuale(r, ang, sp, drift, edge);
+  addLight += sparkleQuale(r, ang, sp, drift, edge);
 #endif
 
-  // ---- slot: global brightness clamp lands here (Q2) -------------
+  // ---- slot: global brightness clamp lands here (Q2 step 4) ------
+  col += addLight;
 
   // unfiltered half of the comparison: left (side-by-side) or top (stacked)
   if ((uSplit > 0.5 && uSplit < 1.5 && uv.x < 0.5) ||
