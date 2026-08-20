@@ -89,7 +89,18 @@ void main() {
   addLight += sparkleQuale(r, ang, sp, drift, edge);
 #endif
 
-  // ---- slot: global brightness clamp lands here (Q2 step 4) ------
+  // ---- slot: global brightness clamp -----------------------------
+  // SAFETY: ceiling on ADDED flashing light (photopsia + sparkle) —
+  // the scene itself is never clamped. Measured 2026-08-20 by magenta
+  // bisection at today's reachable worst case (both sliders maxed):
+  // flecks at 0.55, none at 0.65; the ceiling sits at that upper
+  // bound, so today's output is untouched and NO configuration of
+  // stacked qualia can ever add more light than today. Not a tunable:
+  // stays out of config, schema, and presets. Scales, never clips —
+  // hue preserved, and below the ceiling the scale factor is exactly 1.
+  const float ADD_CAP = 0.65;
+  float addLuma = dot(addLight, vec3(0.299, 0.587, 0.114));
+  addLight *= ADD_CAP / max(addLuma, ADD_CAP);
   col += addLight;
 
   // unfiltered half of the comparison: left (side-by-side) or top (stacked)

@@ -33,6 +33,11 @@ regressions can be traced to what changed. Newest first.
   hardcoded in the chunk per the 2026-08-19 precedent — a SAFETY cap is
   not a tunable and never enters the schema or presets. `[my-synthesis]`
   mechanism, `[measured]` ceiling once the step lands.
+  - Ceiling measured 2026-08-20 (step 4, magenta-bisection at both
+    sliders maxed): addLight luma flecked at 0.55, none at 0.65 —
+    `ADD_CAP = 0.65`, the bracket's upper bound, so today's output is
+    untouched. Torture config (all params at schema max) observed
+    busier but not brighter `[measured — user by-eye]`.
 
 ## 2026-08-20 — Q1 shipped: stitched chunks; two dev findings en route
 

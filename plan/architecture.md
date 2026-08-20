@@ -2,9 +2,9 @@
 
 Maintained by `/architecture`; derived from `plan/` + `DECISIONS.md` +
 the code — update it there, then regenerate here. **Last updated:
-2026-08-20** (Q2 steps 1–3 landed: schema + clamp-on-load in config.js,
-addLight restructure in the compositor, user pass all; the global
-SAFETY ceiling itself — step 4 — still to come).
+2026-08-20** (Q2 steps 1–4 landed: schema + clamp-on-load, addLight
+restructure, global SAFETY ceiling ADD_CAP = 0.65 measured — user pass
+all; GATE Q2 payoff is the remaining step).
 
 ---
 
@@ -81,10 +81,10 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │  10-field: survival mask, ONE function 🟩   │◀── 🟨 perimetry import
 │  qualia chunks 20–24 🟩 (each SAFETY-capped)│◀── 🟨 FF2–FF5 (Phase D era)
 │  90-composite: fixed slots 🟩               │
-│    addLight accumulator ◐ (Q2 step 3,       │
-│    user pass — by-eye identical)            │
-│    global SAFETY brightness clamp 🟦 (Q2    │
-│    step 4)                                  │
+│    addLight accumulator + global SAFETY     │
+│    brightness clamp ◐ (Q2 steps 3–4, user   │
+│    pass; ADD_CAP = 0.65 measured; 🟩 at     │
+│    GATE Q2)                                 │
 │  fill-in quale replaces murk 🟦 (Phase C)   │
 │  peripheral look (blur/motion) 🟦 (Phase D) │
 └────────┬────────────────────────────────────┘
@@ -198,11 +198,11 @@ additive: 21-photopsia (flashing net, amplitude-capped)
 post-add: 22-sparkle (edge ring, amplitude-capped)
 ```
 
-### Compositor 🟩, addLight ◐, clamp 🟦 (DECISIONS 2026-08-20)
+### Compositor 🟩, addLight + clamp ◐ (🟩 at GATE Q2) (DECISIONS 2026-08-20)
 
-The addLight restructure landed (Q2 step 3, user pass — by-eye
-identical, toggles round-trip clean); the SAFETY ceiling itself is
-step 4 and not built yet:
+Restructure and SAFETY ceiling both landed (Q2 steps 3–4, user pass):
+`ADD_CAP = 0.65`, measured 2026-08-20 (flecks at 0.55, none at 0.65,
+both sliders maxed); torture config busier but not brighter:
 
 ```
 view math (immersive cover-fit / split contain-fit)
@@ -214,8 +214,8 @@ photopsia ─┐          │                            │
 sparkle ───┴─▶ addLight (photopsia weighted        ▼
                by deadness + sparkle) ──▶ SAFETY: luma ceiling —
                                           scale down only when over;
-                                          ceiling MEASURED from today's
-                                          worst case, hardcoded (not a
+                                          ADD_CAP = 0.65 — measured
+                                          2026-08-20, hardcoded (not a
                                           tunable, never in presets)
                                                    │
                               base colour + clamped addLight ──▶ pixels

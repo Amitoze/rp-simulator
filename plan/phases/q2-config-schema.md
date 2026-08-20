@@ -90,7 +90,7 @@ the intended shapes (🟦 planned).
       visible difference is a bug. SAFETY: both per-quale caps travel
       untouched. Check: by-eye identical at defaults, all toggles
       round-trip clean.
-- [ ] 4. Measure, then clamp: worst-case addLight luma under TODAY's
+- [x] 4. Measure, then clamp: worst-case addLight luma under TODAY's
       reachable settings (both sliders maxed, defaults otherwise) is
       measured (temporary debug output — e.g. paint pixels where luma
       exceeds a trial CAP — then removed); CAP lands hardcoded in
