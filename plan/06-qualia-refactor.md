@@ -51,19 +51,20 @@ Behaviour-identical restructure — output must match today pixel-for-eye
 at fixed settings before anything else lands on top.
 
 ```
-[ ] Split shader.frag into chunks: 00-prelude (noise helpers, uniforms),
+[x] Split shader.frag into chunks: 00-prelude (noise helpers, uniforms),
     10-field (tier 1 — survival mask as ONE function), 20-smoke,
     21-photopsia, 22-sparkle, 23-murk (minimal extraction — Phase C
     deletes it; do not polish), 90-composite (fixed slots + clamp)
-[ ] Stitcher in renderer.js: a PURE function, config in → compiled
+    — built as SEVEN chunks: 24-transition added (DECISIONS 2026-08-19)
+[x] Stitcher in renderer.js: a PURE function, config in → compiled
     program out — no global config baked in (per-pane feature depends
     on this; retrofitting it later forces a rework)
-[ ] Disabled qualia are EXCLUDED at stitch time (compile-time, not
+[x] Disabled qualia are EXCLUDED at stitch time (compile-time, not
     uniform branches) — off costs literally zero; recompile on toggle
     (~tens of ms, once per settings click) is acceptable
-[ ] En route: edge sparkle's hardcoded rate (uTime * 60.0) and band
+[x] En route: edge sparkle's hardcoded rate (uTime * 60.0) and band
     widths move to config — closes the trace's "config, never
-    constants" flag
+    constants" flag (SPARKLE block; flickerHz = 60/(2π) exact)
 ```
 
 ## Q2. Config schema + global clamp (`config.js`, `90-composite`)
@@ -85,6 +86,10 @@ at fixed settings before anything else lands on top.
     its sliders appear when toggled on — zero per-quale UI code, so
     Phase C/D qualia get their UI for free
 [ ] Toggle flips → renderer restitches; slider moves → uniform update
+[ ] UX (specced 2026-08-20, user request): expandable "Adjust
+    Symptoms" section at the BOTTOM of the menu. FIELD listed FIRST
+    with faders only — no toggle, tier 1 is not removable (DECISIONS
+    2026-08-18); each quale below it gets toggle → faders on enable
 ```
 
 ## Q4. Preset files (`presets/`)
@@ -137,6 +142,9 @@ at fixed settings before anything else lands on top.
 ```
 [ ] Q1: by-eye identical to pre-refactor output at fixed settings,
     desktop AND phone (side-by-side against a pre-refactor tab)
+    — desktop PASSED 2026-08-19 (user by-eye, monolith retired);
+    phone OUTSTANDING: blocked by insecure-context crash, mediaDevices
+    guard landed unverified (plan/phases/q1-chunks.md step 12)
 [ ] Q2: all-on/all-max configuration stays within today's brightness
     ceiling (clamp observed doing its job)
 [ ] Q3: toggling any quale on/off round-trips cleanly (no residue,

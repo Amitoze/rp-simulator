@@ -3,6 +3,29 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-20 — Q1 shipped: stitched chunks; two dev findings en route
+
+- **GATE Q1, desktop: passed by eye** (side-by-side worktree comparison
+  vs main at fixed settings) `[measured — user by-eye]`; toggle
+  round-trip clean via QUALIA flags; SAFETY caps verified inside their
+  chunks. Monolith `shader.frag` retired. **Phone item outstanding** —
+  see guard entry below; verify via LAN check or the deployed HTTPS
+  site before calling GATE Q1 fully closed.
+- **Dev server threaded** (`ThreadingHTTPServer` + HTTP/1.1
+  keep-alive). The 8 parallel chunk fetches stalled for seconds on the
+  single-threaded HTTP/1.0 server — Network waterfall showed
+  partial-overlap with long Stalled bars `[measured]`; before/after
+  load times not captured. Dev-only: deployed hosts never affected.
+- **mediaDevices guard in startCamera.** On insecure origins (phone via
+  `http://<LAN-IP>`) the camera API is ABSENT, not denied — the old
+  code threw synchronously past the .catch chains and killed main()
+  before the first frame. Latent Phase A bug (pre-refactor fails
+  identically — this is what proved it wasn't a Q1 regression). Guard
+  returns a rejected promise → fallback sample scene renders with the
+  filter. Committed unverified (recorded in the commit); HTTPS dev
+  serving registered as FF7, reopens when a gate needs live phone
+  camera pre-merge (plausibly Phase D).
+
 ## 2026-08-19 — Q1 build calls (chunk split in progress)
 
 - **Transition greying is a seventh chunk** (`24-transition.frag`). The
