@@ -39,3 +39,10 @@ pre-refactor output, desktop AND phone (GATE Q, staged).
       dev server (measured: partial-overlap waterfall, long Stalled
       bars). Dev-only; deployed hosts unaffected. Check: parallel
       waterfall, load back to pre-refactor feel.
+- [ ] 12. `controls.js` — mediaDevices guard: on insecure origins
+      (phone via LAN http) the camera API is absent and startCamera
+      threw synchronously past the .catch chains, killing main() before
+      the first frame (both versions — latent Phase A bug, not a Q1
+      regression). Guard returns a rejected promise → fallback scene
+      renders. HTTPS-for-phone-camera registered as FF7. Check: LAN-IP
+      URL shows filtered sample scene, console clean, desktop + phone.

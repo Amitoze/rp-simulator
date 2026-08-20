@@ -37,6 +37,12 @@ let facing = IS_TOUCH ? 'environment' : 'user';
 let camStream = null;
 
 function startCamera(mode) {
+  // insecure origins (plain http on a LAN IP) don't just deny the
+  // camera — navigator.mediaDevices is absent entirely, and asking it
+  // for the camera throws synchronously past the .catch chains. Report
+  // it the same way as a denied camera so the fallback scene runs.
+  if (!navigator.mediaDevices)
+    return Promise.reject(new Error('camera API unavailable (insecure context)'));
   if (camStream) camStream.getTracks().forEach(t => t.stop());
   camStream = null;
   state.hasCam = false;
