@@ -11,7 +11,7 @@ are the task breakdown:
 |---|---|---|---|
 | [01-foundation.md](01-foundation.md) | A — landing page, WebGL sim, camera/video, mobile, config | — | ✅ done 2026-08-13 (built 2026-08-12/13, pre-plan) |
 | [02-donut-field.md](02-donut-field.md) | B — messy-donut field geometry | 0.5 day | ✅ done 2026-08-18 (gate passed by eye) |
-| [06-qualia-refactor.md](06-qualia-refactor.md) | Q — qualia refactor: toggleable qualia over fixed field geometry, preset files, per-pane configs | 1–1.5 days | **Q1 done 2026-08-20** (7 chunks + pure stitcher; gate: desktop passed, phone outstanding); Q2–Q5 next |
+| [06-qualia-refactor.md](06-qualia-refactor.md) | Q — qualia refactor: toggleable qualia over fixed field geometry, preset files, per-pane configs | 1–1.5 days | **Q1 done 2026-08-20** (7 chunks + pure stitcher; gate passed: desktop 08-19, phone 08-20); Q2–Q5 next |
 | [03-fill-in.md](03-fill-in.md) | C — fill-in replaces transparency; photopsias confined to the scotoma | 0.5 day | |
 | [04-peripheral-rendering.md](04-peripheral-rendering.md) | D — how the preserved outer islands look | 0.5–1 day | |
 | [05-fast-follow.md](05-fast-follow.md) | Register of work deferred off the critical path | deferred | FF1–FF6 registered |

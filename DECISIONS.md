@@ -8,9 +8,8 @@ regressions can be traced to what changed. Newest first.
 - **GATE Q1, desktop: passed by eye** (side-by-side worktree comparison
   vs main at fixed settings) `[measured — user by-eye]`; toggle
   round-trip clean via QUALIA flags; SAFETY caps verified inside their
-  chunks. Monolith `shader.frag` retired. **Phone item outstanding** —
-  see guard entry below; verify via LAN check or the deployed HTTPS
-  site before calling GATE Q1 fully closed.
+  chunks. Monolith `shader.frag` retired. Phone item confirmed passed
+  by the user 2026-08-20 (post-guard) — GATE Q1 fully closed.
 - **Dev server threaded** (`ThreadingHTTPServer` + HTTP/1.1
   keep-alive). The 8 parallel chunk fetches stalled for seconds on the
   single-threaded HTTP/1.0 server — Network waterfall showed

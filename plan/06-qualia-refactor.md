@@ -140,11 +140,11 @@ at fixed settings before anything else lands on top.
 ## GATE Q (staged; Q1–Q2 gate before Q3–Q5 build on them)
 
 ```
-[ ] Q1: by-eye identical to pre-refactor output at fixed settings,
+[x] Q1: by-eye identical to pre-refactor output at fixed settings,
     desktop AND phone (side-by-side against a pre-refactor tab)
-    — desktop PASSED 2026-08-19 (user by-eye, monolith retired);
-    phone OUTSTANDING: blocked by insecure-context crash, mediaDevices
-    guard landed unverified (plan/phases/q1-chunks.md step 12)
+    — desktop PASSED 2026-08-19, phone PASSED 2026-08-20 (user by-eye;
+    phone was initially blocked by the insecure-context crash, fixed
+    by the mediaDevices guard, q1-chunks step 12)
 [ ] Q2: all-on/all-max configuration stays within today's brightness
     ceiling (clamp observed doing its job)
 [ ] Q3: toggling any quale on/off round-trips cleanly (no residue,
