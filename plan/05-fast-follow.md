@@ -14,6 +14,7 @@ should pull it back. These are evaluated ideas, not someday-maybes.
 | FF4 | Frame-difference motion boost in the islands (periphery as motion detector, actively amplified) | Phase D | Needs a previous-frame FBO — a pipeline change for a subtle gain | FF3 lands (FBOs exist anyway), or Gate D shows motion salience is too weak |
 | FF5 | Opponent-space desaturation — red-green degrades faster than blue-yellow/luminance (Hansen 2009) | Phase D | `mix(gray, color, k)` is 90% of the effect for 10% of the code | Gate D's by-eye check says island colour feels wrong in kind, not just amount |
 | FF6 | Island-seed editor — interactive UI to tune `FIELD.islandSeed` / island geography to the user's own field | Phase B | Config-file editing is enough for one user; UI is polish | A second person with RP wants their portrait, or seed-hunting via config edits becomes tedious |
+| FF7 | HTTPS dev serving (self-signed/mkcert cert in serve.py, or a tunnel) so a phone on the LAN gets a secure context and real camera access | Q1 phone gate (2026-08-19) | Camera APIs only exist in secure contexts; the mediaDevices guard + sample scene cover phone gates, and the deployed GitHub Pages site (HTTPS) already proves the live-camera path | A pre-merge gate specifically needs live phone camera — Phase D's motion-salience checks are the plausible trigger |
 
 ## FF1. Gaze-contingent rendering
 
@@ -50,6 +51,25 @@ the cheap version ships first, the by-eye gate decides whether the
 expensive version earns its place. FF3 unlocks FF4 (both need the render
 pipeline to grow an FBO); FF5 is a colour-space refinement inside D3's
 existing mix.
+
+## FF7. HTTPS dev serving
+
+**What it is.** Serve the dev build over HTTPS (self-signed or mkcert
+certificate wired into serve.py, or an HTTPS tunnel like cloudflared),
+so a phone on the LAN is a secure context and `navigator.mediaDevices`
+exists — real camera during pre-merge phone testing.
+
+**Evaluation.** Discovered via the Q1 phone gate: on `http://<LAN-IP>`
+the camera API is absent entirely (not merely denied) and the sim
+crashed before rendering — fixed by the startCamera guard, which falls
+back to the filtered sample scene. That is enough for rendering gates;
+the deployed HTTPS site already exercises the real camera path. Local
+HTTPS adds cert-trust friction on phones (iOS especially) for a payoff
+no current gate needs.
+
+**Revisit when:** a phase gate needs live phone camera before merge —
+most plausibly Phase D (motion salience of the islands is best judged
+against real moving surroundings, not the sample scene).
 
 ## FF6. Island-seed editor
 

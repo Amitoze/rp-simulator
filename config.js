@@ -52,3 +52,29 @@ export const FIELD = {
   // and every island moves somewhere else. Fixed = islands are places.
   islandSeed: 7.0,
 };
+
+// Fixed look of the edge sparkle (no UI slider — edit here).
+export const SPARKLE = {
+  // flicker rate in flashes per second. 60 / (2*pi) ≈ 9.55 reproduces
+  // the pre-refactor hardcoded rate (sin(uTime * 60.0)) exactly — see
+  // DECISIONS.md 2026-08-19.
+  flickerHz: 60 / (2 * Math.PI),
+
+  // the flashing band straddles the wobbly surviving edge:
+  // [start, end] distances from the edge, in screen-radius units,
+  // on the inside and outside of the boundary
+  bandIn: [0.08, 0.01],
+  bandOut: [0.03, 0.10],
+};
+
+// Which qualia are stitched into the shader. Tier 1 (FIELD) is not
+// here and never will be: geometry is not a quale and cannot be
+// toggled. All-on reproduces the pre-refactor look. Q2 grows each
+// entry into { enabled, params } with a full schema.
+export const QUALIA = {
+  smoke:      { enabled: true },
+  murk:       { enabled: true },   // dies in Phase C (fill-in replaces it)
+  photopsia:  { enabled: true },
+  sparkle:    { enabled: true },
+  transition: { enabled: true },
+};
