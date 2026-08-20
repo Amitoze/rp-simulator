@@ -99,3 +99,22 @@ export const QUALIA = {
 
   transition: { enabled: true, params: {} },  // toggle only — no tunables yet
 };
+
+// Clamp every param value into its schema range, naming each clamp in
+// the console rather than silently trusting the number. Runs once here
+// at load, in place — a hand-edited (or, later, preset-supplied) value
+// outside [min, max] can never reach a uniform.
+function loadQualia(qualia) {
+  for (const [qname, quale] of Object.entries(qualia)) {
+    for (const [pname, p] of Object.entries(quale.params)) {
+      const vals = Array.isArray(p.value) ? p.value : [p.value];
+      const clamped = vals.map(v => Math.min(p.max, Math.max(p.min, v)));
+      if (clamped.some((v, i) => v !== vals[i])) {
+        console.warn(`QUALIA.${qname}.${pname}: ${JSON.stringify(p.value)} ` +
+                     `outside [${p.min}, ${p.max}] — clamped`);
+        p.value = Array.isArray(p.value) ? clamped : clamped[0];
+      }
+    }
+  }
+}
+loadQualia(QUALIA);

@@ -2,9 +2,9 @@
 
 Maintained by `/architecture`; derived from `plan/` + `DECISIONS.md` +
 the code — update it there, then regenerate here. **Last updated:
-2026-08-20** (Q2 step 1 landed: schema shape in config, NET/SPARKLE
-dissolved, renderer/controls read it — user by-eye pass; clamp-on-load
-and the compositor clamp still to come).
+2026-08-20** (Q2 steps 1–2 landed: schema shape + clamp-on-load in
+config.js, user pass both; compositor restructure and global clamp
+still to come).
 
 ---
 
@@ -52,10 +52,10 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │ CONFIG  config.js                           │
 │  DEFAULTS (UI state) 🟩   FIELD (tier 1) 🟩 │
 │  QUALIA {enabled} flags 🟩                  │
-│  QUALIA full schema {value,min,max,label} ◐ │
-│    (Q2 step 1: landed, by-eye pass; phase   │
-│    gate pending)                            │
-│  clamp-to-range on load 🟦 (Q2 step 2)      │◀── 🟨 FF6 island-seed editor
+│  QUALIA full schema {value,min,max,label}   │
+│    + clamp-to-range on load ◐               │
+│    (Q2 steps 1–2 landed, user pass;         │
+│    🟩 at GATE Q2)                           │◀── 🟨 FF6 island-seed editor
 │  preset files, sparse overrides 🟦 (Q4)     │
 └────────┬────────────────────────────────────┘
          │ enabled-flags + param values (clamped)
@@ -126,9 +126,10 @@ absent/denied ─────────────────┘    (fallbac
   origins get fallback, not a crash)
 ```
 
-### Config & schema 🟧 in progress, Q2 (DECISIONS 2026-08-20)
+### Config & schema ◐ (Q2 steps 1–2 landed; 🟩 at GATE Q2) (DECISIONS 2026-08-20)
 
-Schema shape ◐ landed (step 1, by-eye pass); `loadQualia()` clamp 🟦:
+Schema shape and `loadQualia()` clamp both landed, user-checked
+(by-eye identical; out-of-range 999 → warned and capped):
 
 ```
 config.js

@@ -78,7 +78,7 @@ the intended shapes (🟦 planned).
       value; nothing new invented; SAFETY multipliers stay in chunks,
       not in the schema. Check: sim renders by-eye identical at
       defaults; `grep -n "NET\b\|SPARKLE" *.js` shows no survivors.
-- [ ] 2. `config.js` — `loadQualia()`: clamps every param value into
+- [x] 2. `config.js` — `loadQualia()`: clamps every param value into
       [min, max] on load, `console.warn` naming each clamped param;
       renderer/controls consume the clamped result. Check: temporarily
       set photopsia flickerHz to 999 → console warns, net flickers at
