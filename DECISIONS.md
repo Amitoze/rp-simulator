@@ -38,6 +38,10 @@ regressions can be traced to what changed. Newest first.
     `ADD_CAP = 0.65`, the bracket's upper bound, so today's output is
     untouched. Torture config (all params at schema max) observed
     busier but not brighter `[measured — user by-eye]`.
+  - **GATE Q2 passed 2026-08-20** (user by-eye): all-on/all-max on the
+    branch vs main worktree sliders-maxed, side by side — within
+    today's brightness ceiling, clamp observed working. SAFETY gate
+    line passed for Q2; re-verify when Q3–Q5 touch the capped paths.
 
 ## 2026-08-20 — Q1 shipped: stitched chunks; two dev findings en route
 

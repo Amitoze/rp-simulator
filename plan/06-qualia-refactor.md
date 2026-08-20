@@ -70,13 +70,13 @@ at fixed settings before anything else lands on top.
 ## Q2. Config schema + global clamp (`config.js`, `90-composite`)
 
 ```
-[ ] QUALIA block: per quale { enabled, params }, each param
+[x] QUALIA block: per quale { enabled, params }, each param
     { value, min, max, label } — schema lives IN CODE; preset files
     (Q4) may only override values, never structure, ranges, or caps
-[ ] Param values clamped to schema ranges on load
-[ ] Global brightness clamp in the compositor — verified against the
-    worst-case all-on, all-max configuration
-[ ] FIELD stays tier 1 (unchanged pattern), documented as non-toggleable
+[x] Param values clamped to schema ranges on load
+[x] Global brightness clamp in the compositor — verified against the
+    worst-case all-on, all-max configuration (ADD_CAP 0.65, measured)
+[x] FIELD stays tier 1 (unchanged pattern), documented as non-toggleable
 ```
 
 ## Q3. Generated advanced panel (`controls.js`)
@@ -145,8 +145,10 @@ at fixed settings before anything else lands on top.
     — desktop PASSED 2026-08-19, phone PASSED 2026-08-20 (user by-eye;
     phone was initially blocked by the insecure-context crash, fixed
     by the mediaDevices guard, q1-chunks step 12)
-[ ] Q2: all-on/all-max configuration stays within today's brightness
-    ceiling (clamp observed doing its job)
+[x] Q2: all-on/all-max configuration stays within today's brightness
+    ceiling (clamp observed doing its job) — PASSED 2026-08-20 (user
+    by-eye, main worktree sliders-maxed vs torture config: busier,
+    not brighter; ADD_CAP 0.65 measured, see q2-config-schema.md)
 [ ] Q3: toggling any quale on/off round-trips cleanly (no residue,
     no recompile glitch beyond the expected blink)
 [ ] Q4: save-as-preset → reload → load preset reproduces the exact
@@ -155,6 +157,8 @@ at fixed settings before anything else lands on top.
     today's comparison view; two different presets render honestly
     side by side
 [ ] Baseline fps on a phone throughout (two-pane mode included)
-[ ] SAFETY: per-quale caps unchanged, global clamp added — net effect
-    can only be darker than today, never brighter
+[x] SAFETY: per-quale caps unchanged, global clamp added — net effect
+    can only be darker than today, never brighter — PASSED for Q2
+    2026-08-20; the cross-cutting rule re-verifies whenever Q3–Q5
+    touch these paths
 ```

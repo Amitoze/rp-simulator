@@ -17,6 +17,9 @@ export const DEFAULTS = {
 };
 
 // Geometry of the visual field (no UI sliders — edit here).
+// TIER 1: always on, configurable, NEVER toggleable — geometry is not
+// a quale (where vision survives is not an experience you can switch
+// off). Deliberately outside QUALIA, and outside presets' reach.
 // All values marked "deg" are degrees of eccentricity, mapped so the
 // screen edge ≈ 90° (see DECISIONS.md). {mild, late} pairs are the value
 // at degeneration slider 0 and 1; in between is a straight blend.

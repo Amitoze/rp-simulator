@@ -2,9 +2,9 @@
 
 Maintained by `/architecture`; derived from `plan/` + `DECISIONS.md` +
 the code — update it there, then regenerate here. **Last updated:
-2026-08-20** (Q2 steps 1–4 landed: schema + clamp-on-load, addLight
-restructure, global SAFETY ceiling ADD_CAP = 0.65 measured — user pass
-all; GATE Q2 payoff is the remaining step).
+2026-08-20** (Q2 complete, GATE Q2 passed by eye: QUALIA schema +
+clamp-on-load, addLight restructure, global SAFETY ceiling ADD_CAP =
+0.65 measured — all 🟩; Q3 generated panel is next).
 
 ---
 
@@ -53,9 +53,8 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │  DEFAULTS (UI state) 🟩   FIELD (tier 1) 🟩 │
 │  QUALIA {enabled} flags 🟩                  │
 │  QUALIA full schema {value,min,max,label}   │
-│    + clamp-to-range on load ◐               │
-│    (Q2 steps 1–2 landed, user pass;         │
-│    🟩 at GATE Q2)                           │◀── 🟨 FF6 island-seed editor
+│    + clamp-to-range on load 🟩              │
+│    (Q2, GATE passed 2026-08-20)             │◀── 🟨 FF6 island-seed editor
 │  preset files, sparse overrides 🟦 (Q4)     │
 └────────┬────────────────────────────────────┘
          │ enabled-flags + param values (clamped)
@@ -71,7 +70,7 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │ FRAME LOOP  renderer.js 🟩                  │
 │  uniforms each frame: time, sliders,        │
 │  field radii (degrees → screen units)       │
-│  reads quale params from schema ◐ (Q2 s1)   │
+│  reads quale params from schema 🟩 (Q2)     │
 │  two panes, two draw calls 🟦 (Q5)          │◀── 🟨 FF1 gaze tracking
 └────────┬────────────────────────────────────┘
          │ one fullscreen triangle
@@ -82,9 +81,8 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │  qualia chunks 20–24 🟩 (each SAFETY-capped)│◀── 🟨 FF2–FF5 (Phase D era)
 │  90-composite: fixed slots 🟩               │
 │    addLight accumulator + global SAFETY     │
-│    brightness clamp ◐ (Q2 steps 3–4, user   │
-│    pass; ADD_CAP = 0.65 measured; 🟩 at     │
-│    GATE Q2)                                 │
+│    brightness clamp 🟩 (Q2, ADD_CAP = 0.65  │
+│    measured; GATE passed 2026-08-20)        │
 │  fill-in quale replaces murk 🟦 (Phase C)   │
 │  peripheral look (blur/motion) 🟦 (Phase D) │
 └────────┬────────────────────────────────────┘
@@ -128,10 +126,10 @@ absent/denied ─────────────────┘    (fallbac
   origins get fallback, not a crash)
 ```
 
-### Config & schema ◐ (Q2 steps 1–2 landed; 🟩 at GATE Q2) (DECISIONS 2026-08-20)
+### Config & schema 🟩 (Q2, GATE passed 2026-08-20) (DECISIONS 2026-08-20)
 
-Schema shape and `loadQualia()` clamp both landed, user-checked
-(by-eye identical; out-of-range 999 → warned and capped):
+Schema shape and `loadQualia()` clamp built and gated (by-eye
+identical at defaults; out-of-range 999 → warned and capped):
 
 ```
 config.js
@@ -198,11 +196,12 @@ additive: 21-photopsia (flashing net, amplitude-capped)
 post-add: 22-sparkle (edge ring, amplitude-capped)
 ```
 
-### Compositor 🟩, addLight + clamp ◐ (🟩 at GATE Q2) (DECISIONS 2026-08-20)
+### Compositor 🟩 incl. addLight + clamp (Q2, GATE passed 2026-08-20)
 
-Restructure and SAFETY ceiling both landed (Q2 steps 3–4, user pass):
-`ADD_CAP = 0.65`, measured 2026-08-20 (flecks at 0.55, none at 0.65,
-both sliders maxed); torture config busier but not brighter:
+addLight restructure and SAFETY ceiling built and gated: `ADD_CAP =
+0.65`, measured 2026-08-20 (flecks at 0.55, none at 0.65, both sliders
+maxed); all-on/all-max judged busier but not brighter than main
+(DECISIONS 2026-08-20):
 
 ```
 view math (immersive cover-fit / split contain-fit)

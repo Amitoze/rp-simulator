@@ -98,7 +98,7 @@ the intended shapes (🟦 planned).
       value and date. Clamp: `addLight *= CAP / max(luma, CAP)`.
       Check: defaults by-eye unchanged; debug paint shows the clamp
       engaging only on a torture config (all-on, all params at max).
-- [ ] 5. GATE Q2 payoff (user's call, never self-certified): all-on /
+- [x] 5. GATE Q2 payoff (user's call, never self-certified): all-on /
       all-max config side-by-side against main's worktree (:8001 vs
       :8000, the Q1 rig) — brightest flashes must be no brighter than
       today's slider-maxed worst case; clamp observed doing its job.
@@ -108,10 +108,14 @@ the intended shapes (🟦 planned).
 ## Gate (copied from GATE Q, staged)
 
 ```
-[ ] Q2: all-on/all-max configuration stays within today's brightness
+[x] Q2: all-on/all-max configuration stays within today's brightness
     ceiling (clamp observed doing its job)
-[ ] SAFETY: per-quale caps unchanged, global clamp added — net effect
+    — PASSED 2026-08-20, user by-eye vs main worktree (:8001 sliders
+    maxed vs :8000 torture config): busier, not brighter
+[x] SAFETY: per-quale caps unchanged, global clamp added — net effect
     can only be darker than today, never brighter
+    — PASSED 2026-08-20 (ADD_CAP 0.65, measured); cross-cutting rule
+    re-verifies whenever Q3–Q5 touch these paths
 ```
 
 Whose call: **the user's, by eye, against the worktree comparison** —
