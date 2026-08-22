@@ -212,6 +212,40 @@ mid-journey adult (charity-recruited samples) — the frame's
 protagonist is the person the literature reaches worst. The §1 cheap
 frame test (2–3 conversations) doubles as evidence requests 1, 2, 5.
 
+### User lived-experience register (2026-08-22, first-person; n=1)
+
+The user's own friction list, given unprompted after reading the lit
+map. Each item lands on an existing concept column (map.md matrix) —
+independent single-person convergence with the literature, recorded
+as [user-experience] (not generalisable alone):
+
+- Coping with low light in wardrobes, drawers, at desk → C12: the
+  Rasch-hardest RP tasks are exactly "orienting in poor and bright
+  light" [Latham16].
+- Helping others understand how I see / what help I need (physical
+  AND emotional) → C2/C15, and Latham15's single hardest emotional
+  task: "communicating visual loss to others". ⚠ This job belongs to
+  sibling 2 (partial-vision-legibility), not the kept frame.
+- Hope for work — that today's work remains possible and income
+  continues → C4 (anticipatory anxiety) + C13 (career cliff).
+- Avoiding social events — outdoors, solo, or crowded — as too
+  stressful → C5 (avoidance-coping / activity shrinkage).
+- VI events/services aimed at total vision loss; wants to maximise
+  utility of RESIDUAL vision; aids/technology engagement → C8
+  (blindness-coded services) — the frame's service-misfit, felt
+  first-hand.
+
+### Parked: simulator feature brainstorm (sibling 2 material)
+
+Captured 2026-08-22, solution-in-hand warning applied: these serve
+the partial-vision-legibility sibling (and the existing rp-simulator),
+NOT the kept frame. Held here untouched for /roadmap on that sibling:
+customisable animation matched to the user's own fields (guided
+symptom flow / hand-drawn field on phone / ophthalmologist scan
+import); scenario library (night vision, face-to-face eye contact,
+hand-pointed directions, "look at this", phone-vs-distance-vs-mobility
+paradox); mobility game tasks.
+
 ## 3 Landscape
 (evidenced input from the lit map, ratified 2026-08-22 — /frame Pass 3
 still interrogates this; tags as in §2)
