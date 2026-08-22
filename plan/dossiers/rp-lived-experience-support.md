@@ -140,10 +140,118 @@ disjointed. If their blockers cluster elsewhere (e.g. cost, denial,
 permission), the frame needs revision.
 
 ## 2 Evidence
-(pending — Pass 2)
+(lit-map digest, ratified 2026-08-22 — full resolution in
+`plan/research/lit/rp-lived-experience-support/` {protocol, search-log,
+sources, map}; scoping+multivocal review, solo-scale, shortcuts
+declared)
+
+### What the literature establishes for the kept frame
+
+- **The blockers are real and mechanised.** Adjustment to progressive
+  loss is identity work along a gradient (sighted → in-transition →
+  VI); concealment, aid-refusal and deferral are ways of staying on
+  the sighted side, and concealment-without-planning measurably
+  costs stress and self-acceptance.
+  [peer-reviewed/qual-grounded-theory/full-text — Spiegel16;
+  peer-reviewed/qual/abstract-only — Hayeems05 (needs full-text)]
+- **Deferral is documented behaviour and partly service-co-produced**:
+  people arrive at rehabilitation with worse vision than months
+  earlier; clinicians refer only when patients feel "ready".
+  [peer-reviewed/abstract-only — Overbury11;
+  peer-reviewed/qual/full-text — Stolwijk23]
+- **"No permission" and "no information" do not appear as blockers**
+  anywhere in the corpus — the frame's rejection of the permission
+  frame and its "disjointed, unguided" characterisation both hold.
+  [my-synthesis over the corpus]
+- **Anxiety in RP is anticipatory**: it tracks the function people
+  expect to lose next, not current vision; depression tracks
+  *perceived* (not measured) function. Mental-health burden ≈2×
+  general population. [peer-reviewed/full-text — Sainohira18, Lacy20;
+  abstract-only — Hahm08, Kim13]
+- **QoL collapses while acuity is still good** (NEI-VFQ 68 vs 90 at
+  acuity ≥0.7) and the challenge structure is stage-resolved (light
+  extremes/obstacles early; reading, faces, products, transport
+  later); hardest emotional task = communicating vision loss;
+  mid-journey career cliff (early retirement 40–50%).
+  [peer-reviewed/abstract-only — Sugawara10, Latham15/16,
+  Zehe-Lindau25; full-text — Cross22, Green20]
+- **Services are event-coded and endpoint-coded, not gradient-coded**
+  (refined form of the "skew total-blindness" claim): 33% unaware
+  services exist; blindness-coded identity at the service door;
+  emotional support along the pathway "dire"; no follow-up tracks
+  deterioration. [peer-reviewed/full-text — Trott23, Stolwijk23,
+  Demmin20; abstract-only — Overbury11, Thetford11;
+  grey/AACODS:caution — RNIB 2024: 74% no emotional-support
+  signposting]
+- **Peer support is a facilitator but not a neutral good** — helpful,
+  fit-sensitive, effectiveness never studied; unguided communities
+  model a blind-coded life to newcomers. [full-text — Garip19,
+  Ng-Reddit25, Ng-SR25; abstract-only — Nyman11, Botha24]
+- ⚠ Quarantined until primary chased: suicide-risk SMR 2.61 claim
+  (narrative-review-cited only, Chivers21).
+
+### OPEN EVIDENCE REQUESTS (= the literature's cannot-answers;
+interview-ready phrasings in map.md §cannot-answer)
+
+1. Does learning non-visual skills BEFORE loss change outcomes for RP
+   adults? (zero direct studies — the frame's central question is
+   unstudied)
+2. What breaks deferral — what actually triggers people to start
+   adapting?
+3. Does diagnosis-era support change mid-journey preparedness? (the
+   §1 weld-watch belief; no longitudinal evidence exists)
+4. Structured vs unstructured peer support — what does structure add?
+5. Where do mid-journey adults actually get adaptation guidance
+   (informal channel mix — essentially unstudied)?
+6. Are Vision Australia / Guide Dogs services gradient-capable? (no
+   published characterisation; ask the providers)
+7. (literature-chase) primary source behind the suicide-risk claim.
+
+Note: the corpus systematically under-samples the NON-ENGAGED
+mid-journey adult (charity-recruited samples) — the frame's
+protagonist is the person the literature reaches worst. The §1 cheap
+frame test (2–3 conversations) doubles as evidence requests 1, 2, 5.
 
 ## 3 Landscape
-(pending — Pass 3)
+(evidenced input from the lit map, ratified 2026-08-22 — /frame Pass 3
+still interrogates this; tags as in §2)
+
+What exists today for a mid-journey RP adult, per the literature:
+
+- **Clinical ophthalmology** — diagnosis and monitoring; experienced
+  as information-poor ("expected more understanding and support from
+  their doctors"), communication-style-sensitive, with clinicians
+  themselves reporting helplessness. [full-text — Chivers21,
+  Simonelli22]
+- **Low-vision rehabilitation services** — effective once entered,
+  but entry is the failure point (awareness → referral → readiness →
+  attendance leakage at every step) and they are blindness-coded to
+  the partial-vision eye. No systematic re-engagement as vision
+  changes. [full-text — Stolwijk23; abstract-only — Overbury11,
+  Matti10, O'Connor08, Thetford11]
+- **Genetic testing / counselling** — valued, explicitly hired for
+  "mental preparation for the future"; workforce thin (89% of IRD
+  genetic counselors say MD:GC ratio too high); support around it
+  time-bounded to diagnosis. [full-text — Combs13a; abstract-only —
+  Inaba22, Alabek23]
+- **Counselling / mental-health support** — scarce, un-signposted,
+  evidence-free for this population; up to 91% of VI patients with
+  mental-health problems untreated. [full-text — Trott23, Demmin20;
+  abstract-only — Nyman10]
+- **Peer communities (offline + online)** — the de-facto guidance
+  channel; double duty (emotional + practical strategy exchange), but
+  unguided, fit-sensitive, and culture-shaping toward blind-coded
+  identities. Structured group formats existed by the 1980s–90s and
+  were never evaluated. [full-text — Ng-Reddit25; abstract-only —
+  Botha24, McCulloh94]
+- **The multidisciplinary coordinated pathway** — exists as published
+  ideal (rehab-from-diagnosis, coordinator roles) and is
+  "underimplemented in routine clinical settings" — i.e. the guided
+  path the frame says is missing is *prescribed but not delivered*.
+  [full-text — Murro23; abstract-only — Herse05]
+
+Channel fact retained from §1: user intends to collaborate with
+Vision Australia; their service design is unpublished (open request 6).
 
 ## 4 Statement
 (pending — Pass 4)
