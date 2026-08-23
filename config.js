@@ -16,30 +16,32 @@ export const DEFAULTS = {
   menuCollapsed: false,
 };
 
-// Geometry of the visual field (no UI sliders — edit here).
-// TIER 1: always on, configurable, NEVER toggleable — geometry is not
-// a quale (where vision survives is not an experience you can switch
-// off). Deliberately outside QUALIA, and outside presets' reach.
-// All values marked "deg" are degrees of eccentricity, mapped so the
-// screen edge ≈ 90° (see DECISIONS.md). {mild, late} pairs are the value
-// at degeneration slider 0 and 1; in between is a straight blend.
+// Geometry of the visual field. Same {value, min, max, label} param
+// shape as QUALIA params, so the load clamp and the generated faders
+// treat both alike — but TIER 1: always on, configurable, NEVER
+// toggleable — geometry is not a quale (where vision survives is not
+// an experience you can switch off). Deliberately outside QUALIA, and
+// outside presets' reach.
+// Radii are degrees of eccentricity, mapped so the screen edge ≈ 90°
+// (see DECISIONS.md). [mild, late] pair-values are the value at
+// degeneration slider 0 and 1; in between is a straight blend.
 export const FIELD = {
-  // radius of the surviving central island
-  inner: { mild: 81, late: 13 },
+  // radius of the surviving central island, [mild, late]
+  inner: { value: [81, 13], min: 0, max: 90, label: 'Central island radius' },
 
   // radius where far-peripheral islands can begin — the dead ring's far
-  // side. Widens outward as degeneration advances.
-  outer: { mild: 65, late: 85 },
+  // side, [mild, late]. Widens outward as degeneration advances.
+  outer: { value: [65, 85], min: 0, max: 90, label: 'Far islands begin' },
 
-  // 0..1 — how much of the beyond-the-ring field survives when mild
-  outerCoverage: 0.65,
+  // how much of the beyond-the-ring field survives when mild
+  outerCoverage: { value: 0.65, min: 0, max: 1, label: 'Far island coverage' },
 
   // how strongly the slider erodes the islands (1 = all gone at full)
-  erosion: 0.9,
+  erosion: { value: 0.9, min: 0, max: 1, label: 'Island erosion' },
 
-  // picks the personal geography of the islands — any number; change it
-  // and every island moves somewhere else. Fixed = islands are places.
-  islandSeed: 7.0,
+  // picks the personal geography of the islands — change it and every
+  // island moves somewhere else. Fixed = islands are places.
+  islandSeed: { value: 7.0, min: 0, max: 20, label: 'Island layout seed' },
 };
 
 // The qualia schema: which qualia are stitched into the shader, and
@@ -106,18 +108,19 @@ export const QUALIA = {
 // Clamp every param value into its schema range, naming each clamp in
 // the console rather than silently trusting the number. Runs once here
 // at load, in place — a hand-edited (or, later, preset-supplied) value
-// outside [min, max] can never reach a uniform.
-function loadQualia(qualia) {
-  for (const [qname, quale] of Object.entries(qualia)) {
-    for (const [pname, p] of Object.entries(quale.params)) {
-      const vals = Array.isArray(p.value) ? p.value : [p.value];
-      const clamped = vals.map(v => Math.min(p.max, Math.max(p.min, v)));
-      if (clamped.some((v, i) => v !== vals[i])) {
-        console.warn(`QUALIA.${qname}.${pname}: ${JSON.stringify(p.value)} ` +
-                     `outside [${p.min}, ${p.max}] — clamped`);
-        p.value = Array.isArray(p.value) ? clamped : clamped[0];
-      }
+// outside [min, max] can never reach a uniform. FIELD and every
+// quale's params share the param shape, so one clamp covers all.
+function clampParams(owner, params) {
+  for (const [pname, p] of Object.entries(params)) {
+    const vals = Array.isArray(p.value) ? p.value : [p.value];
+    const clamped = vals.map(v => Math.min(p.max, Math.max(p.min, v)));
+    if (clamped.some((v, i) => v !== vals[i])) {
+      console.warn(`${owner}.${pname}: ${JSON.stringify(p.value)} ` +
+                   `outside [${p.min}, ${p.max}] — clamped`);
+      p.value = Array.isArray(p.value) ? clamped : clamped[0];
     }
   }
 }
-loadQualia(QUALIA);
+clampParams('FIELD', FIELD);
+for (const [qname, quale] of Object.entries(QUALIA))
+  clampParams(`QUALIA.${qname}`, quale.params);

@@ -16,10 +16,6 @@
   <div class="body">
     <label>Degeneration of central field</label>
     <input type="range" id="sDegen" min="0" max="1" step="0.01">
-    <label>Density of flashing net</label>
-    <input type="range" id="sNet" min="0" max="1" step="0.01">
-    <label>Periphery transparency</label>
-    <input type="range" id="sThru" min="0" max="1" step="0.01">
     <label>Background</label>
     <div class="seg">
       <button id="bgCam" class="on">Camera</button>
@@ -31,6 +27,11 @@
       <button id="vwImm" class="on">Immersive</button>
       <button id="vwSbs">Side-by-side</button>
     </div>
+    <!-- filled by controls.js from the schema (config.js) -->
+    <details id="adv">
+      <summary>Adjust symptoms</summary>
+      <div id="advBody"></div>
+    </details>
   </div>
 </div>
 <div id="note">starting…</div>

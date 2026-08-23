@@ -54,6 +54,15 @@ function stitchShader(sources, qualia) {
   return defines + '\n' + body;
 }
 
+// Chunk sources, fetched once in main(); module-level so restitch can
+// rebuild without refetching.
+const sources = {};
+
+// The one live { program, uniform locations } pair. The frame loop and
+// restitch both go through this shared ref — a closure-captured U would
+// go stale on the first toggle's program swap.
+const live = { prog: null, U: null };
+
 // (chunk sources, qualia config) in → { program, uniform locations }
 // out. Recompiling on a toggle (Q3) is just calling this again. aPos
 // is pinned to attribute 0 before linking so the vertex buffer setup
@@ -79,16 +88,56 @@ function makeProgram(sources, qualia) {
   return { prog, U };
 }
 
+// Rebuild the program for the given qualia config and swap it in.
+// Exported for controls.js (a quale toggle changes what's stitched);
+// top-level function declaration, so the renderer↔controls import
+// cycle resolves by hoisting.
+export function restitch(qualia) {
+  const old = live.prog;
+  ({ prog: live.prog, U: live.U } = makeProgram(sources, qualia));
+  gl.useProgram(live.prog);
+  if (old) gl.deleteProgram(old);
+}
+
+// Write every qualia-derived uniform from the schema, every frame.
+// Both apply functions take config OBJECTS and read no globals —
+// per-pane rendering (Q5) calls them twice with different configs.
+// Uniforms of disabled qualia have null locations: gl.uniform* on
+// null is a defined no-op.
+function applyQualia(U, qualia) {
+  const net = qualia.photopsia.params;
+  gl.uniform1f(U.uNetDensity, net.density.value);
+  gl.uniform1f(U.uNetScale, net.scale.value);
+  gl.uniform1f(U.uNetWarp, net.messiness.value);
+  gl.uniform1f(U.uNetFlicker, 2 * Math.PI * net.flickerHz.value);
+  gl.uniform1f(U.uSeeThru, qualia.murk.params.transparency.value);
+  const spk = qualia.sparkle.params;
+  gl.uniform1f(U.uSparkleFlicker, 2 * Math.PI * spk.flickerHz.value);
+  gl.uniform2f(U.uSparkleBandIn, spk.bandIn.value[0], spk.bandIn.value[1]);
+  gl.uniform2f(U.uSparkleBandOut, spk.bandOut.value[0], spk.bandOut.value[1]);
+}
+
+// Field geometry from config: degrees → screen units (edge ≈ 90°, so
+// r = deg/180). degen blends each [mild, late] pair and erodes the
+// outer islands' coverage.
+function applyField(U, field, degen) {
+  const d2r = deg => deg / 180;
+  const lerp = (a, b, t) => a + (b - a) * t;
+  gl.uniform1f(U.uEdgeBase, d2r(lerp(field.inner.value[0], field.inner.value[1], degen)));
+  gl.uniform1f(U.uOuterEdge, d2r(lerp(field.outer.value[0], field.outer.value[1], degen)));
+  gl.uniform1f(U.uOuterCover,
+    field.outerCoverage.value * (1 - field.erosion.value * degen));
+  gl.uniform1f(U.uIslandSeed, field.islandSeed.value);
+}
+
 async function main() {
   // no-store: python http.server sends no cache headers, and a stale
   // cached chunk silently ignores config/shader edits
-  const sources = {};
   await Promise.all(CHUNKS.map(async c => {
     sources[c] = await (await fetch(`shader/${c}.frag`, { cache: 'no-store' })).text();
   }));
 
-  const { prog, U } = makeProgram(sources, QUALIA);
-  gl.useProgram(prog);
+  restitch(QUALIA);
 
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -96,21 +145,6 @@ async function main() {
   // aPos is pinned to attribute 0 inside makeProgram
   gl.enableVertexAttribArray(0);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-
-  // quale params from the schema — set once, not per frame (sliders
-  // override density/transparency live in the frame loop until Q3)
-  const net = QUALIA.photopsia.params;
-  gl.uniform1f(U.uNetScale, net.scale.value);
-  gl.uniform1f(U.uNetWarp, net.messiness.value);
-  gl.uniform1f(U.uNetFlicker, 2 * Math.PI * net.flickerHz.value);
-
-  const spk = QUALIA.sparkle.params;
-  gl.uniform1f(U.uSparkleFlicker, 2 * Math.PI * spk.flickerHz.value);
-  gl.uniform2f(U.uSparkleBandIn, spk.bandIn.value[0], spk.bandIn.value[1]);
-  gl.uniform2f(U.uSparkleBandOut, spk.bandOut.value[0], spk.bandOut.value[1]);
-
-  // fixed island geography from config.js — set once, not per frame
-  gl.uniform1f(U.uIslandSeed, FIELD.islandSeed);
 
   const tex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -136,6 +170,8 @@ async function main() {
 
   const t0 = performance.now();
   function frame() {
+    // through the shared ref — restitch may have swapped the program
+    const U = live.U;
     // pick the texture source: local video file, else camera, else the
     // procedural fallback scene (uSrc = 0)
     const useVid = state.videoMode && fileVideo.readyState >= 2;
@@ -149,18 +185,8 @@ async function main() {
     gl.uniform1f(U.uMirror, !useVid && state.mirror ? 1 : 0);
     gl.uniform1f(U.uTime, (performance.now() - t0) / 1000);
     gl.uniform2f(U.uRes, canvas.width, canvas.height);
-    // field geometry from config: degrees → screen units (edge ≈ 90°,
-    // so r = deg/180). The slider blends mild → late for both radii and
-    // erodes the outer islands' coverage.
-    const degen = parseFloat(sliders.degen.value);
-    const d2r = deg => deg / 180;
-    const lerp = (a, b, t) => a + (b - a) * t;
-    gl.uniform1f(U.uEdgeBase, d2r(lerp(FIELD.inner.mild, FIELD.inner.late, degen)));
-    gl.uniform1f(U.uOuterEdge, d2r(lerp(FIELD.outer.mild, FIELD.outer.late, degen)));
-    gl.uniform1f(U.uOuterCover,
-      FIELD.outerCoverage * (1 - FIELD.erosion * degen));
-    gl.uniform1f(U.uNetDensity, parseFloat(sliders.net.value));
-    gl.uniform1f(U.uSeeThru, parseFloat(sliders.thru.value));
+    applyQualia(U, QUALIA);
+    applyField(U, FIELD, parseFloat(sliders.degen.value));
     // comparison layout follows orientation: side-by-side in landscape,
     // stacked in portrait
     gl.uniform1f(U.uSplit,
