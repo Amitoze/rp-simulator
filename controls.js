@@ -1,6 +1,9 @@
 // Panel UI, background sources (camera / local video), and shared state.
 
-import { DEFAULTS, QUALIA } from './config.js';
+import { DEFAULTS, FIELD, QUALIA } from './config.js';
+// cycle-safe: restitch is a top-level function declaration in
+// renderer.js, and it's only called from event handlers anyway
+import { restitch } from './renderer.js';
 
 export const state = {
   hasCam: false,      // camera stream is live
@@ -17,8 +20,6 @@ export const video = document.getElementById('cam');
 export const fileVideo = document.getElementById('vid');
 export const sliders = {
   degen: document.getElementById('sDegen'),
-  net: document.getElementById('sNet'),
-  thru: document.getElementById('sThru'),
 };
 
 function updateNote() {
@@ -74,14 +75,90 @@ function bindToggle(idA, idB, setState) {
 
 function applyDefaults() {
   sliders.degen.value = DEFAULTS.degeneration;
-  // quale-owned sliders take their initial position from the schema;
-  // after load the slider is live and the schema value is only the
-  // default (Q3 rewires the UI to the schema itself)
-  sliders.net.value = QUALIA.photopsia.params.density.value;
-  sliders.thru.value = QUALIA.murk.params.transparency.value;
   if (DEFAULTS.background === 'video') document.getElementById('bgVid').click();
   if (DEFAULTS.view === 'sideBySide') document.getElementById('vwSbs').click();
   if (DEFAULTS.menuCollapsed) document.getElementById('panelHead').click();
+}
+
+// --- generated "Adjust symptoms" section ----------------------------
+// Born from the schema: FIELD's faders first (tier 1 — configurable,
+// never toggleable), then one toggle row per quale, its faders shown
+// only while enabled. No per-quale UI code — add a param to the schema
+// and its fader appears.
+
+function addFader(parent, label, p, index) {
+  const lab = document.createElement('label');
+  lab.textContent = label;
+  const s = document.createElement('input');
+  s.type = 'range';
+  s.min = p.min;
+  s.max = p.max;
+  // continuous: any stepped grid would snap defaults like 13 (of 0–90)
+  // to a nearby grid point and misreport the schema's true value
+  s.step = 'any';
+  s.value = index === null ? p.value : p.value[index];
+  // a drag only writes the schema; the frame loop reads it next frame
+  s.addEventListener('input', () => {
+    if (index === null) p.value = parseFloat(s.value);
+    else p.value[index] = parseFloat(s.value);
+  });
+  parent.append(lab, s);
+}
+
+function addParams(parent, params) {
+  for (const p of Object.values(params)) {
+    if (Array.isArray(p.value)) {
+      // pair-value → two sliders writing one [a, b] param
+      addFader(parent, `${p.label} · a`, p, 0);
+      addFader(parent, `${p.label} · b`, p, 1);
+    } else {
+      addFader(parent, p.label, p, null);
+    }
+  }
+}
+
+function buildAdvanced() {
+  const body = document.getElementById('advBody');
+
+  const fg = document.createElement('div');
+  fg.className = 'group';
+  const fh = document.createElement('div');
+  fh.className = 'ghead';
+  fh.textContent = 'Visual field';
+  fg.append(fh);
+  addParams(fg, FIELD);
+  body.append(fg);
+
+  for (const [qname, quale] of Object.entries(QUALIA)) {
+    const g = document.createElement('div');
+    g.className = 'group';
+    const row = document.createElement('div');
+    row.className = 'qrow';
+    const name = document.createElement('span');
+    name.textContent = qname[0].toUpperCase() + qname.slice(1);
+    const btn = document.createElement('button');
+    btn.className = 'qtoggle' + (quale.enabled ? ' on' : '');
+    btn.setAttribute('aria-label', name.textContent);
+    btn.setAttribute('aria-pressed', quale.enabled);
+    row.append(name, btn);
+    g.append(row);
+    // zero-param qualia are a toggle row and nothing else
+    let faders = null;
+    if (Object.keys(quale.params).length) {
+      faders = document.createElement('div');
+      addParams(faders, quale.params);
+      faders.hidden = !quale.enabled;
+      g.append(faders);
+    }
+    btn.addEventListener('click', () => {
+      quale.enabled = !quale.enabled;
+      btn.classList.toggle('on', quale.enabled);
+      btn.setAttribute('aria-pressed', quale.enabled);
+      if (faders) faders.hidden = !quale.enabled;
+      restitch(QUALIA);
+    });
+    body.append(g);
+  }
 }
 
 export function initControls() {
@@ -101,6 +178,7 @@ export function initControls() {
   });
 
   applyDefaults();
+  buildAdvanced();
 
   document.getElementById('camFlip').addEventListener('click', () => {
     const other = facing === 'user' ? 'environment' : 'user';
