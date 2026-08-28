@@ -130,31 +130,33 @@ correctness bug for portraits. Plan of record:
 pre-ratified"): field joins the toggles and the presets.*
 
 ```
-[ ] FIELD becomes toggleable like other symptoms (user's call,
-    reverses tier-1-not-removable): toggle off = full survival AND
-    edge parked beyond the screen corner (10-field is never
+[x] FIELD toggleable like other symptoms (user's call, reverses
+    tier-1-not-removable): compile-time Q_FIELD short-circuit — off =
+    full survival, edges parked at 10.0 (10-field never
     stitch-excluded — its outputs feed photopsia/sparkle/transition)
-[ ] FIELD values + degeneration slider position enter presets:
-    envelope gains top-level `field` + `degeneration`; old presets
-    fill both from defaults (re-save to pin)
-[ ] none.json gains field-off → "none" IS the unfiltered view;
-    the 2026-08-28 ⚠ below dissolves without touching the compositor
-[ ] Pane = (screen region, preset, compiled program); immersive = one
-    pane, comparison = two
-[ ] Two draw calls per frame, scissor/viewport clipping — NOT doubled
-    uniforms in one program; perf-neutral (two half-screen passes =
-    one full-screen pass of pixel work)
-[ ] Split-layout arithmetic moves out of GLSL into viewport math;
-    the hardcoded rawScene override dies — the clean half is just the
-    "none" preset
-    ⚠ found 2026-08-28 (Q4 step 2): all-qualia-off is NOT the raw
-    scene — tier 1 always masks, and with no fill qualia the dead
-    ring renders black. "None = unfiltered" needs a design answer at
-    Q5 phase-plan (see phases/q4-presets.md step 2 note)
-[ ] Reference pane (left / top in stacked) frozen at its loaded
-    preset's values; sliders edit only the active pane (right / bottom)
-[ ] Both panes share camera texture and clock — identical configs
-    produce identical wobble/flicker, which is what honest A/B needs
+    (2026-08-28)
+[x] FIELD values enter presets, degeneration AS a field param
+    (amended mid-phase: FIELD.params.degeneration, General slider =
+    its sole UI); envelope v2 { name, saved, field, qualia }; old
+    presets fill from defaults (re-save to pin) (2026-08-28)
+[x] none.json gains field-off → "none" IS the unfiltered view; the
+    2026-08-28 ⚠ dissolved without touching the compositor
+    (2026-08-28)
+[x] Pane = (screen region, preset, compiled program); immersive = one
+    pane, comparison = two — asymmetric: active = live schema,
+    reference = inert materialised config (2026-08-28)
+[x] Two draw calls per frame, scissor/viewport clipping — NOT doubled
+    uniforms in one program; perf-neutral, confirmed on phone at the
+    gate (2026-08-28)
+[x] Split-layout arithmetic moved out of GLSL into viewport math;
+    uSplit/rawScene override dead — the clean half is the "none"
+    reference pane, honestly rendered (2026-08-28)
+[x] Reference pane (left / top in stacked) frozen at its loaded
+    preset's values (frozen by construction — sliders cannot reach
+    the detached config); selector under View, side-by-side only
+    (user revision of the three-tab spec) (2026-08-28)
+[x] Both panes share camera texture and clock — same frame observed
+    on both sides at the step-3 check (2026-08-28)
 ```
 
 ## Deferrals registered
@@ -190,10 +192,13 @@ pre-ratified"): field joins the toggles and the presets.*
     tuned state — PASSED 2026-08-28 (user by-eye, desktop + phone;
     SAFETY re-verified through the preset input channel — torture
     file warned, clamped, busier not brighter)
-[ ] Q5: comparison view with "none" left / tuned preset right matches
+[x] Q5: comparison view with "none" left / tuned preset right matches
     today's comparison view; two different presets render honestly
-    side by side
-[ ] Baseline fps on a phone throughout (two-pane mode included)
+    side by side — PASSED 2026-08-28 (user by-eye, desktop + phone;
+    field toggle round-trip and per-pane SAFETY clamp verified in the
+    same gate)
+[x] Baseline fps on a phone throughout (two-pane mode included) —
+    PASSED 2026-08-28 (user, phone)
 [x] SAFETY: per-quale caps unchanged, global clamp added — net effect
     can only be darker than today, never brighter — PASSED for Q2
     2026-08-20; the cross-cutting rule re-verifies whenever Q3–Q5

@@ -3,6 +3,23 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-28 — GATE Q5 passed; Q5 closed — PHASE Q COMPLETE
+
+- **GATE Q5 passed on the user's by-eye call, desktop and phone
+  (2026-08-28):** comparison view (None reference / tuned right)
+  matches the pre-Q5 look; two different presets render honestly side
+  by side; field toggle round-trips (off = raw scene, on = exact
+  return); baseline fps holds on the phone in two-pane mode; SAFETY
+  holds — ADD_CAP clamp effective in both panes, all-on/all-max in
+  comparison stays busier-not-brighter. Never self-certified.
+- **Phase Q is complete** (Q1–Q5 all gated): the monolith is now
+  toggleable qualia + a toggleable field over per-pane preset-driven
+  rendering. C and D land as new chunks + schema entries and inherit
+  the panel, presets, panes, and SAFETY clamp for free. New qualia
+  must ship enabled:false (2026-08-28 rule) — Phase C's fill-in is
+  the first test (murk's deletion/substitution is the sanctioned
+  exception, gated by eye).
+
 ## 2026-08-28 — Q5 planned: field-off mechanism, pane model, three-tab menu ratified
 
 - **Three-tab layout revised after first use (user, 2026-08-28,

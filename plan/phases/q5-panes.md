@@ -139,23 +139,24 @@ deferrals unchanged (per-pane slider editing stays parked).
       change ONLY the left pane; Symptom-tab loads change ONLY the
       right; two different portraits side by side render honestly;
       panel fits phone width.
-- [ ] 5. GATE Q5 payoff (user's call, never self-certified) — the
-      gate block below, desktop AND phone.
+- [x] 5. GATE Q5 payoff (user's call, never self-certified) — PASSED
+      2026-08-28, desktop AND phone; all four items below.
 
 ## Gate (copied from GATE Q, staged + Q5 scope additions)
 
 ```
-[ ] Q5: comparison view with "none" reference / tuned preset right
+[x] Q5: comparison view with "none" reference / tuned preset right
     matches today's comparison view; two different presets render
-    honestly side by side
-[ ] Field toggle round-trips cleanly (off = raw scene, on = exact
-    return, no residue beyond the recompile blink)
-[ ] Baseline fps on a phone in two-pane mode (the one real perf
-    exposure: two programs, two draw calls — argument says neutral,
-    the phone says the truth)
-[ ] SAFETY (cross-cutting): ADD_CAP clamp present and effective in
-    BOTH panes; field-off pane adds ~zero light; net effect can only
-    be darker than today, never brighter
+    honestly side by side — PASSED 2026-08-28 (user by-eye,
+    desktop + phone)
+[x] Field toggle round-trips cleanly (off = raw scene, on = exact
+    return, no residue beyond the recompile blink) — PASSED
+    2026-08-28 (desktop + phone)
+[x] Baseline fps on a phone in two-pane mode — PASSED 2026-08-28
+    (user, phone)
+[x] SAFETY (cross-cutting): ADD_CAP clamp present and effective in
+    BOTH panes; field-off pane adds ~zero light — PASSED 2026-08-28
+    (all-on/all-max in comparison view: busier, never brighter)
 ```
 
 Whose call: **the user's, by eye, desktop and phone** — presented,
