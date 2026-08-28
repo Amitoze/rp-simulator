@@ -100,11 +100,15 @@ deferrals unchanged (per-pane slider editing stays parked).
       OFF → the raw unfiltered scene even with all qualia on (the
       mechanism proof); ON → by-eye identical to before; round-trips
       with only the recompile blink; a field fader drag still works.
-- [ ] 2. `presets.js` (+ `controls.js` import surface) — envelope v2:
-      extract `materialise(values)` as the pure reset→overlay→clamp
-      core; BASELINE/snapshot/applyPreset/exportPreset cover
-      `field` {enabled, params} and `degeneration` (slider position);
-      `presets/none.json` gains `"field": { "enabled": false }`.
+- [x] 2. `presets.js` (+ `config.js`, `renderer.js`, `controls.js`) —
+      envelope v2 (amended mid-step, user ratified: degeneration IS a
+      field param — `FIELD.params.degeneration`, General slider =
+      convenience view, sole UI): extract `materialise(values)` as
+      the pure reset→overlay→clamp core; BASELINE/snapshot/
+      applyPreset/exportPreset cover `field` {enabled, params —
+      degeneration included}; envelope = { name, saved, field,
+      qualia }; `presets/none.json` gains
+      `"field": { "enabled": false }`.
       Check (console + UI): save → reload → load pins field values,
       field toggle state, AND slider position; loading None now shows
       the RAW scene (the Q4 ⚠ dissolving — observable); the old v1

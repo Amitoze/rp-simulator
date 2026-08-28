@@ -2,10 +2,6 @@
 // Edit this file to change the initial state of the simulator.
 
 export const DEFAULTS = {
-  // main slider, 0..1 — tier 1 (field geometry), so it lives here,
-  // not in QUALIA. Quale-owned slider defaults live in their schema.
-  degeneration: 0.75,   // degeneration of central field
-
   // 'camera' | 'video'
   background: 'camera',
 
@@ -30,6 +26,13 @@ export const DEFAULTS = {
 export const FIELD = {
   enabled: true,
   params: {
+    // how far the degeneration has advanced, 0..1 — picks the point
+    // on every [mild, late] pair below. A field param like any other
+    // (it IS the field's progression), but its UI is the headline
+    // General-tab slider, deliberately not duplicated in the
+    // generated group (DECISIONS 2026-08-20, reaffirmed 2026-08-28)
+    degeneration: { value: 0.75, min: 0, max: 1, label: 'Degeneration of central field' },
+
     // radius of the surviving central island, [mild, late]
     inner: { value: [81, 13], min: 0, max: 90, label: 'Central island radius' },
 

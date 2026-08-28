@@ -225,7 +225,8 @@ each frame: video pixels ──▶ texture upload
        clock; uSplit/rawScene/split math die from the shader; FIELD
        toggleable via compile-time Q_FIELD define (off = survival 1,
        edges parked at 10.0 — raw scene, zero per-pixel cost);
-       envelope v2 { name, saved, degeneration, field, qualia };
+       envelope v2 { name, saved, field, qualia } — degeneration is
+       FIELD.params.degeneration, General slider = its sole UI;
        menu → three tabs General | Reference | Symptom, per-pane
        preset controls
 ```

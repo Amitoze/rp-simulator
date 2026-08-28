@@ -5,6 +5,20 @@ regressions can be traced to what changed. Newest first.
 
 ## 2026-08-28 — Q5 planned: field-off mechanism, pane model, three-tab menu ratified
 
+- **Degeneration is a FIELD param, not a separate concept** (user
+  ratified mid-step-2, amending the pre-ratified "top-level
+  degeneration in the envelope"): `DEFAULTS.degeneration` dissolves
+  into `FIELD.params.degeneration` — it *is* the field's progression;
+  the General-tab slider is a convenience view onto it (the most
+  intuitive knob for a viewer), kept as its SOLE UI — not duplicated
+  in the generated group (reaffirms 2026-08-20; two live sliders on
+  one value would leave one showing a stale position). Envelope v2
+  simplifies to { name, saved, field, qualia }; BASELINE becomes a
+  pure schema walk (the DOM-read-at-import trap disappears);
+  applyField(U, field) needs no degen argument — panes carry their
+  own degeneration for free, closing the plan's
+  "degeneration-two-owners" risk structurally.
+
 - **Field-off is a compile-time short-circuit** (ratified). The
   stitcher emits `#define Q_FIELD` only when the field is enabled;
   `fieldSurvival` opens with an `#ifndef Q_FIELD` path returning

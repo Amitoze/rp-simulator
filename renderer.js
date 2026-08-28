@@ -1,6 +1,6 @@
 // WebGL setup and the per-frame render loop.
 
-import { state, video, fileVideo, sliders, initControls, IS_TOUCH } from './controls.js';
+import { state, video, fileVideo, initControls, IS_TOUCH } from './controls.js';
 import { FIELD, QUALIA } from './config.js';
 
 const canvas = document.getElementById('gl');
@@ -123,12 +123,14 @@ function applyQualia(U, qualia) {
 }
 
 // Field geometry from config: degrees → screen units (edge ≈ 90°, so
-// r = deg/180). degen blends each [mild, late] pair and erodes the
-// outer islands' coverage.
-function applyField(U, field, degen) {
+// r = deg/180). The degeneration param blends each [mild, late] pair
+// and erodes the outer islands' coverage — a schema param since Q5,
+// so panes carry their own (the General slider is just its UI).
+function applyField(U, field) {
   const d2r = deg => deg / 180;
   const lerp = (a, b, t) => a + (b - a) * t;
   const p = field.params;
+  const degen = p.degeneration.value;
   gl.uniform1f(U.uEdgeBase, d2r(lerp(p.inner.value[0], p.inner.value[1], degen)));
   gl.uniform1f(U.uOuterEdge, d2r(lerp(p.outer.value[0], p.outer.value[1], degen)));
   gl.uniform1f(U.uOuterCover,
@@ -192,7 +194,7 @@ async function main() {
     gl.uniform1f(U.uTime, (performance.now() - t0) / 1000);
     gl.uniform2f(U.uRes, canvas.width, canvas.height);
     applyQualia(U, QUALIA);
-    applyField(U, FIELD, parseFloat(sliders.degen.value));
+    applyField(U, FIELD);
     // comparison layout follows orientation: side-by-side in landscape,
     // stacked in portrait
     gl.uniform1f(U.uSplit,

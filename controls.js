@@ -76,7 +76,7 @@ function bindToggle(idA, idB, setState) {
 }
 
 function applyDefaults() {
-  sliders.degen.value = DEFAULTS.degeneration;
+  sliders.degen.value = FIELD.params.degeneration.value;
   if (DEFAULTS.background === 'video') document.getElementById('bgVid').click();
   if (DEFAULTS.view === 'sideBySide') document.getElementById('vwSbs').click();
   if (DEFAULTS.menuCollapsed) document.getElementById('panelHead').click();
@@ -108,7 +108,12 @@ function addFader(parent, label, p, index) {
 }
 
 function addParams(parent, params) {
-  for (const p of Object.values(params)) {
+  for (const [pname, p] of Object.entries(params)) {
+    // degeneration's UI is the headline General-tab slider — a schema
+    // param like any other, but deliberately not duplicated here
+    // (DECISIONS 2026-08-20): two live sliders on one value would
+    // leave whichever wasn't dragged showing a stale position
+    if (pname === 'degeneration') continue;
     if (Array.isArray(p.value)) {
       // pair-value → two sliders writing one [a, b] param
       addFader(parent, `${p.label} · a`, p, 0);
@@ -182,7 +187,7 @@ async function initPresets() {
     try {
       const r = await fetch(`presets/${sel.value}`, { cache: 'no-store' });
       const preset = await r.json();
-      applyPreset(preset.qualia ?? {});
+      applyPreset(preset);
     } catch (e) {
       // a broken file must never half-apply: applyPreset was not
       // reached, so the sim keeps its current state
@@ -222,7 +227,7 @@ async function initPresets() {
     if (!f) return;
     try {
       const preset = JSON.parse(await f.text());
-      applyPreset(preset.qualia ?? {});
+      applyPreset(preset);
       // reflect the load in the dropdown: one reusable ad-hoc entry,
       // labelled from the file's own name (user request 2026-08-28)
       const sel = document.getElementById('presetSel');
@@ -268,6 +273,13 @@ export function initControls() {
     panel.classList.toggle('min');
     panel.querySelector('.chev').textContent =
       panel.classList.contains('min') ? '☰' : 'Done';
+  });
+
+  // the General slider is the convenience view onto the schema's
+  // degeneration param: drags write the schema (the frame loop reads
+  // it next frame, same contract as every generated fader)
+  sliders.degen.addEventListener('input', () => {
+    FIELD.params.degeneration.value = parseFloat(sliders.degen.value);
   });
 
   applyDefaults();
