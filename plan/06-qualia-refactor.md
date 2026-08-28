@@ -116,6 +116,9 @@ correctness bug for portraits. Plan of record:
     tune → save → compare → iterate loop does not close without this;
     export is required, not polish
 [ ] A "none" preset: every quale off — becomes the unfiltered view (Q5)
+[ ] Menu tabs (user UX spec 2026-08-28): panel splits into General
+    (degeneration slider, background, view) and Adjust Symptoms
+    (load presets above configure symptoms) — tabs horizontal at top
 ```
 
 ## Q5. Per-pane configs (`renderer.js`, `controls.js`)

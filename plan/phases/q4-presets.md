@@ -129,7 +129,7 @@ files carry values only; degeneration is tier 1 and not in presets.
       Check: dropdown shows Defaults + None; pick None → unfiltered;
       drag a slider, pick Defaults → defaults restored (BASELINE, not
       the drag); console clean.
-- [ ] 4. `presets.js` + `controls.js` + `sim.html` — close the loop:
+- [x] 4. `presets.js` + `controls.js` + `sim.html` — close the loop:
       "Save as preset" button → name prompt (default "portrait") →
       `{ name, saved, qualia }` Blob download; `<input type="file">`
       picker row → FileReader → parse → apply (bad JSON: console
@@ -139,7 +139,20 @@ files carry values only; degeneration is tier 1 and not in presets.
       match the tuned state exactly; then hand-edit the file (add an
       unknown key, push a value out of range) → load → warned,
       clamped, nothing brighter.
-- [ ] 5. GATE Q4 payoff (user's call, never self-certified):
+- [ ] 5. `sim.html` + `controls.js` + `style.css` — menu tabs (user UX
+      spec, 2026-08-28): two horizontal tabs at the top of the panel
+      body. Tab "General": the degeneration slider + Background + View
+      rows. Tab "Adjust Symptoms", two sections: "Load presets"
+      (dropdown + save / load-file row) above "Configure symptoms"
+      (the generated FIELD + qualia groups — the old expandable
+      details section dies; the tab replaces it as the container, so
+      the generator and its rebuild-after-load are untouched). Tab
+      switching is display-only: no schema writes, no restitch.
+      Check: tabs round-trip; every control works from its new home
+      (slider, background/view, preset load + save, toggles, faders);
+      panel fits a phone-width viewport; the panel still rebuilds
+      correctly after a preset load with the Symptoms tab open.
+- [ ] 6. GATE Q4 payoff (user's call, never self-certified):
       save-as-preset → reload → load reproduces the exact tuned
       state, desktop AND phone (phone proves the iOS download/Files
       path); torture file (all-on, all params at max, plus

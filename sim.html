@@ -30,6 +30,11 @@
     <label>Preset</label>
     <!-- options filled by controls.js from presets/index.json -->
     <select id="presetSel"></select>
+    <div class="seg">
+      <button id="presetSave">Save as preset</button>
+      <button id="presetLoad">Load file…</button>
+    </div>
+    <input type="file" id="presetFile" accept=".json,application/json" hidden>
     <!-- filled by controls.js from the schema (config.js) -->
     <details id="adv">
       <summary>Adjust symptoms</summary>

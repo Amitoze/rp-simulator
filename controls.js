@@ -4,8 +4,8 @@ import { DEFAULTS, FIELD, QUALIA } from './config.js';
 // cycle-safe: restitch is a top-level function declaration in
 // renderer.js, and it's only called from event handlers anyway
 import { restitch } from './renderer.js';
-// same pattern: hoisted declaration, called from the dropdown handler
-import { applyPreset } from './presets.js';
+// same pattern: hoisted declarations, called from event handlers
+import { applyPreset, exportPreset } from './presets.js';
 
 export const state = {
   hasCam: false,      // camera stream is live
@@ -205,6 +205,32 @@ async function initPresets() {
   } catch (e) {
     console.error('preset manifest failed to load:', e);
   }
+
+  // save: the tune → save → compare loop closes here (export is
+  // required, not polish — DECISIONS 2026-08-19)
+  document.getElementById('presetSave').addEventListener('click', () => {
+    const name = prompt('Preset name:', 'portrait');
+    if (name) exportPreset(name.trim() || 'portrait');
+  });
+
+  // ad-hoc load: any preset file, not just the shipped manifest
+  const fileIn = document.getElementById('presetFile');
+  document.getElementById('presetLoad').addEventListener('click',
+    () => fileIn.click());
+  fileIn.addEventListener('change', async () => {
+    const f = fileIn.files[0];
+    if (!f) return;
+    try {
+      const preset = JSON.parse(await f.text());
+      applyPreset(preset.qualia ?? {});
+    } catch (e) {
+      // unreadable must never half-apply: the parse fails before
+      // applyPreset is reached, so the sim keeps its current state
+      console.error(`preset file "${f.name}" unreadable:`, e);
+      note.textContent = 'preset file unreadable — see console';
+    }
+    fileIn.value = ''; // so re-picking the same file fires again
+  });
 }
 
 export function initControls() {

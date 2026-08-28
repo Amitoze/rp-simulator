@@ -72,6 +72,31 @@ export function applyPreset(values) {
   buildAdvanced();
 }
 
+// Export the live schema as a downloadable preset file: the ratified
+// envelope { name, saved, qualia } around a FULL snapshot — every
+// enabled flag and param value — so the file reproduces this exact
+// look no matter how schema defaults move later (frozen-snapshot
+// semantics, DECISIONS 2026-08-28). SAFETY caps are not params, so
+// they cannot be exported — and therefore never re-imported.
+export function exportPreset(name) {
+  const preset = {
+    name,
+    saved: new Date().toISOString().slice(0, 10),
+    qualia: snapshot(),
+  };
+  const blob = new Blob([JSON.stringify(preset, null, 2) + '\n'],
+                        { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+                   .replace(/^-+|-+$/g, '');
+  a.download = (slug || 'preset') + '.json';
+  a.click();
+  // revoke after the download has had a moment to start — an
+  // immediate revoke races the click in some browsers
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
 // Debug handle for the console checks in this step (kept afterwards:
 // poking presets from DevTools is a feature in a static sim)
 window.rpPresets = { BASELINE, snapshot, applyPreset };
