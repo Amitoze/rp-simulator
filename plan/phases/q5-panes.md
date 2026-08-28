@@ -89,7 +89,7 @@ deferrals unchanged (per-pane slider editing stays parked).
 
 ## Steps
 
-- [ ] 1. `config.js` + `controls.js` + `renderer.js` +
+- [x] 1. `config.js` + `controls.js` + `renderer.js` +
       `shader/10-field.frag` — the field toggle end-to-end: FIELD
       reshapes to `{ enabled: true, params: {…} }` (quale shape;
       applyField + clamp call sites re-point to `.params`); stitcher

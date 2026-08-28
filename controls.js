@@ -127,45 +127,42 @@ export function buildAdvanced() {
   const body = document.getElementById('advBody');
   body.replaceChildren();
 
-  const fg = document.createElement('div');
-  fg.className = 'group';
-  const fh = document.createElement('div');
-  fh.className = 'ghead';
-  fh.textContent = 'Visual field';
-  fg.append(fh);
-  addParams(fg, FIELD);
-  body.append(fg);
-
-  for (const [qname, quale] of Object.entries(QUALIA)) {
+  // one toggle-row group; FIELD and the qualia share the shape since
+  // FIELD went quale-shaped (Q5, DECISIONS 2026-08-28)
+  const addGroup = (label, entry) => {
     const g = document.createElement('div');
     g.className = 'group';
     const row = document.createElement('div');
     row.className = 'qrow';
     const name = document.createElement('span');
-    name.textContent = qname[0].toUpperCase() + qname.slice(1);
+    name.textContent = label;
     const btn = document.createElement('button');
-    btn.className = 'qtoggle' + (quale.enabled ? ' on' : '');
-    btn.setAttribute('aria-label', name.textContent);
-    btn.setAttribute('aria-pressed', quale.enabled);
+    btn.className = 'qtoggle' + (entry.enabled ? ' on' : '');
+    btn.setAttribute('aria-label', label);
+    btn.setAttribute('aria-pressed', entry.enabled);
     row.append(name, btn);
     g.append(row);
-    // zero-param qualia are a toggle row and nothing else
+    // zero-param entries are a toggle row and nothing else
     let faders = null;
-    if (Object.keys(quale.params).length) {
+    if (Object.keys(entry.params).length) {
       faders = document.createElement('div');
-      addParams(faders, quale.params);
-      faders.hidden = !quale.enabled;
+      addParams(faders, entry.params);
+      faders.hidden = !entry.enabled;
       g.append(faders);
     }
     btn.addEventListener('click', () => {
-      quale.enabled = !quale.enabled;
-      btn.classList.toggle('on', quale.enabled);
-      btn.setAttribute('aria-pressed', quale.enabled);
-      if (faders) faders.hidden = !quale.enabled;
-      restitch(QUALIA);
+      entry.enabled = !entry.enabled;
+      btn.classList.toggle('on', entry.enabled);
+      btn.setAttribute('aria-pressed', entry.enabled);
+      if (faders) faders.hidden = !entry.enabled;
+      restitch(QUALIA, FIELD);
     });
     body.append(g);
-  }
+  };
+
+  addGroup('Visual field', FIELD); // listed first, as before
+  for (const [qname, quale] of Object.entries(QUALIA))
+    addGroup(qname[0].toUpperCase() + qname.slice(1), quale);
 }
 
 // --- preset dropdown -------------------------------------------------

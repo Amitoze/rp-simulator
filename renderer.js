@@ -36,16 +36,21 @@ const CHUNK_QUALE = {
   '24-transition': 'transition',
 };
 
-// PURE: (chunk sources, qualia config) in → GLSL source out. Reads no
-// globals — per-pane rendering (Q5) stitches two different configs, so
-// nothing about "the" current config may be baked in here. Disabled
-// qualia are excluded at stitch time: their chunk text is omitted AND
-// the matching Q_* define is absent, so the compositor's #ifdef call
-// sites vanish too — off costs zero per pixel.
-function stitchShader(sources, qualia) {
+// PURE: (chunk sources, qualia + field configs) in → GLSL source out.
+// Reads no globals — per-pane rendering (Q5) stitches two different
+// configs, so nothing about "the" current config may be baked in here.
+// Disabled qualia are excluded at stitch time: their chunk text is
+// omitted AND the matching Q_* define is absent, so the compositor's
+// #ifdef call sites vanish too — off costs zero per pixel.
+// FIELD is different: 10-field is ALWAYS included (its outputs feed
+// sparkle/transition/photopsia); Q_FIELD only selects which body
+// compiles — the real geometry, or the full-survival short-circuit
+// (DECISIONS 2026-08-28).
+function stitchShader(sources, qualia, field) {
   const defines = Object.keys(qualia)
     .filter(name => qualia[name].enabled)
     .map(name => `#define Q_${name.toUpperCase()}`)
+    .concat(field.enabled ? ['#define Q_FIELD'] : [])
     .join('\n');
   const body = CHUNKS
     .filter(c => !(c in CHUNK_QUALE) || qualia[CHUNK_QUALE[c]].enabled)
@@ -67,10 +72,10 @@ const live = { prog: null, U: null };
 // out. Recompiling on a toggle (Q3) is just calling this again. aPos
 // is pinned to attribute 0 before linking so the vertex buffer setup
 // survives a program swap.
-function makeProgram(sources, qualia) {
+function makeProgram(sources, qualia, field) {
   const prog = gl.createProgram();
   gl.attachShader(prog, compile(gl.VERTEX_SHADER, vsSrc));
-  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, stitchShader(sources, qualia)));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, stitchShader(sources, qualia, field)));
   gl.bindAttribLocation(prog, 0, 'aPos');
   gl.linkProgram(prog);
   if (!gl.getProgramParameter(prog, gl.LINK_STATUS))
@@ -92,9 +97,9 @@ function makeProgram(sources, qualia) {
 // Exported for controls.js (a quale toggle changes what's stitched);
 // top-level function declaration, so the renderer↔controls import
 // cycle resolves by hoisting.
-export function restitch(qualia) {
+export function restitch(qualia, field) {
   const old = live.prog;
-  ({ prog: live.prog, U: live.U } = makeProgram(sources, qualia));
+  ({ prog: live.prog, U: live.U } = makeProgram(sources, qualia, field));
   gl.useProgram(live.prog);
   if (old) gl.deleteProgram(old);
 }
@@ -123,11 +128,12 @@ function applyQualia(U, qualia) {
 function applyField(U, field, degen) {
   const d2r = deg => deg / 180;
   const lerp = (a, b, t) => a + (b - a) * t;
-  gl.uniform1f(U.uEdgeBase, d2r(lerp(field.inner.value[0], field.inner.value[1], degen)));
-  gl.uniform1f(U.uOuterEdge, d2r(lerp(field.outer.value[0], field.outer.value[1], degen)));
+  const p = field.params;
+  gl.uniform1f(U.uEdgeBase, d2r(lerp(p.inner.value[0], p.inner.value[1], degen)));
+  gl.uniform1f(U.uOuterEdge, d2r(lerp(p.outer.value[0], p.outer.value[1], degen)));
   gl.uniform1f(U.uOuterCover,
-    field.outerCoverage.value * (1 - field.erosion.value * degen));
-  gl.uniform1f(U.uIslandSeed, field.islandSeed.value);
+    p.outerCoverage.value * (1 - p.erosion.value * degen));
+  gl.uniform1f(U.uIslandSeed, p.islandSeed.value);
 }
 
 async function main() {
@@ -137,7 +143,7 @@ async function main() {
     sources[c] = await (await fetch(`shader/${c}.frag`, { cache: 'no-store' })).text();
   }));
 
-  restitch(QUALIA);
+  restitch(QUALIA, FIELD);
 
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);

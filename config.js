@@ -16,32 +16,37 @@ export const DEFAULTS = {
   menuCollapsed: false,
 };
 
-// Geometry of the visual field. Same {value, min, max, label} param
-// shape as QUALIA params, so the load clamp and the generated faders
-// treat both alike — but TIER 1: always on, configurable, NEVER
-// toggleable — geometry is not a quale (where vision survives is not
-// an experience you can switch off). Deliberately outside QUALIA, and
-// outside presets' reach.
+// Geometry of the visual field. Quale-shaped ({ enabled, params })
+// since Q5 so the generated panel gives it a toggle like any symptom
+// (user's call, DECISIONS 2026-08-28 — reverses the earlier
+// tier-1-not-toggleable rule). Still TIER 1 in one respect: the
+// 10-field chunk is ALWAYS stitched — toggling off compiles a
+// short-circuit (full survival, edges parked off-screen), it never
+// removes the chunk, because its outputs feed sparkle, transition,
+// and photopsia.
 // Radii are degrees of eccentricity, mapped so the screen edge ≈ 90°
 // (see DECISIONS.md). [mild, late] pair-values are the value at
 // degeneration slider 0 and 1; in between is a straight blend.
 export const FIELD = {
-  // radius of the surviving central island, [mild, late]
-  inner: { value: [81, 13], min: 0, max: 90, label: 'Central island radius' },
+  enabled: true,
+  params: {
+    // radius of the surviving central island, [mild, late]
+    inner: { value: [81, 13], min: 0, max: 90, label: 'Central island radius' },
 
-  // radius where far-peripheral islands can begin — the dead ring's far
-  // side, [mild, late]. Widens outward as degeneration advances.
-  outer: { value: [65, 85], min: 0, max: 90, label: 'Far islands begin' },
+    // radius where far-peripheral islands can begin — the dead ring's
+    // far side, [mild, late]. Widens outward as degeneration advances.
+    outer: { value: [65, 85], min: 0, max: 90, label: 'Far islands begin' },
 
-  // how much of the beyond-the-ring field survives when mild
-  outerCoverage: { value: 0.65, min: 0, max: 1, label: 'Far island coverage' },
+    // how much of the beyond-the-ring field survives when mild
+    outerCoverage: { value: 0.65, min: 0, max: 1, label: 'Far island coverage' },
 
-  // how strongly the slider erodes the islands (1 = all gone at full)
-  erosion: { value: 0.9, min: 0, max: 1, label: 'Island erosion' },
+    // how strongly the slider erodes the islands (1 = all gone at full)
+    erosion: { value: 0.9, min: 0, max: 1, label: 'Island erosion' },
 
-  // picks the personal geography of the islands — change it and every
-  // island moves somewhere else. Fixed = islands are places.
-  islandSeed: { value: 7.0, min: 0, max: 20, label: 'Island layout seed' },
+    // picks the personal geography of the islands — change it and every
+    // island moves somewhere else. Fixed = islands are places.
+    islandSeed: { value: 7.0, min: 0, max: 20, label: 'Island layout seed' },
+  },
 };
 
 // The qualia schema: which qualia are stitched into the shader, and
@@ -121,6 +126,6 @@ export function clampParams(owner, params) {
     }
   }
 }
-clampParams('FIELD', FIELD);
+clampParams('FIELD', FIELD.params);
 for (const [qname, quale] of Object.entries(QUALIA))
   clampParams(`QUALIA.${qname}`, quale.params);

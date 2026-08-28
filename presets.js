@@ -6,7 +6,7 @@
 // caps are outside its reach by construction: this file never touches
 // them. (DECISIONS 2026-08-28 "Q4 planned".)
 
-import { QUALIA, clampParams } from './config.js';
+import { QUALIA, FIELD, clampParams } from './config.js';
 // cycle-safe: restitch is a hoisted top-level function declaration in
 // renderer.js, and it is only called from user actions, never at load
 import { restitch } from './renderer.js';
@@ -66,7 +66,7 @@ export function applyPreset(values) {
   for (const [qname, quale] of Object.entries(QUALIA))
     clampParams(`preset → ${qname}`, quale.params);
   // 4. enabled flags may have changed what is stitched into the shader
-  restitch(QUALIA);
+  restitch(QUALIA, FIELD);
   // 5. the panel's sliders and toggles show schema state — regenerate
   // them from it so they reflect the loaded preset, not the old drags
   buildAdvanced();
