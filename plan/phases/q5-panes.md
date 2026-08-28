@@ -114,7 +114,7 @@ deferrals unchanged (per-pane slider editing stays parked).
       the RAW scene (the Q4 ⚠ dissolving — observable); the old v1
       portrait.json still loads, field/degen at defaults, console
       clean.
-- [ ] 3. `renderer.js` + `shader/90-composite.frag` — the pane
+- [x] 3. `renderer.js` + `shader/90-composite.frag` — the pane
       machinery: per-pane { config, prog, U }; drawPane(pane, region)
       with viewport+scissor; reference pane materialised from None at
       boot; comparison = reference left/top + Symptom right/bottom,

@@ -215,9 +215,11 @@ each frame: video pixels ──▶ texture upload
        global read (Q5 depends on this); restitch() = makeProgram
        again + program swap + delete old — uniforms self-heal on the
        next frame (DECISIONS 2026-08-20 "Q3 planned")
-🟧 Q5 (design ratified, DECISIONS 2026-08-28 "Q5 planned"; step 1
-       built + checked 2026-08-28 — field toggle end-to-end, FIELD
-       quale-shaped, Q_FIELD short-circuit proven: off = raw scene):
+🟧 Q5 (design ratified, DECISIONS 2026-08-28 "Q5 planned"; steps 1–3
+       built + step-checked 2026-08-28 — field toggle, envelope v2
+       incl. degeneration-as-field-param, pane machinery: uSplit/
+       rawScene dead, reference pane honest; remaining: three-tab
+       menu, GATE):
        ASYMMETRIC panes — active (Symptom/RP) pane = the live schema
        singletons, panel edits as today; reference pane = inert deep
        config from ITS preset (default None), own program, frozen by

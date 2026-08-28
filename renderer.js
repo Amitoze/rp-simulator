@@ -1,7 +1,10 @@
 // WebGL setup and the per-frame render loop.
 
 import { state, video, fileVideo, initControls, IS_TOUCH } from './controls.js';
-import { FIELD, QUALIA } from './config.js';
+import { FIELD, QUALIA, REFERENCE_PRESET } from './config.js';
+// cycle-safe: materialise is a hoisted function declaration in
+// presets.js, first called long after every module has evaluated
+import { materialise } from './presets.js';
 
 const canvas = document.getElementById('gl');
 const gl = canvas.getContext('webgl');
@@ -84,7 +87,7 @@ function makeProgram(sources, qualia, field) {
   // comes back null, and gl.uniform* on null is a defined no-op
   const U = {};
   for (const name of ['uTex', 'uSrc', 'uMirror', 'uTime', 'uRes', 'uEdgeBase',
-                      'uNetDensity', 'uSeeThru', 'uSplit', 'uAspect',
+                      'uNetDensity', 'uSeeThru', 'uFit', 'uAspect',
                       'uNetScale', 'uNetWarp', 'uNetFlicker',
                       'uOuterEdge', 'uOuterCover', 'uIslandSeed',
                       'uSparkleFlicker', 'uSparkleBandIn', 'uSparkleBandOut']) {
@@ -102,6 +105,16 @@ export function restitch(qualia, field) {
   ({ prog: live.prog, U: live.U } = makeProgram(sources, qualia, field));
   gl.useProgram(live.prog);
   if (old) gl.deleteProgram(old);
+}
+
+// The comparison view's reference pane: an inert materialised config
+// with its own compiled program (Q5, DECISIONS 2026-08-28 —
+// asymmetric panes: sliders and presets edit the live schema above;
+// nothing can reach this copy). Rebuilt only when its preset changes.
+let refPane = null;
+export function setReference(cfg) {
+  if (refPane) gl.deleteProgram(refPane.prog);
+  refPane = { cfg, ...makeProgram(sources, cfg.qualia, cfg.field) };
 }
 
 // Write every qualia-derived uniform from the schema, every frame.
@@ -141,11 +154,19 @@ function applyField(U, field) {
 async function main() {
   // no-store: python http.server sends no cache headers, and a stale
   // cached chunk silently ignores config/shader edits
+  const refJson = fetch(REFERENCE_PRESET, { cache: 'no-store' })
+    .then(r => r.json());
   await Promise.all(CHUNKS.map(async c => {
     sources[c] = await (await fetch(`shader/${c}.frag`, { cache: 'no-store' })).text();
   }));
 
   restitch(QUALIA, FIELD);
+
+  // reference pane boots on the configured default (none = the honest
+  // unfiltered view); until the fetch lands, comparison draws only
+  // the active pane — a blink at worst
+  refJson.then(p => setReference(materialise(p)))
+    .catch(e => console.error('reference preset failed to load:', e));
 
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -177,31 +198,58 @@ async function main() {
   resize();
 
   const t0 = performance.now();
+
+  // One pane, one draw: clip to its rect, bind ITS program, write
+  // every uniform from ITS config. fit: 0 = cover (immersive),
+  // 1 = contain + letterbox (comparison halves) — today's looks.
+  function drawPane(prog, U, qualia, field, rect, fit, shared) {
+    gl.viewport(rect[0], rect[1], rect[2], rect[3]);
+    gl.scissor(rect[0], rect[1], rect[2], rect[3]);
+    gl.useProgram(prog);
+    gl.uniform1i(U.uTex, 0);
+    gl.uniform1f(U.uSrc, shared.src);
+    gl.uniform1f(U.uMirror, shared.mirror);
+    gl.uniform1f(U.uTime, shared.time);   // SHARED clock: identical
+    gl.uniform2f(U.uRes, rect[2], rect[3]); // configs = identical wobble
+    gl.uniform1f(U.uAspect, shared.aspect);
+    gl.uniform1f(U.uFit, fit);
+    applyQualia(U, qualia);
+    applyField(U, field); // each pane's OWN degeneration rides here
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  gl.enable(gl.SCISSOR_TEST);
   function frame() {
-    // through the shared ref — restitch may have swapped the program
-    const U = live.U;
     // pick the texture source: local video file, else camera, else the
-    // procedural fallback scene (uSrc = 0)
+    // procedural fallback scene (uSrc = 0); uploaded ONCE, shared by
+    // both panes — honest A/B needs the same frame on both sides
     const useVid = state.videoMode && fileVideo.readyState >= 2;
     const srcEl = useVid ? fileVideo
                 : (state.hasCam && video.readyState >= 2 ? video : null);
     if (srcEl) {
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, srcEl);
     }
-    gl.uniform1i(U.uTex, 0);
-    gl.uniform1f(U.uSrc, useVid ? 2 : (state.hasCam ? 1 : 0));
-    gl.uniform1f(U.uMirror, !useVid && state.mirror ? 1 : 0);
-    gl.uniform1f(U.uTime, (performance.now() - t0) / 1000);
-    gl.uniform2f(U.uRes, canvas.width, canvas.height);
-    applyQualia(U, QUALIA);
-    applyField(U, FIELD);
-    // comparison layout follows orientation: side-by-side in landscape,
-    // stacked in portrait
-    gl.uniform1f(U.uSplit,
-      state.splitMode ? (canvas.width >= canvas.height ? 1 : 2) : 0);
-    gl.uniform1f(U.uAspect,
-      srcEl && srcEl.videoWidth ? srcEl.videoWidth / srcEl.videoHeight : 16 / 9);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    const shared = {
+      src: useVid ? 2 : (state.hasCam ? 1 : 0),
+      mirror: !useVid && state.mirror ? 1 : 0,
+      time: (performance.now() - t0) / 1000,
+      aspect: srcEl && srcEl.videoWidth
+        ? srcEl.videoWidth / srcEl.videoHeight : 16 / 9,
+    };
+    const w = canvas.width, h = canvas.height;
+    if (!state.splitMode) {
+      drawPane(live.prog, live.U, QUALIA, FIELD, [0, 0, w, h], 0, shared);
+    } else {
+      // layout follows orientation: side-by-side in landscape (ref
+      // left), stacked in portrait (ref top; GL y-origin is bottom)
+      const halfW = Math.floor(w / 2), halfH = Math.floor(h / 2);
+      const [refRect, actRect] = w >= h
+        ? [[0, 0, halfW, h], [halfW, 0, w - halfW, h]]
+        : [[0, halfH, w, h - halfH], [0, 0, w, halfH]];
+      if (refPane) drawPane(refPane.prog, refPane.U, refPane.cfg.qualia,
+                            refPane.cfg.field, refRect, 1, shared);
+      drawPane(live.prog, live.U, QUALIA, FIELD, actRect, 1, shared);
+    }
     requestAnimationFrame(frame);
   }
   frame();

@@ -52,6 +52,11 @@ export const FIELD = {
   },
 };
 
+// Which preset file the comparison view's reference pane boots with.
+// The reference pane renders this honestly through the full pipeline —
+// "none" (field off, all qualia off) IS the unfiltered view (Q5).
+export const REFERENCE_PRESET = 'presets/none.json';
+
 // The qualia schema: which qualia are stitched into the shader, and
 // every tunable each one owns. Tier 1 (FIELD) is not here and never
 // will be: geometry is not a quale and cannot be toggled. All-on at

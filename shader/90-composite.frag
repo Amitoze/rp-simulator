@@ -3,6 +3,12 @@
 // injected by the stitcher only when that quale is enabled — a
 // disabled quale's call site AND function body are absent from the
 // compiled program entirely (off costs zero).
+//
+// Since Q5 this shader knows nothing about split views: it renders
+// ONE pane. The renderer draws it once per pane (viewport+scissor),
+// each pane with its own program and config; uFit picks the content
+// fit — 0 = cover (immersive), 1 = contain + letterbox (comparison
+// halves) — preserving the pre-Q5 looks exactly.
 void main() {
   vec2 uv = vUV;
   float screenAsp = uRes.x / uRes.y;
@@ -11,37 +17,26 @@ void main() {
   float contAsp;         // aspect of that geometry space
   float bars = 0.0;      // 1 = letterbox bar
 
-  if (uSplit < 0.5) {
-    // immersive: cover-fit — content fills the screen undistorted,
-    // overflow is cropped (never stretched)
+  if (uFit < 0.5) {
+    // cover-fit: content fills the pane undistorted, overflow cropped
     vec2 frac = vec2(min(1.0, screenAsp / uAspect),
                      min(1.0, uAspect / screenAsp));
     suv = 0.5 + (uv - 0.5) * frac;
     cuv = uv;
     contAsp = screenAsp;
   } else {
-    // comparison: two halves — side by side (uSplit=1, landscape) or
-    // stacked (uSplit=2, portrait) — each contain-fit (letterboxed,
-    // never stretched)
-    vec2 halfPx, p;
-    if (uSplit < 1.5) {
-      halfPx = vec2(uRes.x * 0.5, uRes.y);
-      p = vec2(fract(uv.x * 2.0), uv.y) * halfPx;
-    } else {
-      halfPx = vec2(uRes.x, uRes.y * 0.5);
-      p = vec2(uv.x, fract(uv.y * 2.0)) * halfPx;
-    }
-    float cw = min(halfPx.x, halfPx.y * uAspect);
-    float ch = cw / uAspect;
-    vec2 o = (halfPx - vec2(cw, ch)) * 0.5; // centered content rect
-    suv = (p - o) / vec2(cw, ch);
+    // contain-fit: whole content visible, letterboxed, never
+    // stretched; geometry maps over the CONTENT rect (pre-Q5
+    // comparison semantics)
+    vec2 frac = vec2(max(1.0, screenAsp / uAspect),
+                     max(1.0, uAspect / screenAsp));
+    suv = 0.5 + (uv - 0.5) * frac;
     if (suv.x < 0.0 || suv.x > 1.0 || suv.y < 0.0 || suv.y > 1.0) bars = 1.0;
     suv = clamp(suv, 0.0, 1.0);
     cuv = suv;
     contAsp = uAspect;
   }
   vec3 scene = getScene(suv);
-  vec3 rawScene = scene;   // pristine copy for the comparison view
 
   // ---- tier 1: field geometry (always on) ------------------------
   vec2 centered = cuv - 0.5;
@@ -103,11 +98,6 @@ void main() {
   addLight *= ADD_CAP / max(addLuma, ADD_CAP);
   col += addLight;
 
-  // unfiltered half of the comparison: left (side-by-side) or top (stacked)
-  if ((uSplit > 0.5 && uSplit < 1.5 && uv.x < 0.5) ||
-      (uSplit > 1.5 && uv.y > 0.5)) {
-    col = rawScene;
-  }
   if (bars > 0.5) col = vec3(0.0); // letterbox
   gl_FragColor = vec4(col, 1.0);
 }
