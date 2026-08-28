@@ -3,6 +3,25 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-28 — Phase G merged early: G2 + G5 parked (user's call)
+
+- **Merged without the formal gate.** G1, G3, G4 each passed the
+  user's by-eye check at step level (desktop only); the user chose to
+  park G2 (touch gaze) and G5 (glance-moment + SAFETY re-verify) and
+  merge. Recorded plainly: the phase GATE did not formally pass.
+- **What is and isn't verified:** mechanical G5 checks RUN at
+  close-out — zero `uTime` in 15-glance-panel (the no-flicker SAFETY
+  constraint holds in code) and the vUV gaze-invariant holds (no
+  symptom chunk reads it). Covered informally during step verdicts:
+  blindspots over the panel, gaze-onto-panel, reference-pane
+  isolation. NOT verified: ADD_CAP all-on/all-max by eye with the
+  panel lit; everything phone (gaze has NO touch input at all).
+- **Reopening conditions:** G2 before any phone-audience demo of the
+  glance experience (the primary audience is mobile — this is a real
+  hole, not polish); the SAFETY by-eye re-verify with the panel lit
+  before or with the next change touching capped paths (plausibly
+  Phase C's fill-in/photopsia work).
+
 ## 2026-08-28 — G4 revised mid-step: source-brightness display, transparency knob (user spec)
 
 - **The display has no brightness knob** — it replicates the source

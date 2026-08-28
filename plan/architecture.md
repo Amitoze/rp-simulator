@@ -345,7 +345,7 @@ sliders / toggles ──▶ state + uniforms (live)
   "none" preset = every quale off = unfiltered view (feeds Q5)
 ```
 
-### Gaze + glance panel 🟧 (Phase G in progress — gaze desktop 🟧 G1 done by eye 2026-08-28, touch 🟦 G2, panel 🟦 G3–G5; DECISIONS 2026-08-28 "Phase G planned")
+### Gaze + glance panel 🟩* (Phase G merged 2026-08-28 — G1/G3/G4 by-eye desktop; *G2 touch gaze 🟦 PARKED (no phone input exists) and G5 formal gate incl. SAFETY by-eye 🟦 PARKED, user's call — DECISIONS "Phase G merged early")
 
 Two coordinate frames, and the phase is the space between them: damage
 is eye-fixed (retina frame), the aid is head-fixed (screen frame).

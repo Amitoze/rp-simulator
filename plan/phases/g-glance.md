@@ -117,9 +117,11 @@ in every step that touches it.
   drag moves the island diagonally without stretching; release springs
   back to centre; in side-by-side, the None reference shows no change
   (field off — nothing to move) while the symptom pane moves.
-- [ ] **2 · Gaze on touch.** One-finger drag on the canvas drives the
-  same gaze target (pointer events; the DOM menu is unaffected);
-  same clamp and spring-back.
+- [ ] **2 · Gaze on touch.** PARKED (user's call, 2026-08-28 — merged
+  without it). Gaze has NO phone input until this lands; reopens
+  before any phone-audience demo of the glance experience. One-finger
+  drag on the canvas drives the same gaze target (pointer events; the
+  DOM menu is unaffected); same clamp and spring-back.
   **Check (user, by eye, phone):** finger-drag moves the mask, no
   page scroll/zoom interference, spring-back on lift, baseline fps
   holds.
@@ -173,7 +175,16 @@ in every step that touches it.
   at 1 shows the world through the panel with a faint ghost even
   over a dark feed (never fully gone); transparency at 0 reproduces
   step 3's opaque inset exactly.
-- [ ] **5 · The glance moment + SAFETY re-verify.** No new machinery —
+- [ ] **5 · The glance moment + SAFETY re-verify.** PARKED (user's
+  call, 2026-08-28 — merged without the formal pass). Mechanical
+  half RUN at close-out: `grep uTime shader/15-glance-panel.frag` →
+  zero hits (no time-varying term ✓) and the vUV gaze-invariant
+  holds (no symptom chunk reads it). Informally covered during
+  G3/G4 verdicts: blindspots compositing over the panel, gaze
+  sliding the island onto it, reference-pane isolation. NOT
+  verified anywhere: ADD_CAP all-on/all-max by-eye with the panel
+  lit, and anything on a phone. Reopens with G2 or before the next
+  SAFETY-touching change. No new machinery —
   integration verification of gaze × panel: code check that
   15-glance-panel contains no `uGaze` (head-fixed by construction),
   then the glance itself.
@@ -186,6 +197,11 @@ in every step that touches it.
   `grep -n "uTime" shader/15-glance-panel.frag` returns nothing.
 
 ## GATE (every by-eye item is the user's call — never self-certified)
+
+**NOT FORMALLY PASSED.** Phase merged 2026-08-28 on the user's
+explicit call with G2 + G5 parked. Items marked ~ were covered
+informally during step verdicts; phone items and the SAFETY by-eye
+re-verify were not covered at all.
 
 - [ ] Gaze: Option-drag (desktop) and finger-drag (phone) move ALL
   symptoms rigidly; the scene stays put; spring-back reads as a
