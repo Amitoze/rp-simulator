@@ -215,9 +215,17 @@ each frame: video pixels ──▶ texture upload
        global read (Q5 depends on this); restitch() = makeProgram
        again + program swap + delete old — uniforms self-heal on the
        next frame (DECISIONS 2026-08-20 "Q3 planned")
-🟦 Q5: pane = (screen region, preset, compiled program);
-       immersive = 1 pane, comparison = 2; two scissored draw calls,
-       shared texture + clock; split math leaves the shader
+🟦 Q5 (design ratified, DECISIONS 2026-08-28 "Q5 planned"):
+       ASYMMETRIC panes — active (Symptom/RP) pane = the live schema
+       singletons, panel edits as today; reference pane = inert deep
+       config from ITS preset (default None), own program, frozen by
+       construction; two scissored draw calls, shared texture +
+       clock; uSplit/rawScene/split math die from the shader; FIELD
+       toggleable via compile-time Q_FIELD define (off = survival 1,
+       edges parked at 10.0 — raw scene, zero per-pixel cost);
+       envelope v2 { name, saved, degeneration, field, qualia };
+       menu → three tabs General | Reference | Symptom, per-pane
+       preset controls
 ```
 
 ### Tier 1 — field geometry 🟩 (10-field)

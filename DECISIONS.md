@@ -3,6 +3,47 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-28 — Q5 planned: field-off mechanism, pane model, three-tab menu ratified
+
+- **Field-off is a compile-time short-circuit** (ratified). The
+  stitcher emits `#define Q_FIELD` only when the field is enabled;
+  `fieldSurvival` opens with an `#ifndef Q_FIELD` path returning
+  survival = 1 with edge/oEdge parked at 10.0 — far past the screen
+  corner (≈1.1 in aspect-corrected r), so sparkle's band, transition's
+  rims, and photopsia's (1 − survival) weight all neutralise exactly.
+  Same compile-time philosophy as every quale toggle; zero per-pixel
+  cost; restitch-on-toggle path reused unchanged. With survival ≡ 1,
+  mix(periphery, scene, 1) = scene — field-off yields the raw scene
+  even with qualia enabled. Rejected: parked uniform values (schema
+  max 90° is the screen EDGE, corners keep the wobbly boundary;
+  magic out-of-schema values; wobble/fbm still burn per pixel) and a
+  runtime uniform branch (per-pixel cost forever for an occasional
+  toggle; violates off-costs-zero). `[my-synthesis]`, mechanism
+  verifiable at step 1's check. Confidence high.
+- **Asymmetric panes** (ratified): the ACTIVE (RP/symptom) pane is
+  the existing live schema singletons — the panel keeps editing them
+  with zero rework; the REFERENCE pane is an inert deep config
+  snapshot materialised from its loaded preset, with its own compiled
+  program, restitched only when its preset changes. Frozen by
+  construction: sliders cannot reach a detached copy. Requires
+  extracting the reset→overlay→clamp core into a pure
+  materialise(values) → config helper shared by applyPreset and the
+  reference loader — two copies of overlay logic would drift.
+  Rejected: symmetric pane objects with panel indirection (rewrites
+  the generator's schema binding now to enable per-pane editing the
+  deferral register explicitly parks). Confidence high.
+- **Three-tab menu, per-pane preset controls** (user spec 2026-08-28,
+  extending the ratified reference-selector option): tabs General |
+  Reference | Symptom. Panes are NAMED: left/top = "Reference",
+  right/bottom = "Symptom" (RP). General keeps degeneration slider +
+  background + view. Reference tab: the reference pane's preset
+  dropdown (Defaults/None/manifest; defaults to None) — the declared
+  home for future reference-pane settings. Symptom tab: the RP pane's
+  preset load/save (Q4's tune → save → compare loop stays here) above
+  Configure symptoms. ASSUMPTION flagged to user: preset controls are
+  per-pane (Reference tab loads the left pane, Symptom tab the
+  right); correct before step 4 if the intent was one shared home.
+
 ## 2026-08-28 — Q5 scope pre-ratified: field joins the toggles and the presets
 
 Three user ratifications ahead of Q5 phase-plan (given directly, not
