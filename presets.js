@@ -10,7 +10,7 @@
 // caps are not params and are never serialised. (DECISIONS
 // 2026-08-28.)
 
-import { QUALIA, FIELD, clampParams } from './config.js';
+import { QUALIA, FIELD, PANEL, clampParams } from './config.js';
 // cycle-safe: restitch and buildAdvanced are hoisted top-level
 // function declarations, only called from user actions. `sliders` is
 // a const and therefore NOT hoisted — it must never be read while
@@ -114,7 +114,9 @@ export function applyPreset(preset) {
   }
   // the General slider mirrors the schema's degeneration param
   sliders.degen.value = FIELD.params.degeneration.value;
-  restitch(QUALIA, FIELD);
+  // PANEL rides along unchanged: the aid is outside the envelope —
+  // a preset load must not knock the panel off (DECISIONS 2026-08-28)
+  restitch(QUALIA, FIELD, PANEL);
   buildAdvanced();
 }
 

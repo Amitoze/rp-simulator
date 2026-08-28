@@ -23,6 +23,11 @@ uniform vec2 uSparkleBandIn;   // sparkle band inside the edge: [start, end]
 uniform vec2 uSparkleBandOut;  // sparkle band outside the edge: [start, end]
 uniform vec2 uGaze;         // where the eye points: offset from straight ahead,
                             // screen fractions (shared by both panes)
+uniform vec2 uPanelPos;     // glance panel centre (screen fractions, y up)
+uniform float uPanelW;      // glance panel width (screen fractions)
+uniform float uPanelAspect; // panel's fixed on-screen width : height ratio
+uniform float uPanelZoom;   // glance panel magnification of the feed centre
+uniform float uPanelHi;     // 1 = reposition mode: draw the boundary highlight
 
 // -- small value-noise helpers ------------------------------------
 float hash(vec2 p) {

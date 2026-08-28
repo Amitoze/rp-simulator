@@ -27,6 +27,12 @@ export const GAZE = {
   // easing time constant, ms — the saccade-ish snap toward the target
   // (applies to both the follow and the spring back)
   easeMs: 200,
+
+  // how far the eye travels per unit of mouse travel (screen fractions
+  // of gaze per screen fraction of pointer movement). Input is RELATIVE
+  // — only movement steers, never the pointer's absolute position
+  // (user spec 2026-08-28)
+  sensitivity: 1,
 };
 
 // Geometry of the visual field. Quale-shaped ({ enabled, params })
@@ -66,6 +72,35 @@ export const FIELD = {
     // picks the personal geography of the islands — change it and every
     // island moves somewhere else. Fixed = islands are places.
     islandSeed: { value: 7.0, min: 0, max: 20, label: 'Island layout seed' },
+  },
+};
+
+// The glance panel (Phase G): a simulated head-worn display — the AID,
+// not a symptom. Quale-shaped so the generated UI machinery renders
+// it, but it lives on the General tab and stays OUTSIDE presets: a
+// portrait is the condition; the aid is worn over it (DECISIONS
+// 2026-08-28). HEAD-FIXED: placed in screen space, deliberately
+// untouched by gaze — glasses move with the head, damage with the eye.
+export const PANEL = {
+  enabled: false,
+
+  // the panel's fixed on-screen width : height ratio — a display's
+  // shape is a property of the device, not a knob: tunable here,
+  // never a fader
+  aspect: 4 / 3,
+
+  params: {
+    // centre of the panel in screen fractions (0..1, y up) — default
+    // upper right, where a glance naturally lands. noUI: placed by
+    // Option+Shift drag, not a fader (user spec 2026-08-28)
+    position: { value: [0.72, 0.72], min: 0, max: 1, noUI: true, label: 'Panel position' },
+
+    // width of the panel, screen fractions — height follows from the
+    // fixed aspect above
+    size: { value: 0.22, min: 0.05, max: 0.6, label: 'Panel size' },
+
+    // how much the panel magnifies the centre of the feed
+    zoom: { value: 2, min: 1, max: 6, label: 'Panel zoom' },
   },
 };
 
@@ -152,5 +187,6 @@ export function clampParams(owner, params) {
   }
 }
 clampParams('FIELD', FIELD.params);
+clampParams('PANEL', PANEL.params);
 for (const [qname, quale] of Object.entries(QUALIA))
   clampParams(`QUALIA.${qname}`, quale.params);

@@ -1,7 +1,7 @@
 // WebGL setup and the per-frame render loop.
 
 import { state, video, fileVideo, initControls, IS_TOUCH } from './controls.js';
-import { FIELD, QUALIA, GAZE, REFERENCE_PRESET } from './config.js';
+import { FIELD, QUALIA, GAZE, PANEL, REFERENCE_PRESET } from './config.js';
 // cycle-safe: materialise is a hoisted function declaration in
 // presets.js, first called long after every module has evaluated
 import { materialise } from './presets.js';
@@ -29,8 +29,9 @@ function compile(type, src) {
 // The shader lives as ordered chunks; the stitcher concatenates them.
 // Chunks not named in CHUNK_QUALE are structural (prelude, field,
 // compositor) and always included.
-const CHUNKS = ['00-prelude', '10-field', '20-smoke', '21-photopsia',
-                '22-sparkle', '23-murk', '24-transition', '90-composite'];
+const CHUNKS = ['00-prelude', '10-field', '15-glance-panel', '20-smoke',
+                '21-photopsia', '22-sparkle', '23-murk', '24-transition',
+                '90-composite'];
 const CHUNK_QUALE = {
   '20-smoke': 'smoke',
   '21-photopsia': 'photopsia',
@@ -49,14 +50,18 @@ const CHUNK_QUALE = {
 // sparkle/transition/photopsia); Q_FIELD only selects which body
 // compiles — the real geometry, or the full-survival short-circuit
 // (DECISIONS 2026-08-28).
-function stitchShader(sources, qualia, field) {
+// PANEL is excluded like a quale but keyed off its own config block —
+// the aid is a device, not a symptom, and lives outside QUALIA.
+function stitchShader(sources, qualia, field, panel) {
   const defines = Object.keys(qualia)
     .filter(name => qualia[name].enabled)
     .map(name => `#define Q_${name.toUpperCase()}`)
     .concat(field.enabled ? ['#define Q_FIELD'] : [])
+    .concat(panel.enabled ? ['#define Q_PANEL'] : [])
     .join('\n');
   const body = CHUNKS
-    .filter(c => !(c in CHUNK_QUALE) || qualia[CHUNK_QUALE[c]].enabled)
+    .filter(c => c === '15-glance-panel' ? panel.enabled
+               : !(c in CHUNK_QUALE) || qualia[CHUNK_QUALE[c]].enabled)
     .map(c => sources[c])
     .join('\n');
   return defines + '\n' + body;
@@ -75,10 +80,10 @@ const live = { prog: null, U: null };
 // out. Recompiling on a toggle (Q3) is just calling this again. aPos
 // is pinned to attribute 0 before linking so the vertex buffer setup
 // survives a program swap.
-function makeProgram(sources, qualia, field) {
+function makeProgram(sources, qualia, field, panel) {
   const prog = gl.createProgram();
   gl.attachShader(prog, compile(gl.VERTEX_SHADER, vsSrc));
-  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, stitchShader(sources, qualia, field)));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, stitchShader(sources, qualia, field, panel)));
   gl.bindAttribLocation(prog, 0, 'aPos');
   gl.linkProgram(prog);
   if (!gl.getProgramParameter(prog, gl.LINK_STATUS))
@@ -91,7 +96,8 @@ function makeProgram(sources, qualia, field) {
                       'uNetScale', 'uNetWarp', 'uNetFlicker',
                       'uOuterEdge', 'uOuterCover', 'uIslandSeed',
                       'uSparkleFlicker', 'uSparkleBandIn', 'uSparkleBandOut',
-                      'uGaze']) {
+                      'uGaze', 'uPanelPos', 'uPanelW', 'uPanelAspect',
+                      'uPanelZoom', 'uPanelHi']) {
     U[name] = gl.getUniformLocation(prog, name);
   }
   return { prog, U };
@@ -101,12 +107,18 @@ function makeProgram(sources, qualia, field) {
 // Exported for controls.js (a quale toggle changes what's stitched);
 // top-level function declaration, so the renderer↔controls import
 // cycle resolves by hoisting.
-export function restitch(qualia, field) {
+export function restitch(qualia, field, panel) {
   const old = live.prog;
-  ({ prog: live.prog, U: live.U } = makeProgram(sources, qualia, field));
+  ({ prog: live.prog, U: live.U } = makeProgram(sources, qualia, field, panel));
   gl.useProgram(live.prog);
   if (old) gl.deleteProgram(old);
 }
+
+// The reference pane never wears the aid: its program is compiled
+// panel-off regardless of the live PANEL state — active-pane only,
+// so the comparison reads "with aid" vs "without" (DECISIONS
+// 2026-08-28).
+const PANEL_OFF = { enabled: false };
 
 // The comparison view's reference pane: an inert materialised config
 // with its own compiled program (Q5, DECISIONS 2026-08-28 —
@@ -115,7 +127,7 @@ export function restitch(qualia, field) {
 let refPane = null;
 export function setReference(cfg) {
   if (refPane) gl.deleteProgram(refPane.prog);
-  refPane = { cfg, ...makeProgram(sources, cfg.qualia, cfg.field) };
+  refPane = { cfg, ...makeProgram(sources, cfg.qualia, cfg.field, PANEL_OFF) };
 }
 
 // Write every qualia-derived uniform from the schema, every frame.
@@ -134,6 +146,20 @@ function applyQualia(U, qualia) {
   gl.uniform1f(U.uSparkleFlicker, 2 * Math.PI * spk.flickerHz.value);
   gl.uniform2f(U.uSparkleBandIn, spk.bandIn.value[0], spk.bandIn.value[1]);
   gl.uniform2f(U.uSparkleBandOut, spk.bandOut.value[0], spk.bandOut.value[1]);
+}
+
+// The aid's uniforms — ACTIVE pane only: the reference pane draws with
+// null (its program was compiled panel-off, DECISIONS 2026-08-28).
+// With the panel disabled the locations are null — a defined no-op.
+function applyPanel(U, panel) {
+  if (!panel) return;
+  const p = panel.params;
+  gl.uniform2f(U.uPanelPos, p.position.value[0], p.position.value[1]);
+  gl.uniform1f(U.uPanelW, p.size.value);
+  gl.uniform1f(U.uPanelAspect, panel.aspect);
+  gl.uniform1f(U.uPanelZoom, p.zoom.value);
+  // boundary highlight rides reposition mode (Option+Shift held)
+  gl.uniform1f(U.uPanelHi, state.repositionMode ? 1 : 0);
 }
 
 // Field geometry from config: degrees → screen units (edge ≈ 90°, so
@@ -161,7 +187,7 @@ async function main() {
     sources[c] = await (await fetch(`shader/${c}.frag`, { cache: 'no-store' })).text();
   }));
 
-  restitch(QUALIA, FIELD);
+  restitch(QUALIA, FIELD, PANEL);
 
   // reference pane boots on the configured default (none = the honest
   // unfiltered view); until the fetch lands, comparison draws only
@@ -211,7 +237,7 @@ async function main() {
   // One pane, one draw: clip to its rect, bind ITS program, write
   // every uniform from ITS config. fit: 0 = cover (immersive),
   // 1 = contain + letterbox (comparison halves) — today's looks.
-  function drawPane(prog, U, qualia, field, rect, fit, shared) {
+  function drawPane(prog, U, qualia, field, panel, rect, fit, shared) {
     gl.viewport(rect[0], rect[1], rect[2], rect[3]);
     gl.scissor(rect[0], rect[1], rect[2], rect[3]);
     gl.useProgram(prog);
@@ -225,6 +251,7 @@ async function main() {
     gl.uniform1f(U.uFit, fit);
     applyQualia(U, qualia);
     applyField(U, field); // each pane's OWN degeneration rides here
+    applyPanel(U, panel); // the aid: active pane only, null elsewhere
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
@@ -255,7 +282,7 @@ async function main() {
     };
     const w = canvas.width, h = canvas.height;
     if (!state.splitMode) {
-      drawPane(live.prog, live.U, QUALIA, FIELD, [0, 0, w, h], 0, shared);
+      drawPane(live.prog, live.U, QUALIA, FIELD, PANEL, [0, 0, w, h], 0, shared);
     } else {
       // layout follows orientation: side-by-side in landscape (ref
       // left), stacked in portrait (ref top; GL y-origin is bottom)
@@ -264,8 +291,8 @@ async function main() {
         ? [[0, 0, halfW, h], [halfW, 0, w - halfW, h]]
         : [[0, halfH, w, h - halfH], [0, 0, w, halfH]];
       if (refPane) drawPane(refPane.prog, refPane.U, refPane.cfg.qualia,
-                            refPane.cfg.field, refRect, 1, shared);
-      drawPane(live.prog, live.U, QUALIA, FIELD, actRect, 1, shared);
+                            refPane.cfg.field, null, refRect, 1, shared);
+      drawPane(live.prog, live.U, QUALIA, FIELD, PANEL, actRect, 1, shared);
     }
     requestAnimationFrame(frame);
   }

@@ -3,6 +3,44 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-28 — G3 revised mid-step: relative input, AR-aid tab, reposition mode (user spec)
+
+Five user corrections at the G3 review, folded into the step before
+its verdict:
+
+- **Gaze and pane input is RELATIVE — deltas only.** Surprise found at
+  review: the G1 build mapped the pointer's absolute position, so
+  engaging Option yanked the mask toward wherever the pointer happened
+  to sit. Now only mouse MOVEMENT while the modifier is held steers
+  (`movementX/Y` accumulate); the absolute pointer position is never
+  read. `GAZE.sensitivity` added (screen fractions of travel per
+  screen fraction of mouse movement). Verified clean-room: one −200px
+  synthetic delta moved the pane centre to cuv 0.515/0.567 vs
+  predicted 0.516/0.563, stable across frames `[measured]`.
+- **The aid gets its own menu tab** — General | Symptoms | AR aid
+  (supersedes this morning's "PANEL group on the General tab"
+  ratification). A third tab returns to the layout, but for a device
+  home, not the reference selector the Q5 revision killed.
+- **Panel size is ONE param.** Width only; height follows a fixed
+  on-screen aspect (`PANEL.aspect` = 4:3 — a device property, config
+  value, never a fader), converted through the pane's pixel aspect so
+  window shape can't distort the display.
+- **Reposition mode: Option+Shift.** While held: the active program
+  swaps to field-only (every quale masked via a DERIVED config —
+  QUALIA untouched, toggles restored exactly on exit), a bright
+  yellow boundary marks the pane, and deltas move it; releasing
+  either key (or window blur) exits. The position param stays in the
+  schema (clamping, state) but is `noUI` — placed by gesture, not
+  fader.
+- **The boundary glow is STEADY, drawn post-mix.** Steady is forced
+  by the ratified no-time-varying-term SAFETY rule — "glowing" must
+  not mean pulsing. Post-mix because it is UI affordance, not world
+  light: it must stay visible over the black dead ring while placing
+  (in field-only view the mask hides the pane's CONTENT in dead
+  regions — honest — so the boundary is the placement guide). Steady
+  additive UI light, no photosensitivity vector, outside ADD_CAP by
+  the same argument as panel light.
+
 ## 2026-08-28 — Phase G planned: glance phase scoped and ratified
 
 - **Phase G queue-jumps C and D** (user's call, 2026-08-28): the two

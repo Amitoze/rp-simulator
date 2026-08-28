@@ -38,6 +38,14 @@ void main() {
   }
   vec3 scene = getScene(suv);
 
+  // ---- slot: the aid (before every symptom slot) -----------------
+  // The panel is part of the WORLD — placed from cuv (head-fixed,
+  // never gaze-shifted), burned into the scene so the field mask and
+  // rim greying composite over it (DECISIONS 2026-08-28)
+#ifdef Q_PANEL
+  scene = panelQuale(scene, cuv);
+#endif
+
   // ---- tier 1: field geometry (always on) ------------------------
   // gaze (Phase G): the retinal frame is measured from where the eye
   // points, not the screen centre — subtracted BEFORE the aspect
@@ -103,6 +111,14 @@ void main() {
   float addLuma = dot(addLight, vec3(0.299, 0.587, 0.114));
   addLight *= ADD_CAP / max(addLuma, ADD_CAP);
   col += addLight;
+
+  // reposition mode (Option+Shift): steady yellow boundary around the
+  // panel — a UI affordance, drawn over the mix so it stays visible in
+  // the dead ring while placing. Steady light only (the panel chunk's
+  // no-flicker SAFETY rule extends here); zero unless uPanelHi is set.
+#ifdef Q_PANEL
+  col = mix(col, vec3(1.0, 0.85, 0.2), panelBorder(cuv) * uPanelHi);
+#endif
 
   if (bars > 0.5) col = vec3(0.0); // letterbox
   gl_FragColor = vec4(col, 1.0);

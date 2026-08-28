@@ -102,7 +102,9 @@ in every step that touches it.
 
 - [x] **1 · Gaze end-to-end, desktop.** ✅ user by-eye pass 2026-08-28
   ("feels right") — rigid travel, clamp, spring-back, reference pane
-  inert; defaults kept (maxExcursion 0.4, easeMs 200, springBack true). `GAZE` config block
+  inert; defaults kept (maxExcursion 0.4, easeMs 200, springBack true).
+  AMENDED in G3 (user): input became RELATIVE — deltas only, absolute
+  pointer position never read (DECISIONS 2026-08-28 "G3 revised"). `GAZE` config block
   (`maxExcursion` ~0.4, `springBack: true`, `easeMs` ~200 — tunables,
   no toggle); `uGaze` in 00-prelude + renderer's uniform list;
   `centered = cuv - 0.5 - uGaze` in 90-composite (before aspect
@@ -121,20 +123,31 @@ in every step that touches it.
   **Check (user, by eye, phone):** finger-drag moves the mask, no
   page scroll/zoom interference, spring-back on lift, baseline fps
   holds.
-- [ ] **3 · Panel skeleton, ideal mode.** `PANEL` config block
+- [x] **3 · Panel skeleton, ideal mode.** ✅ user by-eye pass
+  2026-08-28 ("works as expected"), as amended — relative gaze, AR
+  aid tab, single fixed-ratio size, Option+Shift reposition mode all
+  verified together; clean-room delta placement measured at
+  cuv 0.515/0.567 vs 0.516/0.563 predicted. `PANEL` config block
   (quale-shaped, `enabled: false`, params: rect position/size, zoom;
   schema-shaped for the generator); stitcher gains a panel argument
   (`Q_PANEL` define + chunk genuinely excluded when off; reference
   pane's makeProgram passes panel-off); `15-glance-panel.frag` drawing
   the OPAQUE zoomed crop (ideal-display mode only — simplest
   verifiable slice); `applyPanel` uniforms, active pane only;
-  generated PANEL group rendered into the General tab (generator
+  generated PANEL group rendered into its own AR aid tab (generator
   gains a parent-container argument — a device never appears under
   Adjust Symptoms).
-  **Check (user, by eye, desktop):** toggle on → a sharp zoomed inset
-  of the same feed appears; rect/zoom sliders move, resize, and zoom
-  it; toggle off → gone; side-by-side → the reference pane never
-  shows the panel.
+  AMENDED mid-step (user spec, DECISIONS 2026-08-28 "G3 revised"):
+  AR aid tab replaces the General-tab group; size is a single width
+  param with fixed 4:3 on-screen aspect; position has no fader —
+  Option+Shift enters reposition mode (field-only view, steady
+  yellow boundary, delta-driven placement, exit on key release).
+  **Check (user, by eye, desktop):** toggle on the AR aid tab → a
+  sharp zoomed inset appears; size/zoom sliders resize and magnify
+  it holding shape; Option+Shift → symptoms drop to field-only,
+  boundary glows, mouse movement places the pane, release restores
+  symptoms and keeps the position; toggle off → gone; side-by-side →
+  the reference pane never shows the panel.
 - [ ] **4 · Glasses optics.** Additive compositing:
   `lit = mix(scene + feed × gain, feed, opaqueness)` with
   `gain = displayBrightness ÷ ambient`; `ambient` slider (schema

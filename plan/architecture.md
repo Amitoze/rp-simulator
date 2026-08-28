@@ -77,10 +77,12 @@ filters; devices are worn over the condition, never part of it.
 │    params); boot = schema defaults, never a │
 │    file (DECISIONS 2026-08-28)              │
 │  GAZE block: spring-back / ease / max-      │
-│    excursion tunables, no toggle 🟦 (G)     │
+│    excursion / sensitivity tunables, no     │
+│    toggle 🟧 (G1/G3 done by eye)            │
 │  PANEL block: the aid — quale-shaped but a  │
-│    DEVICE, not a symptom; OUTSIDE presets   │
-│    🟦 (G, DECISIONS 2026-08-28)             │
+│    DEVICE, not a symptom; OUTSIDE presets;  │
+│    single fixed-aspect size, noUI position  │
+│    🟧 (G3 done by eye; optics params = G4)  │
 └────────┬────────────────────────────────────┘
          │ enabled-flags + param values (clamped; live-edited from Q3)
          ▼
@@ -117,8 +119,9 @@ filters; devices are worn over the condition, never part of it.
 │  15-glance-panel: head-fixed aid display,   │
 │    scene slot BEFORE the survival mix,      │
 │    steady light only — never a time-varying │
-│    term — outside ADD_CAP 🟦 (G, DECISIONS  │
-│    2026-08-28)                              │
+│    term — outside ADD_CAP 🟧 (G3 ideal mode │
+│    + reposition boundary done by eye;       │
+│    glasses optics = G4)                     │
 │  90-composite: fixed slots 🟩               │
 │    addLight accumulator + global SAFETY     │
 │    brightness clamp 🟩 (Q2, ADD_CAP = 0.65  │
@@ -142,8 +145,12 @@ filters; devices are worn over the condition, never part of it.
 │  done, user by-eye 2026-08-28) / one-finger │
 │  canvas drag (touch) 🟦 (G2), spring-back   │
 │  on release                                 │
-│  PANEL group on the General tab — a device  │
-│  never appears under Adjust Symptoms 🟦 (G) │
+│  PANEL group in its own AR-aid tab — a      │
+│  device never appears under Adjust Symptoms │
+│  (user re-revision, G3) 🟧 (G)              │
+│  Option+Shift reposition mode: field-only   │
+│  view + steady boundary + delta placement   │
+│  🟧 (G3)                                    │
 └─────────────────────────────────────────────┘
 ```
 
@@ -356,7 +363,9 @@ uGaze ──▶ 90-composite:  centered = cuv − 0.5 − gaze
                   eye, because position is only ever derived from
                   centered (the gaze invariant, DECISIONS 2026-08-28)
 
-PANEL schema ──rect/zoom/brightness/ambient/opaqueness──▶
+PANEL schema ──position (Option+Shift drag, no fader) / size (one
+width, fixed 4:3 on-screen aspect) / zoom; G4 adds brightness,
+ambient, opaqueness──▶
 15-glance-panel (scene slot, BEFORE transition and the survival mix):
   placed from cuv — deliberately NOT gaze-shifted (head-fixed)
   samples the SAME feed, cropped + zoomed  ──▶  panel light:
