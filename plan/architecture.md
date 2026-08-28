@@ -62,9 +62,9 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │    2026-08-28)                              │
 │  FIELD full schema-shape, same param        │
 │    pattern, still preset-proof 🟩 (Q3)      │
-│  ⇄ PRESETS presets.js + presets/ 🟧 (Q4     │
-│    steps 1–2 built: BASELINE + applyPreset  │
-│    + panel rebuild, console-checked):       │
+│  ⇄ PRESETS presets.js + presets/ ◐ (Q4      │
+│    steps 1–5 built + step-checked; GATE Q4  │
+│    pending):                                │
 │    FULL value snapshots, named envelope     │
 │    {name, saved, qualia}; index.json        │
 │    manifest (browser can't ls); load =      │
@@ -283,8 +283,12 @@ sliders / toggles ──▶ state + uniforms (live)
        hardcoded net/transparency slider rows died (replaced by their
        generated equivalents); degeneration stays top-level
 
-🟦 Q4 (design ratified, DECISIONS 2026-08-28 "Q4 planned"):
-       presets.js — NOT BUILT YET; intended shape:
+◐ Q4 (DECISIONS 2026-08-28 "Q4 planned"; steps 1–5 built and
+       step-checked 2026-08-28, GATE Q4 pending). Menu now tabbed
+       (user UX spec 2026-08-28): General (degen slider, background,
+       view) | Adjust Symptoms (load presets above configure
+       symptoms); picker loads select an ad-hoc dropdown entry named
+       from the file. Built shape:
 
   presets/index.json ──filenames──▶ dropdown ("Defaults" entry first,
                                     computed from schema, no file)

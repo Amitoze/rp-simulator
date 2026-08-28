@@ -14,32 +14,40 @@
     <button class="chev" aria-label="Toggle settings">Done</button>
   </header>
   <div class="body">
-    <label>Degeneration of central field</label>
-    <input type="range" id="sDegen" min="0" max="1" step="0.01">
-    <label>Background</label>
-    <div class="seg">
-      <button id="bgCam" class="on">Camera</button>
-      <button id="bgVid">Video</button>
+    <div class="seg tabs">
+      <button id="tabGen" class="on">General</button>
+      <button id="tabSym">Adjust Symptoms</button>
     </div>
-    <button id="camFlip" hidden>⟲ Flip camera</button>
-    <label>View</label>
-    <div class="seg">
-      <button id="vwImm" class="on">Immersive</button>
-      <button id="vwSbs">Side-by-side</button>
+    <div id="tabGeneral">
+      <label>Degeneration of central field</label>
+      <input type="range" id="sDegen" min="0" max="1" step="0.01">
+      <label>Background</label>
+      <div class="seg">
+        <button id="bgCam" class="on">Camera</button>
+        <button id="bgVid">Video</button>
+      </div>
+      <button id="camFlip" hidden>⟲ Flip camera</button>
+      <label>View</label>
+      <div class="seg">
+        <button id="vwImm" class="on">Immersive</button>
+        <button id="vwSbs">Side-by-side</button>
+      </div>
     </div>
-    <label>Preset</label>
-    <!-- options filled by controls.js from presets/index.json -->
-    <select id="presetSel"></select>
-    <div class="seg">
-      <button id="presetSave">Save as preset</button>
-      <button id="presetLoad">Load file…</button>
-    </div>
-    <input type="file" id="presetFile" accept=".json,application/json" hidden>
-    <!-- filled by controls.js from the schema (config.js) -->
-    <details id="adv">
-      <summary>Adjust symptoms</summary>
+    <!-- keeps the id "adv": every symptom-panel style rule is scoped
+         to it, and the generated content is oblivious to the move -->
+    <div id="adv" hidden>
+      <div class="ghead">Load presets</div>
+      <!-- options filled by controls.js from presets/index.json -->
+      <select id="presetSel"></select>
+      <div class="seg">
+        <button id="presetSave">Save as preset</button>
+        <button id="presetLoad">Load file…</button>
+      </div>
+      <input type="file" id="presetFile" accept=".json,application/json" hidden>
+      <div class="ghead">Configure symptoms</div>
+      <!-- filled by controls.js from the schema (config.js) -->
       <div id="advBody"></div>
-    </details>
+    </div>
   </div>
 </div>
 <div id="note">starting…</div>

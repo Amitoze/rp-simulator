@@ -139,7 +139,7 @@ files carry values only; degeneration is tier 1 and not in presets.
       match the tuned state exactly; then hand-edit the file (add an
       unknown key, push a value out of range) → load → warned,
       clamped, nothing brighter.
-- [ ] 5. `sim.html` + `controls.js` + `style.css` — menu tabs (user UX
+- [x] 5. `sim.html` + `controls.js` + `style.css` — menu tabs (user UX
       spec, 2026-08-28): two horizontal tabs at the top of the panel
       body. Tab "General": the degeneration slider + Background + View
       rows. Tab "Adjust Symptoms", two sections: "Load presets"
@@ -148,6 +148,11 @@ files carry values only; degeneration is tier 1 and not in presets.
       details section dies; the tab replaces it as the container, so
       the generator and its rebuild-after-load are untouched). Tab
       switching is display-only: no schema writes, no restitch.
+      Plus (user request 2026-08-28, amends the one-way-loader
+      shortcut): a picker load selects an ad-hoc dropdown entry
+      labelled from the file's envelope name, so the dropdown
+      reflects what was loaded. Deliberately still no dirty tracking:
+      slider drags after a load don't flip the dropdown to "Custom".
       Check: tabs round-trip; every control works from its new home
       (slider, background/view, preset load + save, toggles, faders);
       panel fits a phone-width viewport; the panel still rebuilds

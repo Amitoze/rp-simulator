@@ -178,6 +178,9 @@ export function buildAdvanced() {
 async function initPresets() {
   const sel = document.getElementById('presetSel');
   sel.addEventListener('change', async () => {
+    // the ad-hoc entry only labels what the picker loaded — a local
+    // file can't be re-fetched, so re-picking it is a no-op
+    if (sel.value === '::file') return;
     if (!sel.value) { applyPreset({}); return; }
     try {
       const r = await fetch(`presets/${sel.value}`, { cache: 'no-store' });
@@ -223,6 +226,18 @@ async function initPresets() {
     try {
       const preset = JSON.parse(await f.text());
       applyPreset(preset.qualia ?? {});
+      // reflect the load in the dropdown: one reusable ad-hoc entry,
+      // labelled from the file's own name (user request 2026-08-28)
+      const sel = document.getElementById('presetSel');
+      let adhoc = sel.querySelector('option[data-adhoc]');
+      if (!adhoc) {
+        adhoc = document.createElement('option');
+        adhoc.dataset.adhoc = '1';
+        adhoc.value = '::file';
+        sel.append(adhoc);
+      }
+      adhoc.textContent = preset.name ?? f.name;
+      sel.value = '::file';
     } catch (e) {
       // unreadable must never half-apply: the parse fails before
       // applyPreset is reached, so the sim keeps its current state
@@ -241,6 +256,15 @@ export function initControls() {
     if (v) fileVideo.play(); else fileVideo.pause();
   });
   bindToggle('vwImm', 'vwSbs', v => { state.splitMode = v; });
+
+  // menu tabs (user UX spec 2026-08-28): display-only — flipping
+  // panes touches no schema state and never restitches
+  const genPane = document.getElementById('tabGeneral');
+  const symPane = document.getElementById('adv');
+  bindToggle('tabGen', 'tabSym', sym => {
+    genPane.hidden = sym;
+    symPane.hidden = !sym;
+  });
 
   document.getElementById('panelHead').addEventListener('click', () => {
     const panel = document.getElementById('panel');
