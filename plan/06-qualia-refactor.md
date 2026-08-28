@@ -102,23 +102,26 @@ correctness bug for portraits. Plan of record:
 [phases/q4-presets.md](phases/q4-presets.md).*
 
 ```
-[ ] Preset = FULL value snapshot in a named envelope
+[x] Preset = FULL value snapshot in a named envelope
     { name, saved, qualia } — frozen-snapshot semantics; loading rule
     (defaults → overlay → warn unknown keys → clamp) is what lets old
     presets survive schema evolution; new qualia default enabled:false
-    so old presets keep their look
-[ ] Boot from the schema — config.js's values ARE the default look, no
+    so old presets keep their look (2026-08-28)
+[x] Boot from the schema — config.js's values ARE the default look, no
     default preset file; presets/index.json is the manifest (a browser
     cannot list a directory), dropdown = computed "Defaults" entry +
-    manifest entries
-[ ] Load: manifest dropdown + file picker for ad-hoc files
-[ ] SAVE AS PRESET (export current state as downloadable JSON) — the
-    tune → save → compare → iterate loop does not close without this;
-    export is required, not polish
-[ ] A "none" preset: every quale off — becomes the unfiltered view (Q5)
-[ ] Menu tabs (user UX spec 2026-08-28): panel splits into General
+    manifest entries (2026-08-28)
+[x] Load: manifest dropdown + file picker for ad-hoc files; picker
+    loads name an ad-hoc dropdown entry (2026-08-28)
+[x] SAVE AS PRESET (export current state as downloadable JSON) — the
+    tune → save → compare → iterate loop closed; iOS download/Files
+    path proven at the gate (2026-08-28)
+[x] A "none" preset: every quale off (2026-08-28) — NOTE: renders the
+    dead ring BLACK, not the unfiltered view; Q5 ⚠ below
+[x] Menu tabs (user UX spec 2026-08-28): panel splits into General
     (degeneration slider, background, view) and Adjust Symptoms
-    (load presets above configure symptoms) — tabs horizontal at top
+    (load presets above configure symptoms) — tabs horizontal at top,
+    text-styled (2026-08-28)
 ```
 
 ## Q5. Per-pane configs (`renderer.js`, `controls.js`)
@@ -171,8 +174,10 @@ correctness bug for portraits. Plan of record:
     no recompile glitch beyond the expected blink)
     — PASSED 2026-08-28 (user by-eye, desktop + phone; SAFETY
     re-verified through the new panel — see q3-generated-panel.md)
-[ ] Q4: save-as-preset → reload → load preset reproduces the exact
-    tuned state
+[x] Q4: save-as-preset → reload → load preset reproduces the exact
+    tuned state — PASSED 2026-08-28 (user by-eye, desktop + phone;
+    SAFETY re-verified through the preset input channel — torture
+    file warned, clamped, busier not brighter)
 [ ] Q5: comparison view with "none" left / tuned preset right matches
     today's comparison view; two different presets render honestly
     side by side

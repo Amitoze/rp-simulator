@@ -3,6 +3,28 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-28 — GATE Q4 passed; Q4 closed
+
+- **GATE Q4 passed on the user's by-eye call, desktop and phone
+  (2026-08-28):** save-as-preset → page reload → load-file reproduces
+  the exact tuned state on both platforms (the phone run proving the
+  iOS download/Files path); SAFETY holds through the new preset input
+  channel (torture file via picker: unknown keys warned, out-of-range
+  values clamped, busier not brighter); baseline fps clean on the
+  phone with the tabbed panel live. Never self-certified; recorded on
+  the user's declaration.
+- **En-route findings this phase:** all-qualia-off renders the dead
+  ring BLACK, not the unfiltered scene — Q5's "clean half is just the
+  none preset" needs a design answer at Q5 phase-plan (⚠ noted on the
+  Q5 card). The step-3 one-way-loader shortcut was half-revised on
+  user request: picker loads now select an ad-hoc dropdown entry named
+  from the file; slider drags still don't flip the dropdown to
+  "Custom" (deliberate — dirty tracking deferred until wanted).
+- **Menu UX (user spec, 2026-08-28):** panel tabbed — General |
+  Adjust Symptoms (load presets above configure symptoms), tabs
+  text-styled, minimalist 4px scrollbar pill; #adv id kept on the tab
+  pane so the generator and its styling survived the move untouched.
+
 ## 2026-08-28 — Q4 planned: preset semantics amended and ratified
 
 - **Presets are FULL value snapshots, not sparse diffs** (ratified —

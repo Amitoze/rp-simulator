@@ -157,7 +157,10 @@ files carry values only; degeneration is tier 1 and not in presets.
       (slider, background/view, preset load + save, toggles, faders);
       panel fits a phone-width viewport; the panel still rebuilds
       correctly after a preset load with the Symptoms tab open.
-- [ ] 6. GATE Q4 payoff (user's call, never self-certified):
+- [x] 6. GATE Q4 payoff (user's call, never self-certified) — PASSED
+      2026-08-28, user by-eye, desktop AND phone (all four items:
+      the loop both platforms incl. iOS download/Files path, torture
+      file busier-not-brighter, fps glance clean):
       save-as-preset → reload → load reproduces the exact tuned
       state, desktop AND phone (phone proves the iOS download/Files
       path); torture file (all-on, all params at max, plus
@@ -168,15 +171,15 @@ files carry values only; degeneration is tier 1 and not in presets.
 ## Gate (copied from GATE Q, staged)
 
 ```
-[ ] Q4: save-as-preset → reload → load preset reproduces the exact
-    tuned state
-[ ] SAFETY (cross-cutting): preset loading is a new input channel to
+[x] Q4: save-as-preset → reload → load preset reproduces the exact
+    tuned state — PASSED 2026-08-28 (user by-eye, desktop + phone)
+[x] SAFETY (cross-cutting): preset loading is a new input channel to
     capped paths — caps unreachable from files, out-of-range values
     clamped on load; net effect can only be darker than today, never
-    brighter
-[ ] Baseline fps on a phone (GATE Q running item — presets cost
-    nothing per frame; verify nothing regressed with the preset row
-    live)
+    brighter — PASSED 2026-08-28 (torture file via picker: warned,
+    clamped, busier not brighter)
+[x] Baseline fps on a phone (GATE Q running item) — PASSED 2026-08-28
+    (user, phone check with the tabbed panel live)
 ```
 
 Whose call: **the user's, by eye, desktop and phone** — presented,

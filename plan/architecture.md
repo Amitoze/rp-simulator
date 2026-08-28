@@ -62,9 +62,8 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │    2026-08-28)                              │
 │  FIELD full schema-shape, same param        │
 │    pattern, still preset-proof 🟩 (Q3)      │
-│  ⇄ PRESETS presets.js + presets/ ◐ (Q4      │
-│    steps 1–5 built + step-checked; GATE Q4  │
-│    pending):                                │
+│  ⇄ PRESETS presets.js + presets/ 🟩 (Q4,    │
+│    GATE passed 2026-08-28):                 │
 │    FULL value snapshots, named envelope     │
 │    {name, saved, qualia}; index.json        │
 │    manifest (browser can't ls); load =      │
@@ -283,8 +282,8 @@ sliders / toggles ──▶ state + uniforms (live)
        hardcoded net/transparency slider rows died (replaced by their
        generated equivalents); degeneration stays top-level
 
-◐ Q4 (DECISIONS 2026-08-28 "Q4 planned"; steps 1–5 built and
-       step-checked 2026-08-28, GATE Q4 pending). Menu now tabbed
+🟩 Q4 (DECISIONS 2026-08-28 "Q4 planned" + "GATE Q4 passed";
+       gate passed by eye 2026-08-28, desktop + phone). Menu tabbed
        (user UX spec 2026-08-28): General (degen slider, background,
        view) | Adjust Symptoms (load presets above configure
        symptoms); picker loads select an ad-hoc dropdown entry named
