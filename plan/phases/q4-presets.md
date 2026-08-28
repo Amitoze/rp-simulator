@@ -118,7 +118,7 @@ files carry values only; degeneration is tier 1 and not in presets.
       net, and sparkle all gone, dead ring plain black, every panel
       toggle reads off, faders hidden, panel not duplicated; apply
       `BASELINE` → default look back, sliders at default positions.
-- [ ] 3. `presets/` + `controls.js` + `sim.html` — the shipped presets
+- [x] 3. `presets/` + `controls.js` + `sim.html` — the shipped presets
       and the dropdown: `presets/none.json` (every quale off — the
       unfiltered view, feeds Q5) and `presets/index.json` (bare
       filename list; a browser cannot list a directory). Preset row in

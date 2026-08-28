@@ -1,0 +1,11 @@
+{
+  "name": "None — all symptoms off",
+  "saved": "2026-08-28",
+  "qualia": {
+    "smoke": { "enabled": false },
+    "murk": { "enabled": false },
+    "photopsia": { "enabled": false },
+    "sparkle": { "enabled": false },
+    "transition": { "enabled": false }
+  }
+}

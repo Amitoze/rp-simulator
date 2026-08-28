@@ -4,6 +4,8 @@ import { DEFAULTS, FIELD, QUALIA } from './config.js';
 // cycle-safe: restitch is a top-level function declaration in
 // renderer.js, and it's only called from event handlers anyway
 import { restitch } from './renderer.js';
+// same pattern: hoisted declaration, called from the dropdown handler
+import { applyPreset } from './presets.js';
 
 export const state = {
   hasCam: false,      // camera stream is live
@@ -166,6 +168,45 @@ export function buildAdvanced() {
   }
 }
 
+// --- preset dropdown -------------------------------------------------
+// Born from presets/index.json (a browser cannot list a directory);
+// each option is labelled from the file's own "name". "Defaults" comes
+// first and is COMPUTED — applyPreset({}) resets to the BASELINE
+// captured at load — so the default look has no file to drift from
+// (DECISIONS 2026-08-28). One-way loader: picking loads; later slider
+// drags don't update the selection.
+async function initPresets() {
+  const sel = document.getElementById('presetSel');
+  sel.addEventListener('change', async () => {
+    if (!sel.value) { applyPreset({}); return; }
+    try {
+      const r = await fetch(`presets/${sel.value}`, { cache: 'no-store' });
+      const preset = await r.json();
+      applyPreset(preset.qualia ?? {});
+    } catch (e) {
+      // a broken file must never half-apply: applyPreset was not
+      // reached, so the sim keeps its current state
+      console.error(`preset "${sel.value}" failed to load:`, e);
+    }
+  });
+  const opt = (value, label) => {
+    const o = document.createElement('option');
+    o.value = value;
+    o.textContent = label;
+    sel.append(o);
+  };
+  opt('', 'Defaults');
+  try {
+    const files = await (await fetch('presets/index.json', { cache: 'no-store' })).json();
+    for (const f of files) {
+      const p = await (await fetch(`presets/${f}`, { cache: 'no-store' })).json();
+      opt(f, p.name ?? f);
+    }
+  } catch (e) {
+    console.error('preset manifest failed to load:', e);
+  }
+}
+
 export function initControls() {
   bindToggle('bgCam', 'bgVid', v => {
     state.videoMode = v;
@@ -184,6 +225,7 @@ export function initControls() {
 
   applyDefaults();
   buildAdvanced();
+  initPresets(); // async: options appear when the manifest arrives
 
   document.getElementById('camFlip').addEventListener('click', () => {
     const other = facing === 'user' ? 'environment' : 'user';
