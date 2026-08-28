@@ -1,17 +1,18 @@
 // Panel UI, background sources (camera / local video), and shared state.
 
-import { DEFAULTS, FIELD, QUALIA } from './config.js';
-// cycle-safe: restitch is a top-level function declaration in
-// renderer.js, and it's only called from event handlers anyway
-import { restitch } from './renderer.js';
+import { DEFAULTS, FIELD, QUALIA, REFERENCE_PRESET } from './config.js';
+// cycle-safe: restitch/setReference are top-level function
+// declarations in renderer.js, only called from event handlers anyway
+import { restitch, setReference } from './renderer.js';
 // same pattern: hoisted declarations, called from event handlers
-import { applyPreset, exportPreset } from './presets.js';
+import { applyPreset, exportPreset, materialise } from './presets.js';
 
 export const state = {
   hasCam: false,      // camera stream is live
   mirror: false,      // mirror the camera image (front camera only)
   videoMode: false,   // self-hosted video file as the background
   splitMode: false,   // comparison view (side-by-side / stacked)
+  refName: 'reference', // the reference pane's loaded preset, for the note
 };
 
 export const IS_TOUCH = matchMedia('(pointer: coarse)').matches;
@@ -28,7 +29,7 @@ function updateNote() {
   const bg = state.videoMode ? 'video: Shanghai city walk, LOVE SHANGHAI, CC BY 4.0'
     : (state.hasCam ? 'live camera' : 'no camera — showing sample scene');
   note.textContent = bg + ' · simulated RP visual field' +
-    (state.splitMode ? ' · comparison (left/top: normal vision)' : '');
+    (state.splitMode ? ` · comparison (left/top: ${state.refName})` : '');
   const flip = document.getElementById('camFlip');
   flip.hidden = state.videoMode || !state.hasCam;
 }
@@ -179,6 +180,7 @@ export function buildAdvanced() {
 // drags don't update the selection.
 async function initPresets() {
   const sel = document.getElementById('presetSel');
+  const refSel = document.getElementById('refSel');
   sel.addEventListener('change', async () => {
     // the ad-hoc entry only labels what the picker loaded — a local
     // file can't be re-fetched, so re-picking it is a no-op
@@ -194,18 +196,44 @@ async function initPresets() {
       console.error(`preset "${sel.value}" failed to load:`, e);
     }
   });
-  const opt = (value, label) => {
+  // reference dropdown: picks what the LEFT/TOP pane shows — an inert
+  // materialised config handed to the renderer; the live schema (and
+  // the Symptom tab) are never touched from here
+  refSel.addEventListener('change', async () => {
+    const label = refSel.options[refSel.selectedIndex].textContent;
+    try {
+      const preset = refSel.value
+        ? await (await fetch(`presets/${refSel.value}`, { cache: 'no-store' })).json()
+        : {};   // Defaults: materialise of an empty preset = BASELINE
+      setReference(materialise(preset));
+      state.refName = label;
+      updateNote();
+    } catch (e) {
+      console.error(`reference preset "${refSel.value}" failed to load:`, e);
+    }
+  });
+
+  const opt = (select, value, label) => {
     const o = document.createElement('option');
     o.value = value;
     o.textContent = label;
-    sel.append(o);
+    select.append(o);
   };
-  opt('', 'Defaults');
+  opt(sel, '', 'Defaults');
+  opt(refSel, '', 'Defaults');
   try {
     const files = await (await fetch('presets/index.json', { cache: 'no-store' })).json();
     for (const f of files) {
       const p = await (await fetch(`presets/${f}`, { cache: 'no-store' })).json();
-      opt(f, p.name ?? f);
+      opt(sel, f, p.name ?? f);
+      opt(refSel, f, p.name ?? f);
+      // the reference pane boots on REFERENCE_PRESET (renderer main):
+      // pre-select it and let the note name it
+      if (`presets/${f}` === REFERENCE_PRESET) {
+        refSel.value = f;
+        state.refName = p.name ?? f;
+        updateNote();
+      }
     }
   } catch (e) {
     console.error('preset manifest failed to load:', e);
@@ -257,10 +285,17 @@ export function initControls() {
     // so playback is never blocked by autoplay policy
     if (v) fileVideo.play(); else fileVideo.pause();
   });
-  bindToggle('vwImm', 'vwSbs', v => { state.splitMode = v; });
+  // the reference selector only means something in comparison view —
+  // shown exactly then (user revision 2026-08-28 of the three-tab
+  // spec: reference controls live under View, not in their own tab)
+  const refRow = document.getElementById('refRow');
+  bindToggle('vwImm', 'vwSbs', v => {
+    state.splitMode = v;
+    refRow.hidden = !v;
+  });
 
-  // menu tabs (user UX spec 2026-08-28): display-only — flipping
-  // panes touches no schema state and never restitches
+  // menu tabs (user spec 2026-08-28, revised): General | Symptom —
+  // display-only: flipping panes touches no state, never restitches
   const genPane = document.getElementById('tabGeneral');
   const symPane = document.getElementById('adv');
   bindToggle('tabGen', 'tabSym', sym => {

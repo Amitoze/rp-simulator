@@ -5,6 +5,14 @@ regressions can be traced to what changed. Newest first.
 
 ## 2026-08-28 — Q5 planned: field-off mechanism, pane model, three-tab menu ratified
 
+- **Three-tab layout revised after first use (user, 2026-08-28,
+  step 4):** back to two tabs — General | Symptom. The reference
+  selector lives in the General tab directly below the View toggle
+  and is visible ONLY in side-by-side view (it means nothing in
+  immersive). Supersedes the three-tab spec ratified earlier the
+  same day; the Reference "tab" was a home for one control and a
+  promise of future settings — those settings now land in the
+  conditional General-tab row instead.
 - **Degeneration is a FIELD param, not a separate concept** (user
   ratified mid-step-2, amending the pre-ratified "top-level
   degeneration in the envelope"): `DEFAULTS.degeneration` dissolves

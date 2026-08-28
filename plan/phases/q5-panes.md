@@ -126,14 +126,16 @@ deferrals unchanged (per-pane slider editing stays parked).
       today; comparison with reference=None matches today's
       comparison view by eye, desktop; toggles/faders/preset loads
       still touch ONLY the right pane.
-- [ ] 4. `sim.html` + `controls.js` + `style.css` — three tabs
-      General | Reference | Symptom (user spec): General keeps
-      degeneration + background + view; Reference tab = reference
-      pane's preset dropdown (Defaults/None/manifest, default None) —
-      loads materialise into the reference pane + restitch it;
-      Symptom tab = RP pane's load/save row above Configure symptoms
-      (unchanged Q4 loop); updateNote names the reference pane's
-      preset instead of "normal vision". Check: Reference-tab loads
+- [x] 4. `sim.html` + `controls.js` + `style.css` — tabs + reference
+      selector (user spec, REVISED mid-step after first use: two tabs
+      General | Symptom, not three): General keeps degeneration +
+      background + view, plus the reference preset dropdown
+      (Defaults/None/manifest, default None) directly BELOW the View
+      toggle, visible only in side-by-side view — loads materialise
+      into the reference pane; Symptom tab = RP pane's load/save row
+      above Configure symptoms (unchanged Q4 loop); updateNote names
+      the reference pane's preset instead of "normal vision".
+      Check: reference row appears only in side-by-side; its loads
       change ONLY the left pane; Symptom-tab loads change ONLY the
       right; two different portraits side by side render honestly;
       panel fits phone width.
