@@ -96,12 +96,21 @@ at fixed settings before anything else lands on top.
 
 ## Q4. Preset files (`presets/`)
 
+*Amended 2026-08-28 (DECISIONS "Q4 planned"): sparse presets rejected —
+a sparse preset silently changes look when defaults are retuned, a
+correctness bug for portraits. Plan of record:
+[phases/q4-presets.md](phases/q4-presets.md).*
+
 ```
-[ ] Preset = sparse JSON: only values that differ from schema defaults
-    (unknown keys: warn in console, ignore — old presets survive
-    schema evolution)
-[ ] config.js names the default preset; presets/index.json is the
-    manifest (a browser cannot list a directory)
+[ ] Preset = FULL value snapshot in a named envelope
+    { name, saved, qualia } — frozen-snapshot semantics; loading rule
+    (defaults → overlay → warn unknown keys → clamp) is what lets old
+    presets survive schema evolution; new qualia default enabled:false
+    so old presets keep their look
+[ ] Boot from the schema — config.js's values ARE the default look, no
+    default preset file; presets/index.json is the manifest (a browser
+    cannot list a directory), dropdown = computed "Defaults" entry +
+    manifest entries
 [ ] Load: manifest dropdown + file picker for ad-hoc files
 [ ] SAVE AS PRESET (export current state as downloadable JSON) — the
     tune → save → compare → iterate loop does not close without this;
