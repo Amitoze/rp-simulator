@@ -2,11 +2,10 @@
 
 Maintained by `/architecture`; derived from `plan/` + `DECISIONS.md` +
 the code — update it there, then regenerate here. **Last updated:
-2026-08-28** (GATE Q3 passed by eye, desktop + phone — generated
-panel and live-schema marks flip 🟦 → 🟩; Q4 design ratified, see
-DECISIONS 2026-08-28 "Q4 planned": presets become FULL value
-snapshots in a named envelope, boot stays on the schema — preset
-marks updated with the ratified shapes, 🟦 planned).
+2026-08-28** (GATE Q5 passed by eye, desktop + phone — PHASE Q
+COMPLETE: per-pane rendering 🟩, field toggleable via Q_FIELD 🟩,
+envelope v2 with degeneration as a field param 🟩; the split shader
+special-case is dead. See DECISIONS 2026-08-28 "GATE Q5 passed".)
 
 ---
 
@@ -60,18 +59,19 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │  schema = LIVE state: UI writes values /    │
 │    enabled at runtime 🟩 (Q3, GATE passed   │
 │    2026-08-28)                              │
-│  FIELD full schema-shape, same param        │
-│    pattern, still preset-proof 🟩 (Q3)      │
-│  ⇄ PRESETS presets.js + presets/ 🟩 (Q4,    │
-│    GATE passed 2026-08-28):                 │
+│  FIELD quale-shaped {enabled, params} incl. │
+│    degeneration (General slider = its sole  │
+│    UI), toggleable 🟩 (Q5)                  │
+│  ⇄ PRESETS presets.js + presets/ 🟩 (Q4;    │
+│    envelope v2 Q5, GATE passed 2026-08-28): │
 │    FULL value snapshots, named envelope     │
-│    {name, saved, qualia}; index.json        │
+│    {name, saved, field, qualia}; index.json │
 │    manifest (browser can't ls); load =      │
-│    defaults → file → warn unknown → clamp;  │
-│    export = serialise live schema; FIELD +  │
-│    SAFETY caps out of reach; boot = schema  │
-│    defaults, never a file (DECISIONS        │
-│    2026-08-28)                              │
+│    materialise(): defaults → file → warn    │
+│    unknown → clamp; export = serialise live │
+│    schema; SAFETY caps out of reach (never  │
+│    params); boot = schema defaults, never a │
+│    file (DECISIONS 2026-08-28)              │
 └────────┬────────────────────────────────────┘
          │ enabled-flags + param values (clamped; live-edited from Q3)
          ▼
@@ -215,9 +215,20 @@ each frame: video pixels ──▶ texture upload
        global read (Q5 depends on this); restitch() = makeProgram
        again + program swap + delete old — uniforms self-heal on the
        next frame (DECISIONS 2026-08-20 "Q3 planned")
-🟦 Q5: pane = (screen region, preset, compiled program);
-       immersive = 1 pane, comparison = 2; two scissored draw calls,
-       shared texture + clock; split math leaves the shader
+🟩 Q5 (GATE passed 2026-08-28, user by-eye desktop + phone):
+       ASYMMETRIC panes — active (Symptom) pane = the live schema
+       singletons, panel edits as today; reference pane = inert
+       materialised config from ITS preset (default None = the honest
+       unfiltered view), own program, frozen by construction; two
+       scissored draw calls, shared texture + clock (same frame both
+       sides); uSplit/rawScene/split math dead — 90-composite renders
+       ONE pane, uFit picks cover/contain; FIELD toggleable via
+       compile-time Q_FIELD (off = survival 1, edges parked at 10.0 —
+       raw scene, zero per-pixel cost); envelope v2 { name, saved,
+       field, qualia } — degeneration is FIELD.params.degeneration,
+       General slider its sole UI; menu = two tabs General | Symptoms
+       + reference selector under View, side-by-side only (user
+       revision); ADD_CAP clamp runs per pane
 ```
 
 ### Tier 1 — field geometry 🟩 (10-field)

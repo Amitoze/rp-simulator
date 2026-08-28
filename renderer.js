@@ -1,7 +1,10 @@
 // WebGL setup and the per-frame render loop.
 
-import { state, video, fileVideo, sliders, initControls, IS_TOUCH } from './controls.js';
-import { FIELD, QUALIA } from './config.js';
+import { state, video, fileVideo, initControls, IS_TOUCH } from './controls.js';
+import { FIELD, QUALIA, REFERENCE_PRESET } from './config.js';
+// cycle-safe: materialise is a hoisted function declaration in
+// presets.js, first called long after every module has evaluated
+import { materialise } from './presets.js';
 
 const canvas = document.getElementById('gl');
 const gl = canvas.getContext('webgl');
@@ -36,16 +39,21 @@ const CHUNK_QUALE = {
   '24-transition': 'transition',
 };
 
-// PURE: (chunk sources, qualia config) in → GLSL source out. Reads no
-// globals — per-pane rendering (Q5) stitches two different configs, so
-// nothing about "the" current config may be baked in here. Disabled
-// qualia are excluded at stitch time: their chunk text is omitted AND
-// the matching Q_* define is absent, so the compositor's #ifdef call
-// sites vanish too — off costs zero per pixel.
-function stitchShader(sources, qualia) {
+// PURE: (chunk sources, qualia + field configs) in → GLSL source out.
+// Reads no globals — per-pane rendering (Q5) stitches two different
+// configs, so nothing about "the" current config may be baked in here.
+// Disabled qualia are excluded at stitch time: their chunk text is
+// omitted AND the matching Q_* define is absent, so the compositor's
+// #ifdef call sites vanish too — off costs zero per pixel.
+// FIELD is different: 10-field is ALWAYS included (its outputs feed
+// sparkle/transition/photopsia); Q_FIELD only selects which body
+// compiles — the real geometry, or the full-survival short-circuit
+// (DECISIONS 2026-08-28).
+function stitchShader(sources, qualia, field) {
   const defines = Object.keys(qualia)
     .filter(name => qualia[name].enabled)
     .map(name => `#define Q_${name.toUpperCase()}`)
+    .concat(field.enabled ? ['#define Q_FIELD'] : [])
     .join('\n');
   const body = CHUNKS
     .filter(c => !(c in CHUNK_QUALE) || qualia[CHUNK_QUALE[c]].enabled)
@@ -67,10 +75,10 @@ const live = { prog: null, U: null };
 // out. Recompiling on a toggle (Q3) is just calling this again. aPos
 // is pinned to attribute 0 before linking so the vertex buffer setup
 // survives a program swap.
-function makeProgram(sources, qualia) {
+function makeProgram(sources, qualia, field) {
   const prog = gl.createProgram();
   gl.attachShader(prog, compile(gl.VERTEX_SHADER, vsSrc));
-  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, stitchShader(sources, qualia)));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, stitchShader(sources, qualia, field)));
   gl.bindAttribLocation(prog, 0, 'aPos');
   gl.linkProgram(prog);
   if (!gl.getProgramParameter(prog, gl.LINK_STATUS))
@@ -79,7 +87,7 @@ function makeProgram(sources, qualia) {
   // comes back null, and gl.uniform* on null is a defined no-op
   const U = {};
   for (const name of ['uTex', 'uSrc', 'uMirror', 'uTime', 'uRes', 'uEdgeBase',
-                      'uNetDensity', 'uSeeThru', 'uSplit', 'uAspect',
+                      'uNetDensity', 'uSeeThru', 'uFit', 'uAspect',
                       'uNetScale', 'uNetWarp', 'uNetFlicker',
                       'uOuterEdge', 'uOuterCover', 'uIslandSeed',
                       'uSparkleFlicker', 'uSparkleBandIn', 'uSparkleBandOut']) {
@@ -92,11 +100,21 @@ function makeProgram(sources, qualia) {
 // Exported for controls.js (a quale toggle changes what's stitched);
 // top-level function declaration, so the renderer↔controls import
 // cycle resolves by hoisting.
-export function restitch(qualia) {
+export function restitch(qualia, field) {
   const old = live.prog;
-  ({ prog: live.prog, U: live.U } = makeProgram(sources, qualia));
+  ({ prog: live.prog, U: live.U } = makeProgram(sources, qualia, field));
   gl.useProgram(live.prog);
   if (old) gl.deleteProgram(old);
+}
+
+// The comparison view's reference pane: an inert materialised config
+// with its own compiled program (Q5, DECISIONS 2026-08-28 —
+// asymmetric panes: sliders and presets edit the live schema above;
+// nothing can reach this copy). Rebuilt only when its preset changes.
+let refPane = null;
+export function setReference(cfg) {
+  if (refPane) gl.deleteProgram(refPane.prog);
+  refPane = { cfg, ...makeProgram(sources, cfg.qualia, cfg.field) };
 }
 
 // Write every qualia-derived uniform from the schema, every frame.
@@ -118,26 +136,37 @@ function applyQualia(U, qualia) {
 }
 
 // Field geometry from config: degrees → screen units (edge ≈ 90°, so
-// r = deg/180). degen blends each [mild, late] pair and erodes the
-// outer islands' coverage.
-function applyField(U, field, degen) {
+// r = deg/180). The degeneration param blends each [mild, late] pair
+// and erodes the outer islands' coverage — a schema param since Q5,
+// so panes carry their own (the General slider is just its UI).
+function applyField(U, field) {
   const d2r = deg => deg / 180;
   const lerp = (a, b, t) => a + (b - a) * t;
-  gl.uniform1f(U.uEdgeBase, d2r(lerp(field.inner.value[0], field.inner.value[1], degen)));
-  gl.uniform1f(U.uOuterEdge, d2r(lerp(field.outer.value[0], field.outer.value[1], degen)));
+  const p = field.params;
+  const degen = p.degeneration.value;
+  gl.uniform1f(U.uEdgeBase, d2r(lerp(p.inner.value[0], p.inner.value[1], degen)));
+  gl.uniform1f(U.uOuterEdge, d2r(lerp(p.outer.value[0], p.outer.value[1], degen)));
   gl.uniform1f(U.uOuterCover,
-    field.outerCoverage.value * (1 - field.erosion.value * degen));
-  gl.uniform1f(U.uIslandSeed, field.islandSeed.value);
+    p.outerCoverage.value * (1 - p.erosion.value * degen));
+  gl.uniform1f(U.uIslandSeed, p.islandSeed.value);
 }
 
 async function main() {
   // no-store: python http.server sends no cache headers, and a stale
   // cached chunk silently ignores config/shader edits
+  const refJson = fetch(REFERENCE_PRESET, { cache: 'no-store' })
+    .then(r => r.json());
   await Promise.all(CHUNKS.map(async c => {
     sources[c] = await (await fetch(`shader/${c}.frag`, { cache: 'no-store' })).text();
   }));
 
-  restitch(QUALIA);
+  restitch(QUALIA, FIELD);
+
+  // reference pane boots on the configured default (none = the honest
+  // unfiltered view); until the fetch lands, comparison draws only
+  // the active pane — a blink at worst
+  refJson.then(p => setReference(materialise(p)))
+    .catch(e => console.error('reference preset failed to load:', e));
 
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -169,31 +198,58 @@ async function main() {
   resize();
 
   const t0 = performance.now();
+
+  // One pane, one draw: clip to its rect, bind ITS program, write
+  // every uniform from ITS config. fit: 0 = cover (immersive),
+  // 1 = contain + letterbox (comparison halves) — today's looks.
+  function drawPane(prog, U, qualia, field, rect, fit, shared) {
+    gl.viewport(rect[0], rect[1], rect[2], rect[3]);
+    gl.scissor(rect[0], rect[1], rect[2], rect[3]);
+    gl.useProgram(prog);
+    gl.uniform1i(U.uTex, 0);
+    gl.uniform1f(U.uSrc, shared.src);
+    gl.uniform1f(U.uMirror, shared.mirror);
+    gl.uniform1f(U.uTime, shared.time);   // SHARED clock: identical
+    gl.uniform2f(U.uRes, rect[2], rect[3]); // configs = identical wobble
+    gl.uniform1f(U.uAspect, shared.aspect);
+    gl.uniform1f(U.uFit, fit);
+    applyQualia(U, qualia);
+    applyField(U, field); // each pane's OWN degeneration rides here
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  gl.enable(gl.SCISSOR_TEST);
   function frame() {
-    // through the shared ref — restitch may have swapped the program
-    const U = live.U;
     // pick the texture source: local video file, else camera, else the
-    // procedural fallback scene (uSrc = 0)
+    // procedural fallback scene (uSrc = 0); uploaded ONCE, shared by
+    // both panes — honest A/B needs the same frame on both sides
     const useVid = state.videoMode && fileVideo.readyState >= 2;
     const srcEl = useVid ? fileVideo
                 : (state.hasCam && video.readyState >= 2 ? video : null);
     if (srcEl) {
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, srcEl);
     }
-    gl.uniform1i(U.uTex, 0);
-    gl.uniform1f(U.uSrc, useVid ? 2 : (state.hasCam ? 1 : 0));
-    gl.uniform1f(U.uMirror, !useVid && state.mirror ? 1 : 0);
-    gl.uniform1f(U.uTime, (performance.now() - t0) / 1000);
-    gl.uniform2f(U.uRes, canvas.width, canvas.height);
-    applyQualia(U, QUALIA);
-    applyField(U, FIELD, parseFloat(sliders.degen.value));
-    // comparison layout follows orientation: side-by-side in landscape,
-    // stacked in portrait
-    gl.uniform1f(U.uSplit,
-      state.splitMode ? (canvas.width >= canvas.height ? 1 : 2) : 0);
-    gl.uniform1f(U.uAspect,
-      srcEl && srcEl.videoWidth ? srcEl.videoWidth / srcEl.videoHeight : 16 / 9);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    const shared = {
+      src: useVid ? 2 : (state.hasCam ? 1 : 0),
+      mirror: !useVid && state.mirror ? 1 : 0,
+      time: (performance.now() - t0) / 1000,
+      aspect: srcEl && srcEl.videoWidth
+        ? srcEl.videoWidth / srcEl.videoHeight : 16 / 9,
+    };
+    const w = canvas.width, h = canvas.height;
+    if (!state.splitMode) {
+      drawPane(live.prog, live.U, QUALIA, FIELD, [0, 0, w, h], 0, shared);
+    } else {
+      // layout follows orientation: side-by-side in landscape (ref
+      // left), stacked in portrait (ref top; GL y-origin is bottom)
+      const halfW = Math.floor(w / 2), halfH = Math.floor(h / 2);
+      const [refRect, actRect] = w >= h
+        ? [[0, 0, halfW, h], [halfW, 0, w - halfW, h]]
+        : [[0, halfH, w, h - halfH], [0, 0, w, halfH]];
+      if (refPane) drawPane(refPane.prog, refPane.U, refPane.cfg.qualia,
+                            refPane.cfg.field, refRect, 1, shared);
+      drawPane(live.prog, live.U, QUALIA, FIELD, actRect, 1, shared);
+    }
     requestAnimationFrame(frame);
   }
   frame();

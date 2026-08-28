@@ -2,10 +2,6 @@
 // Edit this file to change the initial state of the simulator.
 
 export const DEFAULTS = {
-  // main slider, 0..1 — tier 1 (field geometry), so it lives here,
-  // not in QUALIA. Quale-owned slider defaults live in their schema.
-  degeneration: 0.75,   // degeneration of central field
-
   // 'camera' | 'video'
   background: 'camera',
 
@@ -16,33 +12,50 @@ export const DEFAULTS = {
   menuCollapsed: false,
 };
 
-// Geometry of the visual field. Same {value, min, max, label} param
-// shape as QUALIA params, so the load clamp and the generated faders
-// treat both alike — but TIER 1: always on, configurable, NEVER
-// toggleable — geometry is not a quale (where vision survives is not
-// an experience you can switch off). Deliberately outside QUALIA, and
-// outside presets' reach.
+// Geometry of the visual field. Quale-shaped ({ enabled, params })
+// since Q5 so the generated panel gives it a toggle like any symptom
+// (user's call, DECISIONS 2026-08-28 — reverses the earlier
+// tier-1-not-toggleable rule). Still TIER 1 in one respect: the
+// 10-field chunk is ALWAYS stitched — toggling off compiles a
+// short-circuit (full survival, edges parked off-screen), it never
+// removes the chunk, because its outputs feed sparkle, transition,
+// and photopsia.
 // Radii are degrees of eccentricity, mapped so the screen edge ≈ 90°
 // (see DECISIONS.md). [mild, late] pair-values are the value at
 // degeneration slider 0 and 1; in between is a straight blend.
 export const FIELD = {
-  // radius of the surviving central island, [mild, late]
-  inner: { value: [81, 13], min: 0, max: 90, label: 'Central island radius' },
+  enabled: true,
+  params: {
+    // how far the degeneration has advanced, 0..1 — picks the point
+    // on every [mild, late] pair below. A field param like any other
+    // (it IS the field's progression), but its UI is the headline
+    // General-tab slider, deliberately not duplicated in the
+    // generated group (DECISIONS 2026-08-20, reaffirmed 2026-08-28)
+    degeneration: { value: 0.75, min: 0, max: 1, label: 'Degeneration of central field' },
 
-  // radius where far-peripheral islands can begin — the dead ring's far
-  // side, [mild, late]. Widens outward as degeneration advances.
-  outer: { value: [65, 85], min: 0, max: 90, label: 'Far islands begin' },
+    // radius of the surviving central island, [mild, late]
+    inner: { value: [81, 13], min: 0, max: 90, label: 'Central island radius' },
 
-  // how much of the beyond-the-ring field survives when mild
-  outerCoverage: { value: 0.65, min: 0, max: 1, label: 'Far island coverage' },
+    // radius where far-peripheral islands can begin — the dead ring's
+    // far side, [mild, late]. Widens outward as degeneration advances.
+    outer: { value: [65, 85], min: 0, max: 90, label: 'Far islands begin' },
 
-  // how strongly the slider erodes the islands (1 = all gone at full)
-  erosion: { value: 0.9, min: 0, max: 1, label: 'Island erosion' },
+    // how much of the beyond-the-ring field survives when mild
+    outerCoverage: { value: 0.65, min: 0, max: 1, label: 'Far island coverage' },
 
-  // picks the personal geography of the islands — change it and every
-  // island moves somewhere else. Fixed = islands are places.
-  islandSeed: { value: 7.0, min: 0, max: 20, label: 'Island layout seed' },
+    // how strongly the slider erodes the islands (1 = all gone at full)
+    erosion: { value: 0.9, min: 0, max: 1, label: 'Island erosion' },
+
+    // picks the personal geography of the islands — change it and every
+    // island moves somewhere else. Fixed = islands are places.
+    islandSeed: { value: 7.0, min: 0, max: 20, label: 'Island layout seed' },
+  },
 };
+
+// Which preset file the comparison view's reference pane boots with.
+// The reference pane renders this honestly through the full pipeline —
+// "none" (field off, all qualia off) IS the unfiltered view (Q5).
+export const REFERENCE_PRESET = 'presets/none.json';
 
 // The qualia schema: which qualia are stitched into the shader, and
 // every tunable each one owns. Tier 1 (FIELD) is not here and never
@@ -121,6 +134,6 @@ export function clampParams(owner, params) {
     }
   }
 }
-clampParams('FIELD', FIELD);
+clampParams('FIELD', FIELD.params);
 for (const [qname, quale] of Object.entries(QUALIA))
   clampParams(`QUALIA.${qname}`, quale.params);

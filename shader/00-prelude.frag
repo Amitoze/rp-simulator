@@ -10,7 +10,7 @@ uniform vec2 uRes;
 uniform float uEdgeBase;    // radius of surviving central field
 uniform float uNetDensity;  // 0..1 density of the flashing net
 uniform float uSeeThru;     // 0..1 periphery transparency
-uniform float uSplit;       // 0 = immersive, 1 = side-by-side, 2 = stacked
+uniform float uFit;         // content fit: 0 = cover, 1 = contain+letterbox
 uniform float uAspect;      // aspect ratio of the content (video/camera)
 uniform float uNetScale;    // fineness of the net (1 = coarse, higher = tighter)
 uniform float uNetWarp;     // strand messiness (0 = straight, ~0.5 = tangled)

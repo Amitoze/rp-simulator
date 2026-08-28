@@ -1,88 +1,129 @@
-// Preset engine (Q4): capture pristine defaults, snapshot the live
-// schema, and apply full-value presets onto it.
+// Preset engine (Q4, envelope v2 in Q5): capture pristine defaults,
+// snapshot the live state, materialise preset values into detached
+// configs, and apply them to the live schema.
 //
-// A preset is a FULL snapshot of everything preset-reachable — every
-// quale's enabled flag and param values. FIELD, DEFAULTS, and SAFETY
-// caps are outside its reach by construction: this file never touches
-// them. (DECISIONS 2026-08-28 "Q4 planned".)
+// A preset is a FULL snapshot of the whole render config — the field
+// { enabled, params } (degeneration included: it is a field param,
+// the General slider is merely its UI) and every quale's enabled flag
+// and param values — so the file reproduces this exact look no matter
+// how schema defaults move later (frozen-snapshot semantics). SAFETY
+// caps are not params and are never serialised. (DECISIONS
+// 2026-08-28.)
 
-import { QUALIA, clampParams } from './config.js';
-// cycle-safe: restitch is a hoisted top-level function declaration in
-// renderer.js, and it is only called from user actions, never at load
+import { QUALIA, FIELD, clampParams } from './config.js';
+// cycle-safe: restitch and buildAdvanced are hoisted top-level
+// function declarations, only called from user actions. `sliders` is
+// a const and therefore NOT hoisted — it must never be read while
+// this module evaluates (controls.js is still mid-evaluation then);
+// applyPreset touches it only from event handlers.
 import { restitch } from './renderer.js';
-// same cycle-safe pattern: hoisted declaration, called on user actions
-import { buildAdvanced } from './controls.js';
+import { buildAdvanced, sliders } from './controls.js';
 
-// The live schema as one plain object: { <quale>: { enabled, params:
-// { <name>: value } } }. Pair params are copied ([...]), never
-// aliased — a shared array would let later slider drags silently
-// mutate any snapshot that holds it.
-export function snapshot() {
+// plain-value walk of one params map (arrays copied, never aliased —
+// a shared array would let later slider drags mutate any snapshot)
+const snapParams = params => {
   const out = {};
-  for (const [qname, quale] of Object.entries(QUALIA)) {
-    const params = {};
-    for (const [pname, p] of Object.entries(quale.params))
-      params[pname] = Array.isArray(p.value) ? [...p.value] : p.value;
-    out[qname] = { enabled: quale.enabled, params };
-  }
+  for (const [k, p] of Object.entries(params))
+    out[k] = Array.isArray(p.value) ? [...p.value] : p.value;
   return out;
+};
+
+const snapQualia = () => {
+  const out = {};
+  for (const [qname, quale] of Object.entries(QUALIA))
+    out[qname] = { enabled: quale.enabled, params: snapParams(quale.params) };
+  return out;
+};
+
+// The live state as one plain envelope-v2 body — a pure schema walk
+// (the General slider mirrors FIELD.params.degeneration, never the
+// other way round, so no DOM read is needed).
+export function snapshot() {
+  return {
+    field: { enabled: FIELD.enabled, params: snapParams(FIELD.params) },
+    qualia: snapQualia(),
+  };
 }
 
-// Factory settings: the schema's defaults, captured ONCE at page
-// load, before any UI exists. Q3 made the schema the live, mutable
-// state — the first slider drag overwrites a default in place — so
-// "reset to defaults" needs this copy, not the schema itself.
+// Factory settings, captured ONCE at page load, before any UI exists.
 const BASELINE = snapshot();
 
-// Apply preset values onto the live schema. The loading rule
-// (DECISIONS 2026-08-28): start from defaults, overlay the given
-// values, warn-and-ignore unknown names, clamp everything into schema
-// ranges. A missing name therefore means "schema default" — never
-// "whatever the user last dragged" — so a full snapshot reproduces
-// its look exactly, and applyPreset({}) is a clean reset.
-export function applyPreset(values) {
-  // 1. reset to factory settings (deep-copied, same aliasing rule)
-  for (const [qname, quale] of Object.entries(QUALIA)) {
-    quale.enabled = BASELINE[qname].enabled;
-    for (const [pname, p] of Object.entries(quale.params)) {
-      const v = BASELINE[qname].params[pname];
+// Materialise preset values into a DETACHED, schema-shaped config:
+// BASELINE defaults → overlay the file's sections → warn-and-ignore
+// unknown names → clamp everything into schema ranges. Every section
+// is optional (a v1 file has no field/degeneration and fills from
+// defaults; envelope metadata like name/saved is simply never read).
+// The caller decides where the config goes: the live schema via
+// applyPreset, or a reference pane (Q5). One shared core — a second
+// copy of the overlay logic would drift.
+export function materialise(preset) {
+  // schema-shaped deep clone (plain data, JSON round-trip is exact),
+  // then values reset to factory settings
+  const cfg = {
+    field: JSON.parse(JSON.stringify(FIELD)),
+    qualia: JSON.parse(JSON.stringify(QUALIA)),
+  };
+  const resetParams = (params, base) => {
+    for (const [k, p] of Object.entries(params))
+      p.value = Array.isArray(base[k]) ? [...base[k]] : base[k];
+  };
+  cfg.field.enabled = BASELINE.field.enabled;
+  resetParams(cfg.field.params, BASELINE.field.params);
+  for (const [qname, quale] of Object.entries(cfg.qualia)) {
+    quale.enabled = BASELINE.qualia[qname].enabled;
+    resetParams(quale.params, BASELINE.qualia[qname].params);
+  }
+
+  // overlay one { enabled, params } section onto its config twin
+  const overlay = (target, values, owner) => {
+    if (values && 'enabled' in values) target.enabled = !!values.enabled;
+    for (const [k, v] of Object.entries(values?.params ?? {})) {
+      const p = target.params[k];
+      if (!p) { console.warn(`preset: unknown param "${owner}.${k}" — ignored`); continue; }
       p.value = Array.isArray(v) ? [...v] : v;
     }
+  };
+  overlay(cfg.field, preset.field, 'field');
+  for (const [qname, q] of Object.entries(preset.qualia ?? {})) {
+    if (!cfg.qualia[qname]) { console.warn(`preset: unknown quale "${qname}" — ignored`); continue; }
+    overlay(cfg.qualia[qname], q, qname);
   }
-  // 2. overlay; unknown names warn + skip (old presets survive schema
-  // evolution, and typos surface instead of vanishing)
-  for (const [qname, q] of Object.entries(values ?? {})) {
-    const quale = QUALIA[qname];
-    if (!quale) { console.warn(`preset: unknown quale "${qname}" — ignored`); continue; }
-    if ('enabled' in q) quale.enabled = !!q.enabled;
-    for (const [pname, v] of Object.entries(q.params ?? {})) {
-      const p = quale.params[pname];
-      if (!p) { console.warn(`preset: unknown param "${qname}.${pname}" — ignored`); continue; }
-      p.value = Array.isArray(v) ? [...v] : v;
-    }
-  }
-  // 3. the same guard hand-edited config.js gets: out-of-range file
+  // the same guard hand-edited config.js gets: out-of-range file
   // values warn and cap — they can never reach a uniform (SAFETY)
-  for (const [qname, quale] of Object.entries(QUALIA))
+  clampParams('preset → field', cfg.field.params);
+  for (const [qname, quale] of Object.entries(cfg.qualia))
     clampParams(`preset → ${qname}`, quale.params);
-  // 4. enabled flags may have changed what is stitched into the shader
-  restitch(QUALIA);
-  // 5. the panel's sliders and toggles show schema state — regenerate
-  // them from it so they reflect the loaded preset, not the old drags
+  return cfg;
+}
+
+// Apply a preset to the LIVE state (the Symptom pane): materialise,
+// copy into the schema singletons, sync the General slider, restitch,
+// regenerate the panel. Missing sections mean "defaults" — never
+// "whatever the user last dragged" — so applyPreset({}) is a reset.
+export function applyPreset(preset) {
+  const cfg = materialise(preset);
+  const copyParams = (live, from) => {
+    for (const [k, p] of Object.entries(live))
+      p.value = Array.isArray(from[k].value) ? [...from[k].value] : from[k].value;
+  };
+  FIELD.enabled = cfg.field.enabled;
+  copyParams(FIELD.params, cfg.field.params);
+  for (const [qname, quale] of Object.entries(QUALIA)) {
+    quale.enabled = cfg.qualia[qname].enabled;
+    copyParams(quale.params, cfg.qualia[qname].params);
+  }
+  // the General slider mirrors the schema's degeneration param
+  sliders.degen.value = FIELD.params.degeneration.value;
+  restitch(QUALIA, FIELD);
   buildAdvanced();
 }
 
-// Export the live schema as a downloadable preset file: the ratified
-// envelope { name, saved, qualia } around a FULL snapshot — every
-// enabled flag and param value — so the file reproduces this exact
-// look no matter how schema defaults move later (frozen-snapshot
-// semantics, DECISIONS 2026-08-28). SAFETY caps are not params, so
-// they cannot be exported — and therefore never re-imported.
+// Export the live state as a downloadable envelope-v2 preset file.
 export function exportPreset(name) {
   const preset = {
     name,
     saved: new Date().toISOString().slice(0, 10),
-    qualia: snapshot(),
+    ...snapshot(),
   };
   const blob = new Blob([JSON.stringify(preset, null, 2) + '\n'],
                         { type: 'application/json' });
@@ -97,6 +138,7 @@ export function exportPreset(name) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-// Debug handle for the console checks in this step (kept afterwards:
-// poking presets from DevTools is a feature in a static sim)
-window.rpPresets = { BASELINE, snapshot, applyPreset };
+// Debug handle (kept: poking presets from DevTools is a feature in a
+// static sim). NOTE: applyPreset now takes an envelope-shaped object —
+// rpPresets.applyPreset({ qualia: {...} }), not a bare qualia map.
+window.rpPresets = { BASELINE, snapshot, materialise, applyPreset };

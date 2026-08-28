@@ -1,17 +1,18 @@
 // Panel UI, background sources (camera / local video), and shared state.
 
-import { DEFAULTS, FIELD, QUALIA } from './config.js';
-// cycle-safe: restitch is a top-level function declaration in
-// renderer.js, and it's only called from event handlers anyway
-import { restitch } from './renderer.js';
+import { DEFAULTS, FIELD, QUALIA, REFERENCE_PRESET } from './config.js';
+// cycle-safe: restitch/setReference are top-level function
+// declarations in renderer.js, only called from event handlers anyway
+import { restitch, setReference } from './renderer.js';
 // same pattern: hoisted declarations, called from event handlers
-import { applyPreset, exportPreset } from './presets.js';
+import { applyPreset, exportPreset, materialise } from './presets.js';
 
 export const state = {
   hasCam: false,      // camera stream is live
   mirror: false,      // mirror the camera image (front camera only)
   videoMode: false,   // self-hosted video file as the background
   splitMode: false,   // comparison view (side-by-side / stacked)
+  refName: 'reference', // the reference pane's loaded preset, for the note
 };
 
 export const IS_TOUCH = matchMedia('(pointer: coarse)').matches;
@@ -28,7 +29,7 @@ function updateNote() {
   const bg = state.videoMode ? 'video: Shanghai city walk, LOVE SHANGHAI, CC BY 4.0'
     : (state.hasCam ? 'live camera' : 'no camera — showing sample scene');
   note.textContent = bg + ' · simulated RP visual field' +
-    (state.splitMode ? ' · comparison (left/top: normal vision)' : '');
+    (state.splitMode ? ` · comparison (left/top: ${state.refName})` : '');
   const flip = document.getElementById('camFlip');
   flip.hidden = state.videoMode || !state.hasCam;
 }
@@ -76,7 +77,7 @@ function bindToggle(idA, idB, setState) {
 }
 
 function applyDefaults() {
-  sliders.degen.value = DEFAULTS.degeneration;
+  sliders.degen.value = FIELD.params.degeneration.value;
   if (DEFAULTS.background === 'video') document.getElementById('bgVid').click();
   if (DEFAULTS.view === 'sideBySide') document.getElementById('vwSbs').click();
   if (DEFAULTS.menuCollapsed) document.getElementById('panelHead').click();
@@ -108,7 +109,12 @@ function addFader(parent, label, p, index) {
 }
 
 function addParams(parent, params) {
-  for (const p of Object.values(params)) {
+  for (const [pname, p] of Object.entries(params)) {
+    // degeneration's UI is the headline General-tab slider — a schema
+    // param like any other, but deliberately not duplicated here
+    // (DECISIONS 2026-08-20): two live sliders on one value would
+    // leave whichever wasn't dragged showing a stale position
+    if (pname === 'degeneration') continue;
     if (Array.isArray(p.value)) {
       // pair-value → two sliders writing one [a, b] param
       addFader(parent, `${p.label} · a`, p, 0);
@@ -127,45 +133,42 @@ export function buildAdvanced() {
   const body = document.getElementById('advBody');
   body.replaceChildren();
 
-  const fg = document.createElement('div');
-  fg.className = 'group';
-  const fh = document.createElement('div');
-  fh.className = 'ghead';
-  fh.textContent = 'Visual field';
-  fg.append(fh);
-  addParams(fg, FIELD);
-  body.append(fg);
-
-  for (const [qname, quale] of Object.entries(QUALIA)) {
+  // one toggle-row group; FIELD and the qualia share the shape since
+  // FIELD went quale-shaped (Q5, DECISIONS 2026-08-28)
+  const addGroup = (label, entry) => {
     const g = document.createElement('div');
     g.className = 'group';
     const row = document.createElement('div');
     row.className = 'qrow';
     const name = document.createElement('span');
-    name.textContent = qname[0].toUpperCase() + qname.slice(1);
+    name.textContent = label;
     const btn = document.createElement('button');
-    btn.className = 'qtoggle' + (quale.enabled ? ' on' : '');
-    btn.setAttribute('aria-label', name.textContent);
-    btn.setAttribute('aria-pressed', quale.enabled);
+    btn.className = 'qtoggle' + (entry.enabled ? ' on' : '');
+    btn.setAttribute('aria-label', label);
+    btn.setAttribute('aria-pressed', entry.enabled);
     row.append(name, btn);
     g.append(row);
-    // zero-param qualia are a toggle row and nothing else
+    // zero-param entries are a toggle row and nothing else
     let faders = null;
-    if (Object.keys(quale.params).length) {
+    if (Object.keys(entry.params).length) {
       faders = document.createElement('div');
-      addParams(faders, quale.params);
-      faders.hidden = !quale.enabled;
+      addParams(faders, entry.params);
+      faders.hidden = !entry.enabled;
       g.append(faders);
     }
     btn.addEventListener('click', () => {
-      quale.enabled = !quale.enabled;
-      btn.classList.toggle('on', quale.enabled);
-      btn.setAttribute('aria-pressed', quale.enabled);
-      if (faders) faders.hidden = !quale.enabled;
-      restitch(QUALIA);
+      entry.enabled = !entry.enabled;
+      btn.classList.toggle('on', entry.enabled);
+      btn.setAttribute('aria-pressed', entry.enabled);
+      if (faders) faders.hidden = !entry.enabled;
+      restitch(QUALIA, FIELD);
     });
     body.append(g);
-  }
+  };
+
+  addGroup('Visual field', FIELD); // listed first, as before
+  for (const [qname, quale] of Object.entries(QUALIA))
+    addGroup(qname[0].toUpperCase() + qname.slice(1), quale);
 }
 
 // --- preset dropdown -------------------------------------------------
@@ -177,6 +180,7 @@ export function buildAdvanced() {
 // drags don't update the selection.
 async function initPresets() {
   const sel = document.getElementById('presetSel');
+  const refSel = document.getElementById('refSel');
   sel.addEventListener('change', async () => {
     // the ad-hoc entry only labels what the picker loaded — a local
     // file can't be re-fetched, so re-picking it is a no-op
@@ -185,25 +189,51 @@ async function initPresets() {
     try {
       const r = await fetch(`presets/${sel.value}`, { cache: 'no-store' });
       const preset = await r.json();
-      applyPreset(preset.qualia ?? {});
+      applyPreset(preset);
     } catch (e) {
       // a broken file must never half-apply: applyPreset was not
       // reached, so the sim keeps its current state
       console.error(`preset "${sel.value}" failed to load:`, e);
     }
   });
-  const opt = (value, label) => {
+  // reference dropdown: picks what the LEFT/TOP pane shows — an inert
+  // materialised config handed to the renderer; the live schema (and
+  // the Symptom tab) are never touched from here
+  refSel.addEventListener('change', async () => {
+    const label = refSel.options[refSel.selectedIndex].textContent;
+    try {
+      const preset = refSel.value
+        ? await (await fetch(`presets/${refSel.value}`, { cache: 'no-store' })).json()
+        : {};   // Defaults: materialise of an empty preset = BASELINE
+      setReference(materialise(preset));
+      state.refName = label;
+      updateNote();
+    } catch (e) {
+      console.error(`reference preset "${refSel.value}" failed to load:`, e);
+    }
+  });
+
+  const opt = (select, value, label) => {
     const o = document.createElement('option');
     o.value = value;
     o.textContent = label;
-    sel.append(o);
+    select.append(o);
   };
-  opt('', 'Defaults');
+  opt(sel, '', 'Defaults');
+  opt(refSel, '', 'Defaults');
   try {
     const files = await (await fetch('presets/index.json', { cache: 'no-store' })).json();
     for (const f of files) {
       const p = await (await fetch(`presets/${f}`, { cache: 'no-store' })).json();
-      opt(f, p.name ?? f);
+      opt(sel, f, p.name ?? f);
+      opt(refSel, f, p.name ?? f);
+      // the reference pane boots on REFERENCE_PRESET (renderer main):
+      // pre-select it and let the note name it
+      if (`presets/${f}` === REFERENCE_PRESET) {
+        refSel.value = f;
+        state.refName = p.name ?? f;
+        updateNote();
+      }
     }
   } catch (e) {
     console.error('preset manifest failed to load:', e);
@@ -225,7 +255,7 @@ async function initPresets() {
     if (!f) return;
     try {
       const preset = JSON.parse(await f.text());
-      applyPreset(preset.qualia ?? {});
+      applyPreset(preset);
       // reflect the load in the dropdown: one reusable ad-hoc entry,
       // labelled from the file's own name (user request 2026-08-28)
       const sel = document.getElementById('presetSel');
@@ -255,10 +285,17 @@ export function initControls() {
     // so playback is never blocked by autoplay policy
     if (v) fileVideo.play(); else fileVideo.pause();
   });
-  bindToggle('vwImm', 'vwSbs', v => { state.splitMode = v; });
+  // the reference selector only means something in comparison view —
+  // shown exactly then (user revision 2026-08-28 of the three-tab
+  // spec: reference controls live under View, not in their own tab)
+  const refRow = document.getElementById('refRow');
+  bindToggle('vwImm', 'vwSbs', v => {
+    state.splitMode = v;
+    refRow.hidden = !v;
+  });
 
-  // menu tabs (user UX spec 2026-08-28): display-only — flipping
-  // panes touches no schema state and never restitches
+  // menu tabs (user spec 2026-08-28, revised): General | Symptom —
+  // display-only: flipping panes touches no state, never restitches
   const genPane = document.getElementById('tabGeneral');
   const symPane = document.getElementById('adv');
   bindToggle('tabGen', 'tabSym', sym => {
@@ -271,6 +308,13 @@ export function initControls() {
     panel.classList.toggle('min');
     panel.querySelector('.chev').textContent =
       panel.classList.contains('min') ? '☰' : 'Done';
+  });
+
+  // the General slider is the convenience view onto the schema's
+  // degeneration param: drags write the schema (the frame loop reads
+  // it next frame, same contract as every generated fader)
+  sliders.degen.addEventListener('input', () => {
+    FIELD.params.degeneration.value = parseFloat(sliders.degen.value);
   });
 
   applyDefaults();

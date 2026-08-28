@@ -16,7 +16,7 @@
   <div class="body">
     <div class="seg tabs">
       <button id="tabGen" class="on">General</button>
-      <button id="tabSym">Adjust Symptoms</button>
+      <button id="tabSym">Symptoms</button>
     </div>
     <div id="tabGeneral">
       <label>Degeneration of central field</label>
@@ -31,6 +31,14 @@
       <div class="seg">
         <button id="vwImm" class="on">Immersive</button>
         <button id="vwSbs">Side-by-side</button>
+      </div>
+      <!-- the reference (left/top) pane's preset; only meaningful —
+           and only shown — in the comparison view. Future
+           reference-pane settings land here too. -->
+      <div id="refRow" hidden>
+        <label>Reference preset (left/top pane)</label>
+        <!-- options filled by controls.js from presets/index.json -->
+        <select id="refSel"></select>
       </div>
     </div>
     <!-- keeps the id "adv": every symptom-panel style rule is scoped

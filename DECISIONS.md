@@ -3,6 +3,127 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-28 — GATE Q5 passed; Q5 closed — PHASE Q COMPLETE
+
+- **GATE Q5 passed on the user's by-eye call, desktop and phone
+  (2026-08-28):** comparison view (None reference / tuned right)
+  matches the pre-Q5 look; two different presets render honestly side
+  by side; field toggle round-trips (off = raw scene, on = exact
+  return); baseline fps holds on the phone in two-pane mode; SAFETY
+  holds — ADD_CAP clamp effective in both panes, all-on/all-max in
+  comparison stays busier-not-brighter. Never self-certified.
+- **Phase Q is complete** (Q1–Q5 all gated): the monolith is now
+  toggleable qualia + a toggleable field over per-pane preset-driven
+  rendering. C and D land as new chunks + schema entries and inherit
+  the panel, presets, panes, and SAFETY clamp for free. New qualia
+  must ship enabled:false (2026-08-28 rule) — Phase C's fill-in is
+  the first test (murk's deletion/substitution is the sanctioned
+  exception, gated by eye).
+
+## 2026-08-28 — Q5 planned: field-off mechanism, pane model, three-tab menu ratified
+
+- **Three-tab layout revised after first use (user, 2026-08-28,
+  step 4):** back to two tabs — General | Symptom. The reference
+  selector lives in the General tab directly below the View toggle
+  and is visible ONLY in side-by-side view (it means nothing in
+  immersive). Supersedes the three-tab spec ratified earlier the
+  same day; the Reference "tab" was a home for one control and a
+  promise of future settings — those settings now land in the
+  conditional General-tab row instead.
+- **Degeneration is a FIELD param, not a separate concept** (user
+  ratified mid-step-2, amending the pre-ratified "top-level
+  degeneration in the envelope"): `DEFAULTS.degeneration` dissolves
+  into `FIELD.params.degeneration` — it *is* the field's progression;
+  the General-tab slider is a convenience view onto it (the most
+  intuitive knob for a viewer), kept as its SOLE UI — not duplicated
+  in the generated group (reaffirms 2026-08-20; two live sliders on
+  one value would leave one showing a stale position). Envelope v2
+  simplifies to { name, saved, field, qualia }; BASELINE becomes a
+  pure schema walk (the DOM-read-at-import trap disappears);
+  applyField(U, field) needs no degen argument — panes carry their
+  own degeneration for free, closing the plan's
+  "degeneration-two-owners" risk structurally.
+
+- **Field-off is a compile-time short-circuit** (ratified). The
+  stitcher emits `#define Q_FIELD` only when the field is enabled;
+  `fieldSurvival` opens with an `#ifndef Q_FIELD` path returning
+  survival = 1 with edge/oEdge parked at 10.0 — far past the screen
+  corner (≈1.1 in aspect-corrected r), so sparkle's band, transition's
+  rims, and photopsia's (1 − survival) weight all neutralise exactly.
+  Same compile-time philosophy as every quale toggle; zero per-pixel
+  cost; restitch-on-toggle path reused unchanged. With survival ≡ 1,
+  mix(periphery, scene, 1) = scene — field-off yields the raw scene
+  even with qualia enabled. Rejected: parked uniform values (schema
+  max 90° is the screen EDGE, corners keep the wobbly boundary;
+  magic out-of-schema values; wobble/fbm still burn per pixel) and a
+  runtime uniform branch (per-pixel cost forever for an occasional
+  toggle; violates off-costs-zero). `[my-synthesis]`, mechanism
+  verifiable at step 1's check. Confidence high.
+- **Asymmetric panes** (ratified): the ACTIVE (RP/symptom) pane is
+  the existing live schema singletons — the panel keeps editing them
+  with zero rework; the REFERENCE pane is an inert deep config
+  snapshot materialised from its loaded preset, with its own compiled
+  program, restitched only when its preset changes. Frozen by
+  construction: sliders cannot reach a detached copy. Requires
+  extracting the reset→overlay→clamp core into a pure
+  materialise(values) → config helper shared by applyPreset and the
+  reference loader — two copies of overlay logic would drift.
+  Rejected: symmetric pane objects with panel indirection (rewrites
+  the generator's schema binding now to enable per-pane editing the
+  deferral register explicitly parks). Confidence high.
+- **Three-tab menu, per-pane preset controls** (user spec 2026-08-28,
+  extending the ratified reference-selector option): tabs General |
+  Reference | Symptom. Panes are NAMED: left/top = "Reference",
+  right/bottom = "Symptom" (RP). General keeps degeneration slider +
+  background + view. Reference tab: the reference pane's preset
+  dropdown (Defaults/None/manifest; defaults to None) — the declared
+  home for future reference-pane settings. Symptom tab: the RP pane's
+  preset load/save (Q4's tune → save → compare loop stays here) above
+  Configure symptoms. ASSUMPTION flagged to user: preset controls are
+  per-pane (Reference tab loads the left pane, Symptom tab the
+  right); correct before step 4 if the intent was one shared home.
+
+## 2026-08-28 — Q5 scope pre-ratified: field joins the toggles and the presets
+
+Three user ratifications ahead of Q5 phase-plan (given directly, not
+via options tables; phase-plan folds them in as constraints rather
+than re-contesting):
+
+- **FIELD becomes toggleable, same as other symptoms** (user's call —
+  REVERSES "tier 1 is not removable", 2026-08-18, reaffirmed
+  2026-08-20/24). Claude recommended against: the phenomenological
+  argument (where vision survives is not an experience one can switch
+  off) plus the fact that a fully-surviving field VALUE set already
+  yields unfiltered output without a toggle. User ratified the toggle
+  anyway — a direct on/off is the UX they want; the sim is a
+  communication tool and "switch the field loss off" is a natural
+  viewer action. Implementation constraint carried into the plan:
+  10-field can NOT be stitch-excluded like quale chunks — its outputs
+  (survival, edge, oEdge, central, outer) feed photopsia weighting,
+  sparkle band placement, and transition bands. Field-off must force
+  full survival AND park the edge beyond the screen corner, or
+  edge-riding qualia would draw their bands over surviving vision.
+- **FIELD values enter presets** (REVERSES the FIELD-outside-presets
+  exclusion, 2026-08-19/20/28). Reasons ratified: a portrait includes
+  its geometry (two people's donuts differ as much as their smoke),
+  and Q5's frozen reference pane structurally requires per-pane field
+  — with a shared live FIELD, dragging a field fader would silently
+  reshape the reference pane and break honest A/B. Envelope gains a
+  top-level `field` section; old presets fill field from defaults
+  (same can't-pin-what-didn't-exist semantics as the new-qualia rule;
+  re-save to pin geometry).
+- **Degeneration slider position enters presets too** (user's call on
+  the open sub-question): "the peripheral filter on the General tab
+  is saved as part of presets". A portrait's current state includes
+  where it sits on the mild→late blend. It remains the headline
+  interactive slider; loading a preset sets it, playing with it
+  diverges from the loaded preset (consistent with the no-dirty-
+  tracking stance).
+- Consequence for the none preset: `none.json` gains field-off (or
+  fully-surviving field values) — THIS is what makes "none" the
+  unfiltered view, dissolving the 2026-08-28 none-≠-unfiltered ⚠
+  with no compositor change; Phase C's fill-in remains unborrowed.
+
 ## 2026-08-28 — GATE Q4 passed; Q4 closed
 
 - **GATE Q4 passed on the user's by-eye call, desktop and phone

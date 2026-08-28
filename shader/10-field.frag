@@ -1,8 +1,10 @@
-// 10-field — tier 1: the field geometry. ALWAYS stitched in, never
-// toggleable: qualia describe what the experience is like, this says
-// WHERE vision survives. Kept as one substitutable function — a future
-// perimetry import replaces this body with a texture lookup and
-// nothing downstream changes.
+// 10-field — tier 1: the field geometry. ALWAYS stitched in — its
+// outputs feed sparkle, transition, and photopsia — but toggleable
+// since Q5 (user's call, DECISIONS 2026-08-28): without Q_FIELD the
+// body compiles to a full-survival short-circuit instead of being
+// excluded. Kept as one substitutable function — a future perimetry
+// import replaces the real body with a texture lookup and nothing
+// downstream changes.
 //
 // Returns survival: 1 where vision works, 0 in the dead ring. The out
 // params hand back the wobbly edge radii and the two partial masks,
@@ -10,6 +12,15 @@
 float fieldSurvival(vec2 centered, float r, float ang,
                     out float edge, out float oEdge,
                     out float central, out float outer) {
+#ifndef Q_FIELD
+  // field toggled off: vision survives everywhere. Edges parked far
+  // past the screen corner (r tops out ≈1.1 aspect-corrected) so
+  // sparkle's band and transition's centre rim sit off-screen;
+  // outer = 0 is load-bearing — transition's island rim term is
+  // ringO * outer, and ringO evaluates to 1 everywhere on-screen.
+  edge = 10.0; oEdge = 10.0; central = 1.0; outer = 0.0;
+  return 1.0;
+#else
   // irregular boundary: radius wobbles around the island edge and
   // creeps slightly over time so the edge feels alive, not stenciled
   float wobble = noise(vec2(ang * 1.6 + 10.0, uTime * 0.05)) * 0.06
@@ -42,4 +53,5 @@ float fieldSurvival(vec2 centered, float r, float ang,
   outer = smoothstep(oEdge - 0.06, oEdge + 0.05, r) * gate;
 
   return max(central, outer);
+#endif
 }

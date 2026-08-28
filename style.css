@@ -96,7 +96,7 @@ canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
 }
 #adv { margin-top: 4px; }
 #adv .group { margin-bottom: 6px; }
-#adv .ghead { margin: 10px 0 0; font-weight: 600; color: #8f97a5; }
+#panel .ghead { margin: 10px 0 0; font-weight: 600; color: #8f97a5; }
 /* quale row: name left, switch right */
 #adv .qrow {
   display: flex; justify-content: space-between; align-items: center;
