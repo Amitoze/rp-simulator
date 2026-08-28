@@ -117,8 +117,13 @@ function addParams(parent, params) {
   }
 }
 
-function buildAdvanced() {
+// Exported for presets.js: a preset load rewrites the schema, and
+// regenerating the whole section from it is the sync — no per-slider
+// bookkeeping. Idempotent: clears before building, so every caller
+// gets exactly one panel.
+export function buildAdvanced() {
   const body = document.getElementById('advBody');
+  body.replaceChildren();
 
   const fg = document.createElement('div');
   fg.className = 'group';

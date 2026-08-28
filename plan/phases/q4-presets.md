@@ -106,13 +106,18 @@ files carry values only; degeneration is tier 1 and not in presets.
       tweaked snapshot (net density visibly changes), then an
       unknown-key + out-of-range object (two warnings, value clamped,
       sim unchanged beyond the clamped value).
-- [ ] 2. `controls.js` — panel rebuild + "none" behaviour reachable:
+- [x] 2. `controls.js` — panel rebuild + "none" behaviour reachable:
       `buildAdvanced()` becomes idempotent (clears `#advBody` first)
       and is exported for presets.js to call after apply; applyPreset
-      gains the rebuild call. Check: from the console, apply an
-      all-off object → sim shows the unfiltered scene, every panel
-      toggle reads off, faders hidden; apply `BASELINE` → everything
-      back, sliders at defaults.
+      gains the rebuild call. (Check corrected 2026-08-28: all-off is
+      NOT the unfiltered scene under the current compositor — with no
+      fill qualia, periphery stays vec3(0), so the dead ring renders
+      BLACK; tier 1 always masks. Q5's "clean half is just the none
+      preset" line inherits this gap — resolve it at Q5 phase-plan.)
+      Check: from the console, apply an all-off object → smoke, murk,
+      net, and sparkle all gone, dead ring plain black, every panel
+      toggle reads off, faders hidden, panel not duplicated; apply
+      `BASELINE` → default look back, sliders at default positions.
 - [ ] 3. `presets/` + `controls.js` + `sim.html` — the shipped presets
       and the dropdown: `presets/none.json` (every quale off — the
       unfiltered view, feeds Q5) and `presets/index.json` (bare

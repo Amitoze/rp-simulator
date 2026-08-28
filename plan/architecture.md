@@ -62,7 +62,9 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │    2026-08-28)                              │
 │  FIELD full schema-shape, same param        │
 │    pattern, still preset-proof 🟩 (Q3)      │
-│  ⇄ PRESETS presets.js + presets/ 🟦 (Q4):   │
+│  ⇄ PRESETS presets.js + presets/ 🟧 (Q4     │
+│    steps 1–2 built: BASELINE + applyPreset  │
+│    + panel rebuild, console-checked):       │
 │    FULL value snapshots, named envelope     │
 │    {name, saved, qualia}; index.json        │
 │    manifest (browser can't ls); load =      │

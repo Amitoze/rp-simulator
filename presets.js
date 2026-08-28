@@ -10,6 +10,8 @@ import { QUALIA, clampParams } from './config.js';
 // cycle-safe: restitch is a hoisted top-level function declaration in
 // renderer.js, and it is only called from user actions, never at load
 import { restitch } from './renderer.js';
+// same cycle-safe pattern: hoisted declaration, called on user actions
+import { buildAdvanced } from './controls.js';
 
 // The live schema as one plain object: { <quale>: { enabled, params:
 // { <name>: value } } }. Pair params are copied ([...]), never
@@ -65,6 +67,9 @@ export function applyPreset(values) {
     clampParams(`preset → ${qname}`, quale.params);
   // 4. enabled flags may have changed what is stitched into the shader
   restitch(QUALIA);
+  // 5. the panel's sliders and toggles show schema state — regenerate
+  // them from it so they reflect the loaded preset, not the old drags
+  buildAdvanced();
 }
 
 // Debug handle for the console checks in this step (kept afterwards:

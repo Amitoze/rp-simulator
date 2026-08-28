@@ -129,6 +129,10 @@ correctness bug for portraits. Plan of record:
 [ ] Split-layout arithmetic moves out of GLSL into viewport math;
     the hardcoded rawScene override dies — the clean half is just the
     "none" preset
+    ⚠ found 2026-08-28 (Q4 step 2): all-qualia-off is NOT the raw
+    scene — tier 1 always masks, and with no fill qualia the dead
+    ring renders black. "None = unfiltered" needs a design answer at
+    Q5 phase-plan (see phases/q4-presets.md step 2 note)
 [ ] Reference pane (left / top in stacked) frozen at its loaded
     preset's values; sliders edit only the active pane (right / bottom)
 [ ] Both panes share camera texture and clock — identical configs
