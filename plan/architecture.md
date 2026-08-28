@@ -2,10 +2,11 @@
 
 Maintained by `/architecture`; derived from `plan/` + `DECISIONS.md` +
 the code — update it there, then regenerate here. **Last updated:
-2026-08-28** (GATE Q5 passed by eye, desktop + phone — PHASE Q
-COMPLETE: per-pane rendering 🟩, field toggleable via Q_FIELD 🟩,
-envelope v2 with degeneration as a field param 🟩; the split shader
-special-case is dead. See DECISIONS 2026-08-28 "GATE Q5 passed".)
+2026-08-28** (Phase G planned — gaze simulation + AR glance panel,
+queue-jumped ahead of C/D on the user's call: GAZE input, PANEL block,
+15-glance-panel chunk all 🟦. See DECISIONS 2026-08-28 "Phase G
+planned". Same day, earlier: PHASE Q COMPLETE, all Q1–Q5 gates passed
+by eye desktop + phone.)
 
 ---
 
@@ -30,6 +31,9 @@ person's visual field. Geometry (tier 1: *where* vision survives) is
 permanent; qualia (tier 2: *what the loss is like* — smoke, flashes,
 sparkle) are each toggleable and tunable. A comparison view keeps the
 loss legible to sighted viewers, since honest filling-in is invisible.
+A third concept entered with Phase G: **the aid** — a simulated
+head-worn device (glance panel) drawn INTO the world the portrait then
+filters; devices are worn over the condition, never part of it.
 
 ---
 
@@ -72,6 +76,11 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │    schema; SAFETY caps out of reach (never  │
 │    params); boot = schema defaults, never a │
 │    file (DECISIONS 2026-08-28)              │
+│  GAZE block: spring-back / ease / max-      │
+│    excursion tunables, no toggle 🟦 (G)     │
+│  PANEL block: the aid — quale-shaped but a  │
+│    DEVICE, not a symptom; OUTSIDE presets   │
+│    🟦 (G, DECISIONS 2026-08-28)             │
 └────────┬────────────────────────────────────┘
          │ enabled-flags + param values (clamped; live-edited from Q3)
          ▼
@@ -92,7 +101,10 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │  restitch() swaps programs, uniforms        │
 │  self-heal next frame 🟩 (Q3, GATE passed   │
 │  2026-08-28)                                │
-│  two panes, two draw calls 🟦 (Q5)          │◀── 🟨 FF1 gaze tracking
+│  two panes, two draw calls 🟩 (Q5, GATE     │
+│  passed 2026-08-28)                         │
+│  shared gaze offset → uGaze on BOTH panes   │
+│  (one pair of eyes, like the clock) 🟦 (G)  │◀── 🟨 FF1 gaze tracking
 └────────┬────────────────────────────────────┘
          │ one fullscreen triangle
          ▼
@@ -100,6 +112,11 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │ SHADER  shader/*.frag (7 chunks) 🟩         │
 │  10-field: survival mask, ONE function 🟩   │◀── 🟨 perimetry import
 │  qualia chunks 20–24 🟩 (each SAFETY-capped)│◀── 🟨 FF2–FF5 (Phase D era)
+│  15-glance-panel: head-fixed aid display,   │
+│    scene slot BEFORE the survival mix,      │
+│    steady light only — never a time-varying │
+│    term — outside ADD_CAP 🟦 (G, DECISIONS  │
+│    2026-08-28)                              │
 │  90-composite: fixed slots 🟩               │
 │    addLight accumulator + global SAFETY     │
 │    brightness clamp 🟩 (Q2, ADD_CAP = 0.65  │
@@ -117,13 +134,19 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │  toggle → faders; sliders write schema,     │
 │  toggles restitch                           │
 │  preset dropdown ("Defaults" + manifest) /  │
-│  file picker / SAVE-AS-PRESET export 🟦 (Q4)│
+│  file picker / SAVE-AS-PRESET export 🟩     │
+│  (Q4, GATE passed 2026-08-28)               │
+│  gaze input: Option+mouse (desktop) /       │
+│  one-finger canvas drag (touch), spring-    │
+│  back on release 🟦 (G)                     │
+│  PANEL group on the General tab — a device  │
+│  never appears under Adjust Symptoms 🟦 (G) │
 └─────────────────────────────────────────────┘
 ```
 
 | 🟨 item | Attaches at | Adds | Revisit when |
 |---|---|---|---|
-| FF1 gaze tracking | frame loop | field mask follows the eye, not the screen | viewers "cheat" by foveating the islands |
+| FF1 gaze tracking | frame loop | field mask follows the REAL eye (camera eye-tracker) — Phase G's mouse/touch gaze becomes the manual fallback | G proves the interaction and a hands-free demo is wanted |
 | FF2 RP overlay on surviving vision | qualia chunks | contrast loss + dimming on ALL preserved field | user wants iter-3 to touch the surviving field; verify literature first |
 | FF3 WebGL2 mipmap blur | shader pipeline | true LOD blur instead of taps | D1 tap blur shimmers or blows phone perf |
 | FF4 motion boost | shader pipeline | previous-frame FBO, motion amplified in islands | FF3 lands, or Gate D motion feels too weak |
@@ -174,7 +197,7 @@ config.js
        declared place always holds "current settings" (what Q4 export
        serialises and Q5 panes read) (DECISIONS 2026-08-20)
 
-presets/*.json 🟦 (Q4, DECISIONS 2026-08-28) ── FULL value snapshots
+presets/*.json 🟩 (Q4, GATE passed 2026-08-28) ── FULL value snapshots
        (sparse rejected: a sparse preset drifts when defaults move —
        frozen snapshots are the honest portrait semantics); named
        envelope { name, saved, qualia }; values only, never structure,
@@ -200,7 +223,7 @@ qualia config ─────────────────────┤
     recompile on toggle ≈ tens of ms, once per settings click)
 ```
 
-### Frame loop 🟩 → touched by Q2 (schema reads), Q3 (live state 🟩), Q5 (panes 🟦)
+### Frame loop 🟩 → touched by Q2 (schema reads), Q3 (live state 🟩), Q5 (panes 🟩), G (gaze 🟦)
 
 ```
 each frame: video pixels ──▶ texture upload
@@ -279,7 +302,7 @@ sparkle ───┴─▶ addLight (photopsia weighted        ▼
 Scene brightness is never clamped — a bright real wall is the world's
 business. Below the ceiling, output is identical to today.
 
-### UI 🟩 (incl. generated panel, Q3 GATE passed 2026-08-28) → grows in Q4 🟦
+### UI 🟩 (incl. generated panel Q3, presets Q4 — both GATES passed 2026-08-28) → grows in G 🟦 (gaze listener, PANEL group)
 
 ```
 sliders / toggles ──▶ state + uniforms (live)
@@ -310,3 +333,38 @@ sliders / toggles ──▶ state + uniforms (live)
        tune→save→compare loop)
   "none" preset = every quale off = unfiltered view (feeds Q5)
 ```
+
+### Gaze + glance panel 🟦 (Phase G — ratified, not built; DECISIONS 2026-08-28 "Phase G planned")
+
+Two coordinate frames, and the phase is the space between them: damage
+is eye-fixed (retina frame), the aid is head-fixed (screen frame).
+
+```
+Option+mouse (desktop) / one-finger drag (touch)
+        │ where the eye points, as an offset from straight ahead
+        ▼
+GAZE state (controls.js): clamp to max excursion, spring back to
+centre on release (tunables in the GAZE config block)
+        │ ONE shared offset per frame — both panes, like the clock
+        ▼
+uGaze ──▶ 90-composite:  centered = cuv − 0.5 − gaze
+              └─▶ r, ang, sp, survival, edge… ALL shift rigidly —
+                  every present AND future symptom moves with the
+                  eye, because position is only ever derived from
+                  centered (the gaze invariant, DECISIONS 2026-08-28)
+
+PANEL schema ──rect/zoom/brightness/ambient/opaqueness──▶
+15-glance-panel (scene slot, BEFORE transition and the survival mix):
+  placed from cuv — deliberately NOT gaze-shifted (head-fixed)
+  samples the SAME feed, cropped + zoomed  ──▶  panel light:
+    gain = display brightness ÷ ambient   (washes out in daylight,
+    lit  = mix(scene + feed × gain, feed, opaqueness)  glows at night)
+           └── additive glasses ←──────→ ideal display ──┘
+        │ scene + panel light (steady only — no time-varying term,
+        │ outside ADD_CAP; blindspots travel OVER the panel)
+        ▼
+transition ──▶ survival mix ──▶ … (unchanged downstream)
+```
+
+Active pane only — the reference pane stays the bare condition, so
+the comparison reads "with aid" vs "without".

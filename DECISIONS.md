@@ -3,6 +3,61 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-28 — Phase G planned: glance phase scoped and ratified
+
+- **Phase G queue-jumps C and D** (user's call, 2026-08-28): the two
+  backlog features "gaze simulation via Option+mouse" and "glance panel
+  with AR-glasses optics" combine into one phase serving the AR-aid
+  product horizon (00-context). C (fill-in) remains the honesty fix and
+  next in line after G; both G features are additive (new uniforms, one
+  new chunk) and don't conflict with what C/D will touch. Backlog
+  entries promoted out of Inbox.
+- **Panel home: standalone PANEL block, outside presets** (ratified).
+  Quale-shaped `{ enabled, params }` so the generated-panel machinery
+  is reused (FIELD precedent), stitched with `Q_PANEL` and genuinely
+  excludable — unlike FIELD, nothing downstream reads its outputs. UI
+  home is the General tab: it is a device, not a symptom, and must not
+  appear under Adjust Symptoms. Excluded from preset envelopes — a
+  portrait is the condition; the aid is worn over it. Panel renders in
+  the ACTIVE pane only; the reference pane stays the bare condition /
+  unfiltered view, keeping the with-aid vs without A/B honest.
+  Rejected: sixth quale in QUALIA (mislabels a device as a symptom;
+  portraits silently grow device state) and envelope v3 with a `panel`
+  section (grows the preset contract before anything needs it — adding
+  a missing-key-defaults section later is the cheap direction, removing
+  one from files in the wild is the expensive one). Confidence high.
+- **Panel light is scene light: outside ADD_CAP, under the field mask**
+  (ratified). The panel composites into the scene BEFORE the survival
+  mix — structurally forced: addLight applies after the mix, so a
+  panel riding addLight would shine through scotomas, the exact
+  opposite of the phenomenon (blindspots must travel over the panel).
+  Steady light is not a photosensitivity vector, and scene brightness
+  is never clamped (standing doctrine). The SAFETY constraint is made
+  structural instead: **PANEL never gains a time-varying term** — no
+  flicker param, ever; any future pulsing-panel idea must route
+  through addLight and inherit ADD_CAP. Named in the chunk header.
+  Closes the backlog's open ADD_CAP question. Rejected: panel inside
+  ADD_CAP (wrong slot, and couples aid brightness to sparkle/photopsia
+  flaring). Confidence high on the slot `[structural]`; medium on
+  cap-free sufficing — if the gate finds a maxed panel uncomfortably
+  bright, a static luma ceiling on the panel term is one commit.
+- **Below-filter defaults accepted** (user, 2026-08-28): gaze SHARED
+  across panes (one pair of eyes, like the shared clock); release
+  springs back to centre with a short configurable ease (a glance is
+  transient); max-excursion clamp in config (~0.4 screen units); touch
+  gesture is one-finger drag on the canvas; all in a `GAZE` config
+  block — tunable, no toggle (no input = no offset). Each one commit
+  to reverse.
+- **The gaze invariant, named for future symptoms** (from the 2026-08-28
+  deep dive): every quale takes its POSITION from retina-frame values
+  the compositor hands in (`centered`, `sp`, `r`, `ang`, `edge`…) and
+  touches world imagery only via `suv`, never `vUV` — so
+  `centered = cuv − 0.5 − gaze` moves every present and future symptom
+  rigidly. Check: `grep -n vUV shader/*.frag` hits only 00-prelude.
+  The panel deliberately breaks the rule (placed from `cuv`): glasses
+  are head-fixed, damage is eye-fixed — the two frames ARE the
+  phenomenology.
+
 ## 2026-08-28 — GATE Q5 passed; Q5 closed — PHASE Q COMPLETE
 
 - **GATE Q5 passed on the user's by-eye call, desktop and phone
