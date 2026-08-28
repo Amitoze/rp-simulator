@@ -94,31 +94,42 @@ canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
 #panel .tabs button.on {
   background: none; color: #fff; border-bottom-color: #2b62c9;
 }
-#adv { margin-top: 4px; }
-#adv .group { margin-bottom: 6px; }
+#adv, #aid { margin-top: 4px; }
+.gen .group { margin-bottom: 6px; }
 #panel .ghead { margin: 10px 0 0; font-weight: 600; color: #8f97a5; }
+#panel .hint { margin: 6px 0 0; font-size: 12px; line-height: 1.45; color: #8f97a5; }
+/* ⓘ hover tooltip on generated faders (schema `hint`) */
+#panel .tipdot { cursor: help; position: relative; }
+#panel .tipdot:hover::after {
+  content: attr(data-tip);
+  position: absolute; left: 0; bottom: 130%;
+  width: 210px; padding: 6px 8px;
+  background: #14171c; border: 1px solid #2a2f38; border-radius: 6px;
+  font-size: 11px; font-weight: 400; line-height: 1.4; color: #cfd6e2;
+  z-index: 10; pointer-events: none;
+}
 /* quale row: name left, switch right */
-#adv .qrow {
+.gen .qrow {
   display: flex; justify-content: space-between; align-items: center;
   margin-top: 12px; font-weight: 600; color: #cfd4dc;
 }
 /* the switch: a pill track whose ::after is the sliding knob */
-#adv .qtoggle {
+.gen .qtoggle {
   position: relative; width: 40px; height: 22px; padding: 0;
   border-radius: 11px;
   background: rgba(255,255,255,.14);
   border: 1px solid rgba(255,255,255,.18);
   transition: background .18s ease, border-color .18s ease;
 }
-#adv .qtoggle::after {
+.gen .qtoggle::after {
   content: ''; position: absolute; top: 3px; left: 3px;
   width: 16px; height: 16px; border-radius: 50%;
   background: #dfe3ea;
   box-shadow: 0 1px 2px rgba(0,0,0,.4);
   transition: transform .18s ease, background .18s ease;
 }
-#adv .qtoggle.on { background: #2b62c9; border-color: #2b62c9; }
-#adv .qtoggle.on::after { transform: translateX(18px); background: #fff; }
+.gen .qtoggle.on { background: #2b62c9; border-color: #2b62c9; }
+.gen .qtoggle.on::after { transform: translateX(18px); background: #fff; }
 
 /* touch devices: bigger panel, 44px-class touch targets */
 @media (pointer: coarse) {
@@ -137,7 +148,7 @@ canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
   #panel button { padding: 12px 14px; font-size: 15px; }
   #panel input[type=range] { height: 40px; }
   /* bigger switch; padding re-zeroed against the generic button rule */
-  #adv .qtoggle { width: 50px; height: 28px; padding: 0; border-radius: 14px; }
-  #adv .qtoggle::after { width: 22px; height: 22px; }
-  #adv .qtoggle.on::after { transform: translateX(22px); }
+  .gen .qtoggle { width: 50px; height: 28px; padding: 0; border-radius: 14px; }
+  .gen .qtoggle::after { width: 22px; height: 22px; }
+  .gen .qtoggle.on::after { transform: translateX(22px); }
 }

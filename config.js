@@ -12,6 +12,35 @@ export const DEFAULTS = {
   menuCollapsed: false,
 };
 
+// Gaze simulation (Phase G): holding Option/Alt and moving the mouse
+// points the eye somewhere else — the field mask travels, the scene
+// stays put. Tunables only, no toggle: no input means no offset.
+export const GAZE = {
+  // how far the eye can be dragged from straight ahead, in screen
+  // fractions — keeps the island from being pulled half off the bezel
+  maxExcursion: 0.4,
+
+  // release behaviour: spring back to centre (a glance is transient);
+  // false = the gaze stays where it was left
+  springBack: true,
+
+  // easing time constant, ms — the saccade-ish snap toward the target
+  // (applies to both the follow and the spring back)
+  easeMs: 200,
+
+  // zoom change per wheel-delta unit while repositioning the panel
+  // (scroll up = zoom in; one notch ≈ 100 units ≈ 0.2 zoom)
+  wheelZoom: 0.002,
+
+  // how quickly movements react to the mouse: screen fractions
+  // travelled per screen fraction of pointer movement. Covers BOTH
+  // modifier gestures — Option (gaze) and Option+Shift (panel
+  // reposition). Input is RELATIVE — only movement steers, never the
+  // pointer's absolute position (user spec 2026-08-28; doubled from
+  // 1 same day)
+  speed: 2,
+};
+
 // Geometry of the visual field. Quale-shaped ({ enabled, params })
 // since Q5 so the generated panel gives it a toggle like any symptom
 // (user's call, DECISIONS 2026-08-28 — reverses the earlier
@@ -49,6 +78,62 @@ export const FIELD = {
     // picks the personal geography of the islands — change it and every
     // island moves somewhere else. Fixed = islands are places.
     islandSeed: { value: 7.0, min: 0, max: 20, label: 'Island layout seed' },
+  },
+};
+
+// The glance panel (Phase G): a simulated head-worn display — the AID,
+// not a symptom. Quale-shaped so the generated UI machinery renders
+// it, but it lives on the General tab and stays OUTSIDE presets: a
+// portrait is the condition; the aid is worn over it (DECISIONS
+// 2026-08-28). HEAD-FIXED: placed in screen space, deliberately
+// untouched by gaze — glasses move with the head, damage with the eye.
+export const PANEL = {
+  enabled: false,
+
+  // the panel's fixed on-screen width : height ratio — a display's
+  // shape is a property of the device, not a knob: tunable here,
+  // never a fader
+  aspect: 4 / 3,
+
+  // while repositioning, the field mask goes this transparent so the
+  // moving panel stays visible through the dead ring (0 = mask fully
+  // opaque, 1 = mask gone). A placement-view affordance, config only.
+  repositionSeeThru: 0.5,
+
+  // presence floor: at full Display transparency the panel keeps this
+  // much replace-mix, so it reads as a faint ghost rather than
+  // vanishing outright (user spec 2026-08-28: "don't make it
+  // invisible"; halved same day — max should be twice as transparent).
+  // A device property like aspect — tunable here only.
+  minOpacity: 0.06,
+
+  params: {
+    // centre of the panel in screen fractions (0..1, y up) — default
+    // upper right, where a glance naturally lands. noUI: placed by
+    // Option+Shift drag, not a fader (user spec 2026-08-28)
+    position: { value: [0.72, 0.72], min: 0, max: 1, noUI: true, label: 'Panel position' },
+
+    // width of the panel, screen fractions — height follows from the
+    // fixed aspect above. hint renders as a hover ⓘ next to the fader
+    size: { value: 0.22, min: 0.05, max: 0.6, label: 'Panel size',
+            hint: 'Mouse resize: hold Option+Shift, then click and drag — left grows, right shrinks' },
+
+    // how much the panel magnifies the centre of the feed
+    zoom: { value: 2, min: 1, max: 6, label: 'Panel zoom',
+            hint: 'While holding Option+Shift, scroll to zoom the panel in and out' },
+
+    // ambient light estimate — the display replicates the SOURCE
+    // feed's brightness (no brightness knob of its own, user spec
+    // 2026-08-28), and can never EXCEED it (second user correction,
+    // same day: low ambient must not boost). gain = min(1, 1/ambient):
+    // at or below 1 the panel adds the feed at source strength,
+    // above 1 daylight washes it out. min stays above zero: this
+    // value divides, and the schema clamp is the guard
+    ambient: { value: 1, min: 0.2, max: 2, label: 'Ambient light' },
+
+    // 1 = maximum see-through (additive optics, floored by minOpacity
+    // above so the panel never quite vanishes) … 0 = opaque display
+    transparency: { value: 1, min: 0, max: 1, label: 'Display transparency' },
   },
 };
 
@@ -135,5 +220,6 @@ export function clampParams(owner, params) {
   }
 }
 clampParams('FIELD', FIELD.params);
+clampParams('PANEL', PANEL.params);
 for (const [qname, quale] of Object.entries(QUALIA))
   clampParams(`QUALIA.${qname}`, quale.params);

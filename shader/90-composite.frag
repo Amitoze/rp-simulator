@@ -38,8 +38,22 @@ void main() {
   }
   vec3 scene = getScene(suv);
 
+  // ---- slot: the aid (before every symptom slot) -----------------
+  // The panel is part of the WORLD — placed from cuv (head-fixed,
+  // never gaze-shifted), burned into the scene so the field mask and
+  // rim greying composite over it (DECISIONS 2026-08-28)
+#ifdef Q_PANEL
+  scene = panelQuale(scene, cuv);
+#endif
+
   // ---- tier 1: field geometry (always on) ------------------------
-  vec2 centered = cuv - 0.5;
+  // gaze (Phase G): the retinal frame is measured from where the eye
+  // points, not the screen centre — subtracted BEFORE the aspect
+  // correction so a diagonal drag moves the island diagonally,
+  // undistorted. Everything derived from centered (r, ang, sp,
+  // survival, edges) travels rigidly with the eye; the scene samples
+  // via suv and stays put.
+  vec2 centered = cuv - 0.5 - uGaze;
   centered.x *= contAsp;                   // aspect-correct so island is round
   float r = length(centered);
   float ang = atan(centered.y, centered.x);
@@ -97,6 +111,17 @@ void main() {
   float addLuma = dot(addLight, vec3(0.299, 0.587, 0.114));
   addLight *= ADD_CAP / max(addLuma, ADD_CAP);
   col += addLight;
+
+  // reposition mode (Option+Shift), both UI affordances drawn over
+  // the mix, active only while uPanelHi is set. First the field mask
+  // goes uPanelSee transparent — blending back toward the raw scene
+  // (panel included) so the moving panel stays visible through the
+  // dead ring — then the steady yellow boundary. Steady light only
+  // (the panel chunk's no-flicker SAFETY rule extends here).
+#ifdef Q_PANEL
+  col = mix(col, scene, uPanelHi * uPanelSee);
+  col = mix(col, vec3(1.0, 0.85, 0.2), panelBorder(cuv) * uPanelHi);
+#endif
 
   if (bars > 0.5) col = vec3(0.0); // letterbox
   gl_FragColor = vec4(col, 1.0);

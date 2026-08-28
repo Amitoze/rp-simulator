@@ -3,6 +3,166 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-28 — Phase G merged early: G2 + G5 parked (user's call)
+
+- **Merged without the formal gate.** G1, G3, G4 each passed the
+  user's by-eye check at step level (desktop only); the user chose to
+  park G2 (touch gaze) and G5 (glance-moment + SAFETY re-verify) and
+  merge. Recorded plainly: the phase GATE did not formally pass.
+- **What is and isn't verified:** mechanical G5 checks RUN at
+  close-out — zero `uTime` in 15-glance-panel (the no-flicker SAFETY
+  constraint holds in code) and the vUV gaze-invariant holds (no
+  symptom chunk reads it). Covered informally during step verdicts:
+  blindspots over the panel, gaze-onto-panel, reference-pane
+  isolation. NOT verified: ADD_CAP all-on/all-max by eye with the
+  panel lit; everything phone (gaze has NO touch input at all).
+- **Reopening conditions:** G2 before any phone-audience demo of the
+  glance experience (the primary audience is mobile — this is a real
+  hole, not polish); the SAFETY by-eye re-verify with the panel lit
+  before or with the next change touching capped paths (plausibly
+  Phase C's fill-in/photopsia work).
+
+## 2026-08-28 — G4 revised mid-step: source-brightness display, transparency knob (user spec)
+
+- **The display has no brightness knob** — it replicates the source
+  feed's brightness, so the wash-out ratio collapses to `1 / ambient`
+  (ambient re-ranged 0.2–2, default 1 = panel light at exactly source
+  strength). One optics slider instead of two.
+- **…and never exceeds source brightness** (second correction, same
+  session: "when I set it really low it gets very bright, this seems
+  wrong"). `gain = min(1, 1/ambient)` — low ambient is not a boost;
+  only high ambient washes out. Relative night-glow comes from the
+  scene itself being dark, not from amplifying the panel.
+- **`GAZE.sensitivity` became `GAZE.speed`, doubled to 2** (user,
+  same session): one knob for how quickly mouse movement drives both
+  modifier gestures — Option gaze and Option+Shift reposition (it
+  scales the shared deltas, so both inherit it by construction). The
+  200 ms gaze ease is a separate feel and was left untouched.
+- **Click-drag resize inside reposition mode** (user spec): while
+  Option+Shift is held, holding the mouse button turns the drag into
+  a resize — LEFT grows, right shrinks (direction inverted by user
+  correction the same session); the single width param keeps the
+  ratio by construction. On exiting reposition the panel group
+  regenerates so the size fader shows what the gesture wrote
+  (verified pre-inversion: +150px drag → 0.22 → 0.5267, exactly
+  150/978 × speed 2 `[measured]`).
+- **Reposition view refinements** (user spec, same session): the
+  field mask fades to `PANEL.repositionSeeThru` (0.5) while placing —
+  drawn post-mix like the border, so the moving panel stays visible
+  through the dead ring; the scroll wheel drives panel zoom
+  (`GAZE.wheelZoom` per delta unit, scroll up = in); the zoom fader
+  gained its own hover hint.
+- **Pointer lock while Option is held** (user spec: "the screen
+  boundary should be ignored"). Without lock the OS cursor pins at
+  the screen edge and movement events stop; the canvas takes pointer
+  lock on Alt keydown and releases it with the key (Esc also breaks
+  it — degrades to bounded deltas, nothing worse). The earlier
+  delta-only rewrite is what makes lock a drop-in.
+- **Discoverability**: the size fader carries a hover ⓘ (schema
+  params gained an optional `hint` the generator renders), and the
+  AR aid tab gained a short "Moving the panel" help section.
+- **"Ideal display" became "Display transparency", inverted** — 1 =
+  maximum see-through, 0 = opaque display; default 1 (glasses
+  realism). At full transparency the panel must not vanish: a
+  presence floor `PANEL.minOpacity` (0.12 → halved to 0.06 on user
+  correction "max should be twice as transparent"; a device property
+  beside `aspect` — config, never a fader) keeps a faint ghost of
+  the rect even over a dark feed. The shader mix is untouched; all
+  changes live in the schema and the JS uniform computation.
+
+## 2026-08-28 — G3 revised mid-step: relative input, AR-aid tab, reposition mode (user spec)
+
+Five user corrections at the G3 review, folded into the step before
+its verdict:
+
+- **Gaze and pane input is RELATIVE — deltas only.** Surprise found at
+  review: the G1 build mapped the pointer's absolute position, so
+  engaging Option yanked the mask toward wherever the pointer happened
+  to sit. Now only mouse MOVEMENT while the modifier is held steers
+  (`movementX/Y` accumulate); the absolute pointer position is never
+  read. `GAZE.sensitivity` added (screen fractions of travel per
+  screen fraction of mouse movement). Verified clean-room: one −200px
+  synthetic delta moved the pane centre to cuv 0.515/0.567 vs
+  predicted 0.516/0.563, stable across frames `[measured]`.
+- **The aid gets its own menu tab** — General | Symptoms | AR aid
+  (supersedes this morning's "PANEL group on the General tab"
+  ratification). A third tab returns to the layout, but for a device
+  home, not the reference selector the Q5 revision killed.
+- **Panel size is ONE param.** Width only; height follows a fixed
+  on-screen aspect (`PANEL.aspect` = 4:3 — a device property, config
+  value, never a fader), converted through the pane's pixel aspect so
+  window shape can't distort the display.
+- **Reposition mode: Option+Shift.** While held: the active program
+  swaps to field-only (every quale masked via a DERIVED config —
+  QUALIA untouched, toggles restored exactly on exit), a bright
+  yellow boundary marks the pane, and deltas move it; releasing
+  either key (or window blur) exits. The position param stays in the
+  schema (clamping, state) but is `noUI` — placed by gesture, not
+  fader.
+- **The boundary glow is STEADY, drawn post-mix.** Steady is forced
+  by the ratified no-time-varying-term SAFETY rule — "glowing" must
+  not mean pulsing. Post-mix because it is UI affordance, not world
+  light: it must stay visible over the black dead ring while placing
+  (in field-only view the mask hides the pane's CONTENT in dead
+  regions — honest — so the boundary is the placement guide). Steady
+  additive UI light, no photosensitivity vector, outside ADD_CAP by
+  the same argument as panel light.
+
+## 2026-08-28 — Phase G planned: glance phase scoped and ratified
+
+- **Phase G queue-jumps C and D** (user's call, 2026-08-28): the two
+  backlog features "gaze simulation via Option+mouse" and "glance panel
+  with AR-glasses optics" combine into one phase serving the AR-aid
+  product horizon (00-context). C (fill-in) remains the honesty fix and
+  next in line after G; both G features are additive (new uniforms, one
+  new chunk) and don't conflict with what C/D will touch. Backlog
+  entries promoted out of Inbox.
+- **Panel home: standalone PANEL block, outside presets** (ratified).
+  Quale-shaped `{ enabled, params }` so the generated-panel machinery
+  is reused (FIELD precedent), stitched with `Q_PANEL` and genuinely
+  excludable — unlike FIELD, nothing downstream reads its outputs. UI
+  home is the General tab: it is a device, not a symptom, and must not
+  appear under Adjust Symptoms. Excluded from preset envelopes — a
+  portrait is the condition; the aid is worn over it. Panel renders in
+  the ACTIVE pane only; the reference pane stays the bare condition /
+  unfiltered view, keeping the with-aid vs without A/B honest.
+  Rejected: sixth quale in QUALIA (mislabels a device as a symptom;
+  portraits silently grow device state) and envelope v3 with a `panel`
+  section (grows the preset contract before anything needs it — adding
+  a missing-key-defaults section later is the cheap direction, removing
+  one from files in the wild is the expensive one). Confidence high.
+- **Panel light is scene light: outside ADD_CAP, under the field mask**
+  (ratified). The panel composites into the scene BEFORE the survival
+  mix — structurally forced: addLight applies after the mix, so a
+  panel riding addLight would shine through scotomas, the exact
+  opposite of the phenomenon (blindspots must travel over the panel).
+  Steady light is not a photosensitivity vector, and scene brightness
+  is never clamped (standing doctrine). The SAFETY constraint is made
+  structural instead: **PANEL never gains a time-varying term** — no
+  flicker param, ever; any future pulsing-panel idea must route
+  through addLight and inherit ADD_CAP. Named in the chunk header.
+  Closes the backlog's open ADD_CAP question. Rejected: panel inside
+  ADD_CAP (wrong slot, and couples aid brightness to sparkle/photopsia
+  flaring). Confidence high on the slot `[structural]`; medium on
+  cap-free sufficing — if the gate finds a maxed panel uncomfortably
+  bright, a static luma ceiling on the panel term is one commit.
+- **Below-filter defaults accepted** (user, 2026-08-28): gaze SHARED
+  across panes (one pair of eyes, like the shared clock); release
+  springs back to centre with a short configurable ease (a glance is
+  transient); max-excursion clamp in config (~0.4 screen units); touch
+  gesture is one-finger drag on the canvas; all in a `GAZE` config
+  block — tunable, no toggle (no input = no offset). Each one commit
+  to reverse.
+- **The gaze invariant, named for future symptoms** (from the 2026-08-28
+  deep dive): every quale takes its POSITION from retina-frame values
+  the compositor hands in (`centered`, `sp`, `r`, `ang`, `edge`…) and
+  touches world imagery only via `suv`, never `vUV` — so
+  `centered = cuv − 0.5 − gaze` moves every present and future symptom
+  rigidly. Check: `grep -n vUV shader/*.frag` hits only 00-prelude.
+  The panel deliberately breaks the rule (placed from `cuv`): glasses
+  are head-fixed, damage is eye-fixed — the two frames ARE the
+  phenomenology.
+
 ## 2026-08-28 — GATE Q5 passed; Q5 closed — PHASE Q COMPLETE
 
 - **GATE Q5 passed on the user's by-eye call, desktop and phone

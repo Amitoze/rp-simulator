@@ -1,6 +1,6 @@
 // Panel UI, background sources (camera / local video), and shared state.
 
-import { DEFAULTS, FIELD, QUALIA, REFERENCE_PRESET } from './config.js';
+import { DEFAULTS, FIELD, QUALIA, GAZE, PANEL, REFERENCE_PRESET } from './config.js';
 // cycle-safe: restitch/setReference are top-level function
 // declarations in renderer.js, only called from event handlers anyway
 import { restitch, setReference } from './renderer.js';
@@ -13,6 +13,11 @@ export const state = {
   videoMode: false,   // self-hosted video file as the background
   splitMode: false,   // comparison view (side-by-side / stacked)
   refName: 'reference', // the reference pane's loaded preset, for the note
+  gazeTarget: [0, 0], // where the eye is being pointed (screen fractions
+                      // from centre); written by gaze input, eased and
+                      // consumed by the frame loop — one pair of eyes
+  repositionMode: false, // Option+Shift held: placing the glance panel
+                         // (field-only view + boundary highlight)
 };
 
 export const IS_TOUCH = matchMedia('(pointer: coarse)').matches;
@@ -92,6 +97,15 @@ function applyDefaults() {
 function addFader(parent, label, p, index) {
   const lab = document.createElement('label');
   lab.textContent = label;
+  // optional schema hint → an ⓘ with a CSS tooltip (instant on
+  // hover; the native title on the slider is the fallback)
+  if (p.hint) {
+    const dot = document.createElement('span');
+    dot.className = 'tipdot';
+    dot.textContent = ' ⓘ';
+    dot.dataset.tip = p.hint;
+    lab.append(dot);
+  }
   const s = document.createElement('input');
   s.type = 'range';
   s.min = p.min;
@@ -100,6 +114,7 @@ function addFader(parent, label, p, index) {
   // to a nearby grid point and misreport the schema's true value
   s.step = 'any';
   s.value = index === null ? p.value : p.value[index];
+  if (p.hint) s.title = p.hint; // native-tooltip fallback
   // a drag only writes the schema; the frame loop reads it next frame
   s.addEventListener('input', () => {
     if (index === null) p.value = parseFloat(s.value);
@@ -113,8 +128,9 @@ function addParams(parent, params) {
     // degeneration's UI is the headline General-tab slider — a schema
     // param like any other, but deliberately not duplicated here
     // (DECISIONS 2026-08-20): two live sliders on one value would
-    // leave whichever wasn't dragged showing a stale position
-    if (pname === 'degeneration') continue;
+    // leave whichever wasn't dragged showing a stale position.
+    // noUI params (panel position) have a gesture, not a fader.
+    if (pname === 'degeneration' || p.noUI) continue;
     if (Array.isArray(p.value)) {
       // pair-value → two sliders writing one [a, b] param
       addFader(parent, `${p.label} · a`, p, 0);
@@ -125,6 +141,41 @@ function addParams(parent, params) {
   }
 }
 
+// One generated toggle-row group (label, on/off switch, faders while
+// enabled). Module-level since G3: the Symptoms tab (FIELD + qualia)
+// and the General tab's PANEL group (a device, not a symptom — never
+// under Adjust Symptoms) share it via the parent argument.
+function addGroup(parent, label, entry) {
+  const g = document.createElement('div');
+  g.className = 'group';
+  const row = document.createElement('div');
+  row.className = 'qrow';
+  const name = document.createElement('span');
+  name.textContent = label;
+  const btn = document.createElement('button');
+  btn.className = 'qtoggle' + (entry.enabled ? ' on' : '');
+  btn.setAttribute('aria-label', label);
+  btn.setAttribute('aria-pressed', entry.enabled);
+  row.append(name, btn);
+  g.append(row);
+  // zero-param entries are a toggle row and nothing else
+  let faders = null;
+  if (Object.keys(entry.params).length) {
+    faders = document.createElement('div');
+    addParams(faders, entry.params);
+    faders.hidden = !entry.enabled;
+    g.append(faders);
+  }
+  btn.addEventListener('click', () => {
+    entry.enabled = !entry.enabled;
+    btn.classList.toggle('on', entry.enabled);
+    btn.setAttribute('aria-pressed', entry.enabled);
+    if (faders) faders.hidden = !entry.enabled;
+    restitch(QUALIA, FIELD, PANEL);
+  });
+  parent.append(g);
+}
+
 // Exported for presets.js: a preset load rewrites the schema, and
 // regenerating the whole section from it is the sync — no per-slider
 // bookkeeping. Idempotent: clears before building, so every caller
@@ -132,43 +183,18 @@ function addParams(parent, params) {
 export function buildAdvanced() {
   const body = document.getElementById('advBody');
   body.replaceChildren();
-
-  // one toggle-row group; FIELD and the qualia share the shape since
-  // FIELD went quale-shaped (Q5, DECISIONS 2026-08-28)
-  const addGroup = (label, entry) => {
-    const g = document.createElement('div');
-    g.className = 'group';
-    const row = document.createElement('div');
-    row.className = 'qrow';
-    const name = document.createElement('span');
-    name.textContent = label;
-    const btn = document.createElement('button');
-    btn.className = 'qtoggle' + (entry.enabled ? ' on' : '');
-    btn.setAttribute('aria-label', label);
-    btn.setAttribute('aria-pressed', entry.enabled);
-    row.append(name, btn);
-    g.append(row);
-    // zero-param entries are a toggle row and nothing else
-    let faders = null;
-    if (Object.keys(entry.params).length) {
-      faders = document.createElement('div');
-      addParams(faders, entry.params);
-      faders.hidden = !entry.enabled;
-      g.append(faders);
-    }
-    btn.addEventListener('click', () => {
-      entry.enabled = !entry.enabled;
-      btn.classList.toggle('on', entry.enabled);
-      btn.setAttribute('aria-pressed', entry.enabled);
-      if (faders) faders.hidden = !entry.enabled;
-      restitch(QUALIA, FIELD);
-    });
-    body.append(g);
-  };
-
-  addGroup('Visual field', FIELD); // listed first, as before
+  addGroup(body, 'Visual field', FIELD); // listed first, as before
   for (const [qname, quale] of Object.entries(QUALIA))
-    addGroup(qname[0].toUpperCase() + qname.slice(1), quale);
+    addGroup(body, qname[0].toUpperCase() + qname.slice(1), quale);
+}
+
+// The aid's group on the General tab. Built once at init — presets
+// never touch the panel (outside the envelope, DECISIONS 2026-08-28),
+// so unlike buildAdvanced it never needs a rebuild.
+function buildPanelGroup() {
+  const holder = document.getElementById('panelGroup');
+  holder.replaceChildren();
+  addGroup(holder, 'Glance panel (AR aid)', PANEL);
 }
 
 // --- preset dropdown -------------------------------------------------
@@ -278,7 +304,118 @@ async function initPresets() {
   });
 }
 
+// --- gaze + panel reposition (Phase G) -------------------------------
+// RELATIVE input (user spec 2026-08-28): only mouse MOVEMENT while the
+// modifier is held steers — the pointer's absolute position is never
+// read, so engaging Option cannot yank the eye toward wherever the
+// pointer happens to sit. Option = steer the gaze (length-clamped,
+// springs back on release). Option+Shift = reposition the glance
+// panel: the active program swaps to field-only (every quale masked
+// off, panel kept) so pane and field are all that shows while
+// placing, the boundary highlight lights up, and deltas write the
+// panel's position; releasing either key restores the live schema.
+function initGaze() {
+  const release = () => {
+    if (GAZE.springBack) state.gazeTarget = [0, 0];
+  };
+
+  // While Option is held the canvas takes POINTER LOCK: the OS cursor
+  // (which would pin at the screen edge and stop reporting movement)
+  // disappears, and raw mouse deltas keep flowing at any excursion —
+  // the screen boundary is ignored for every modifier gesture (user
+  // spec 2026-08-28). Lock is released with the key; Esc also breaks
+  // it (browser built-in), which merely degrades to bounded deltas.
+  const lockPointer = () => {
+    if (!document.pointerLockElement)
+      document.getElementById('gl').requestPointerLock()?.catch?.(() => {});
+  };
+  const unlockPointer = () => {
+    if (document.pointerLockElement) document.exitPointerLock();
+  };
+
+  // While repositioning, holding the mouse button switches the drag
+  // to RESIZE: left = bigger, right = smaller (one width param, so
+  // the ratio keeps itself); releasing the button resumes placing.
+  // The scroll wheel drives the panel's zoom in the same mode.
+  let resizing = false;
+
+  // masked view for reposition mode — derived, never mutating QUALIA:
+  // the user's toggles come back untouched on exit
+  const maskedQualia = () => Object.fromEntries(Object.entries(QUALIA)
+    .map(([qname, quale]) => [qname, { ...quale, enabled: false }]));
+  const setReposition = on => {
+    if (state.repositionMode === on) return;
+    state.repositionMode = on;
+    if (!on) {
+      resizing = false;
+      // a gesture resize wrote the schema behind the size fader's
+      // back — regenerate the group so the slider shows the truth
+      buildPanelGroup();
+    }
+    restitch(on ? maskedQualia() : QUALIA, FIELD, PANEL);
+  };
+  const syncMode = e =>
+    setReposition(e.altKey && e.shiftKey && PANEL.enabled);
+
+  addEventListener('keydown', e => {
+    syncMode(e);
+    if (e.altKey) lockPointer(); // a keydown is gesture enough to lock
+  });
+  addEventListener('keyup', e => {
+    syncMode(e);
+    if (e.key === 'Alt') { release(); unlockPointer(); }
+  });
+  // Cmd-Tab must not strand the eye, the mode, or the lock
+  addEventListener('blur', () => { setReposition(false); release(); unlockPointer(); });
+
+  addEventListener('mousedown', () => { if (state.repositionMode) resizing = true; });
+  addEventListener('mouseup', () => { resizing = false; });
+
+  // wheel = panel zoom while repositioning (scroll up = zoom in);
+  // passive:false so preventDefault can stop the browser's own
+  // pinch-zoom/scroll handling of the gesture
+  addEventListener('wheel', e => {
+    if (!state.repositionMode) return;
+    e.preventDefault();
+    // Shift is held in this mode, and macOS remaps a shifted wheel's
+    // vertical delta onto deltaX — read whichever axis carries it
+    const d = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+    const z = PANEL.params.zoom;
+    z.value = Math.min(z.max, Math.max(z.min,
+      z.value - d * GAZE.wheelZoom));
+  }, { passive: false });
+
+  addEventListener('mousemove', e => {
+    // moving without Option is not a release: the glance holds until
+    // the key lifts
+    if (!e.altKey) return;
+    syncMode(e); // catches Shift changing between key events
+    const dx = e.movementX / innerWidth * GAZE.speed;
+    const dy = -e.movementY / innerHeight * GAZE.speed; // GL y up
+    if (state.repositionMode) {
+      // button held = resize (drag LEFT = bigger — user correction
+      // 2026-08-28 inverting the first spec); otherwise place
+      const p = resizing ? PANEL.params.size : PANEL.params.position;
+      if (resizing) {
+        p.value = Math.min(p.max, Math.max(p.min, p.value - dx));
+      } else {
+        p.value[0] = Math.min(p.max, Math.max(p.min, p.value[0] + dx));
+        p.value[1] = Math.min(p.max, Math.max(p.min, p.value[1] + dy));
+      }
+    } else {
+      const t = [state.gazeTarget[0] + dx, state.gazeTarget[1] + dy];
+      const len = Math.hypot(t[0], t[1]);
+      if (len > GAZE.maxExcursion) {
+        t[0] *= GAZE.maxExcursion / len;
+        t[1] *= GAZE.maxExcursion / len;
+      }
+      state.gazeTarget = t;
+    }
+  });
+}
+
 export function initControls() {
+  initGaze();
   bindToggle('bgCam', 'bgVid', v => {
     state.videoMode = v;
     // play/pause happens inside the click handler = a user gesture,
@@ -294,14 +431,18 @@ export function initControls() {
     refRow.hidden = !v;
   });
 
-  // menu tabs (user spec 2026-08-28, revised): General | Symptom —
-  // display-only: flipping panes touches no state, never restitches
-  const genPane = document.getElementById('tabGeneral');
-  const symPane = document.getElementById('adv');
-  bindToggle('tabGen', 'tabSym', sym => {
-    genPane.hidden = sym;
-    symPane.hidden = !sym;
-  });
+  // menu tabs (user spec 2026-08-28, re-revised in G3): General |
+  // Symptoms | AR aid — the aid is a device and gets its own home.
+  // Display-only: flipping panes touches no state, never restitches
+  const tabs = [['tabGen', 'tabGeneral'], ['tabSym', 'adv'], ['tabAid', 'aid']];
+  for (const [btnId, paneId] of tabs) {
+    document.getElementById(btnId).addEventListener('click', () => {
+      for (const [b, p] of tabs) {
+        document.getElementById(b).classList.toggle('on', b === btnId);
+        document.getElementById(p).hidden = p !== paneId;
+      }
+    });
+  }
 
   document.getElementById('panelHead').addEventListener('click', () => {
     const panel = document.getElementById('panel');
@@ -319,6 +460,7 @@ export function initControls() {
 
   applyDefaults();
   buildAdvanced();
+  buildPanelGroup();
   initPresets(); // async: options appear when the manifest arrives
 
   document.getElementById('camFlip').addEventListener('click', () => {
