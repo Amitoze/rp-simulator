@@ -3,6 +3,47 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-28 — Q5 scope pre-ratified: field joins the toggles and the presets
+
+Three user ratifications ahead of Q5 phase-plan (given directly, not
+via options tables; phase-plan folds them in as constraints rather
+than re-contesting):
+
+- **FIELD becomes toggleable, same as other symptoms** (user's call —
+  REVERSES "tier 1 is not removable", 2026-08-18, reaffirmed
+  2026-08-20/24). Claude recommended against: the phenomenological
+  argument (where vision survives is not an experience one can switch
+  off) plus the fact that a fully-surviving field VALUE set already
+  yields unfiltered output without a toggle. User ratified the toggle
+  anyway — a direct on/off is the UX they want; the sim is a
+  communication tool and "switch the field loss off" is a natural
+  viewer action. Implementation constraint carried into the plan:
+  10-field can NOT be stitch-excluded like quale chunks — its outputs
+  (survival, edge, oEdge, central, outer) feed photopsia weighting,
+  sparkle band placement, and transition bands. Field-off must force
+  full survival AND park the edge beyond the screen corner, or
+  edge-riding qualia would draw their bands over surviving vision.
+- **FIELD values enter presets** (REVERSES the FIELD-outside-presets
+  exclusion, 2026-08-19/20/28). Reasons ratified: a portrait includes
+  its geometry (two people's donuts differ as much as their smoke),
+  and Q5's frozen reference pane structurally requires per-pane field
+  — with a shared live FIELD, dragging a field fader would silently
+  reshape the reference pane and break honest A/B. Envelope gains a
+  top-level `field` section; old presets fill field from defaults
+  (same can't-pin-what-didn't-exist semantics as the new-qualia rule;
+  re-save to pin geometry).
+- **Degeneration slider position enters presets too** (user's call on
+  the open sub-question): "the peripheral filter on the General tab
+  is saved as part of presets". A portrait's current state includes
+  where it sits on the mild→late blend. It remains the headline
+  interactive slider; loading a preset sets it, playing with it
+  diverges from the loaded preset (consistent with the no-dirty-
+  tracking stance).
+- Consequence for the none preset: `none.json` gains field-off (or
+  fully-surviving field values) — THIS is what makes "none" the
+  unfiltered view, dissolving the 2026-08-28 none-≠-unfiltered ⚠
+  with no compositor change; Phase C's fill-in remains unborrowed.
+
 ## 2026-08-28 — GATE Q4 passed; Q4 closed
 
 - **GATE Q4 passed on the user's by-eye call, desktop and phone

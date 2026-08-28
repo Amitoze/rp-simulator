@@ -126,7 +126,19 @@ correctness bug for portraits. Plan of record:
 
 ## Q5. Per-pane configs (`renderer.js`, `controls.js`)
 
+*Scope extended 2026-08-28 (user-ratified, DECISIONS "Q5 scope
+pre-ratified"): field joins the toggles and the presets.*
+
 ```
+[ ] FIELD becomes toggleable like other symptoms (user's call,
+    reverses tier-1-not-removable): toggle off = full survival AND
+    edge parked beyond the screen corner (10-field is never
+    stitch-excluded — its outputs feed photopsia/sparkle/transition)
+[ ] FIELD values + degeneration slider position enter presets:
+    envelope gains top-level `field` + `degeneration`; old presets
+    fill both from defaults (re-save to pin)
+[ ] none.json gains field-off → "none" IS the unfiltered view;
+    the 2026-08-28 ⚠ below dissolves without touching the compositor
 [ ] Pane = (screen region, preset, compiled program); immersive = one
     pane, comparison = two
 [ ] Two draw calls per frame, scissor/viewport clipping — NOT doubled
