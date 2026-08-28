@@ -97,7 +97,8 @@ function makeProgram(sources, qualia, field, panel) {
                       'uOuterEdge', 'uOuterCover', 'uIslandSeed',
                       'uSparkleFlicker', 'uSparkleBandIn', 'uSparkleBandOut',
                       'uGaze', 'uPanelPos', 'uPanelW', 'uPanelAspect',
-                      'uPanelZoom', 'uPanelHi']) {
+                      'uPanelZoom', 'uPanelGain', 'uPanelOpaque',
+                      'uPanelHi', 'uPanelSee']) {
     U[name] = gl.getUniformLocation(prog, name);
   }
   return { prog, U };
@@ -158,8 +159,17 @@ function applyPanel(U, panel) {
   gl.uniform1f(U.uPanelW, p.size.value);
   gl.uniform1f(U.uPanelAspect, panel.aspect);
   gl.uniform1f(U.uPanelZoom, p.zoom.value);
-  // boundary highlight rides reposition mode (Option+Shift held)
+  // the display replicates the source feed's brightness and never
+  // exceeds it: gain = min(1, 1/ambient) — low ambient is not a
+  // boost, only high ambient washes out (schema min keeps the
+  // divisor alive); transparency inverts into a replace-mix, floored
+  // by minOpacity so full transparency stays a faint ghost, never gone
+  gl.uniform1f(U.uPanelGain, Math.min(1, 1 / p.ambient.value));
+  gl.uniform1f(U.uPanelOpaque,
+    1 - p.transparency.value * (1 - panel.minOpacity));
+  // boundary highlight + mask see-through ride reposition mode
   gl.uniform1f(U.uPanelHi, state.repositionMode ? 1 : 0);
+  gl.uniform1f(U.uPanelSee, panel.repositionSeeThru);
 }
 
 // Field geometry from config: degrees → screen units (edge ≈ 90°, so

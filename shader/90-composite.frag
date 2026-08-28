@@ -112,11 +112,14 @@ void main() {
   addLight *= ADD_CAP / max(addLuma, ADD_CAP);
   col += addLight;
 
-  // reposition mode (Option+Shift): steady yellow boundary around the
-  // panel — a UI affordance, drawn over the mix so it stays visible in
-  // the dead ring while placing. Steady light only (the panel chunk's
-  // no-flicker SAFETY rule extends here); zero unless uPanelHi is set.
+  // reposition mode (Option+Shift), both UI affordances drawn over
+  // the mix, active only while uPanelHi is set. First the field mask
+  // goes uPanelSee transparent — blending back toward the raw scene
+  // (panel included) so the moving panel stays visible through the
+  // dead ring — then the steady yellow boundary. Steady light only
+  // (the panel chunk's no-flicker SAFETY rule extends here).
 #ifdef Q_PANEL
+  col = mix(col, scene, uPanelHi * uPanelSee);
   col = mix(col, vec3(1.0, 0.85, 0.2), panelBorder(cuv) * uPanelHi);
 #endif
 

@@ -82,7 +82,7 @@ filters; devices are worn over the condition, never part of it.
 │  PANEL block: the aid — quale-shaped but a  │
 │    DEVICE, not a symptom; OUTSIDE presets;  │
 │    single fixed-aspect size, noUI position  │
-│    🟧 (G3 done by eye; optics params = G4)  │
+│    🟧 (G3 + G4 done by eye)                 │
 └────────┬────────────────────────────────────┘
          │ enabled-flags + param values (clamped; live-edited from Q3)
          ▼
@@ -119,9 +119,10 @@ filters; devices are worn over the condition, never part of it.
 │  15-glance-panel: head-fixed aid display,   │
 │    scene slot BEFORE the survival mix,      │
 │    steady light only — never a time-varying │
-│    term — outside ADD_CAP 🟧 (G3 ideal mode │
-│    + reposition boundary done by eye;       │
-│    glasses optics = G4)                     │
+│    term — outside ADD_CAP 🟧 (G3 + G4 done  │
+│    by eye: ideal + additive optics, gain =  │
+│    min(1, 1/ambient), reposition ergonomics;│
+│    G5 glance-moment gate pending)           │
 │  90-composite: fixed slots 🟩               │
 │    addLight accumulator + global SAFETY     │
 │    brightness clamp 🟩 (Q2, ADD_CAP = 0.65  │

@@ -8,8 +8,6 @@
 // SAFETY (structural, DECISIONS 2026-08-28): NO time-varying term may
 // ever enter this chunk — steady light only. A pulsing or flashing
 // panel feature must route through addLight and inherit ADD_CAP.
-// G3: ideal-display mode only (opaque replace); the glasses optics
-// (additive light, gain = display / ambient) land in G4.
 
 // One width knob; height follows from the fixed on-screen aspect
 // ratio, converted through the pane's pixel aspect so the panel's
@@ -26,7 +24,15 @@ vec3 panelQuale(vec3 scene, vec2 cuv) {
   // zoomed crop about the feed's centre; getScene owns the flip and
   // mirror, so the panel shows exactly what the main view shows
   vec2 panelUV = 0.5 + (local - 0.5) / uPanelZoom;
-  return getScene(panelUV);
+  vec3 feed = getScene(panelUV);
+  // optical see-through (G4): the display ADDS light over the world —
+  // black is transparent, dim feed pixels vanish. The display has no
+  // brightness of its own: it replicates the source feed, so the
+  // wash-out ratio is 1 / ambient — relatively glowing in the dark,
+  // fading in daylight. uPanelOpaque blends toward the opaque
+  // display; the JS floors it at minOpacity so full transparency
+  // keeps a faint ghost (never invisible).
+  return mix(scene + feed * uPanelGain, feed, uPanelOpaque);
 }
 
 // Reposition-mode boundary: a STEADY yellow glow along the rect's

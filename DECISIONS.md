@@ -3,6 +3,54 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-28 — G4 revised mid-step: source-brightness display, transparency knob (user spec)
+
+- **The display has no brightness knob** — it replicates the source
+  feed's brightness, so the wash-out ratio collapses to `1 / ambient`
+  (ambient re-ranged 0.2–2, default 1 = panel light at exactly source
+  strength). One optics slider instead of two.
+- **…and never exceeds source brightness** (second correction, same
+  session: "when I set it really low it gets very bright, this seems
+  wrong"). `gain = min(1, 1/ambient)` — low ambient is not a boost;
+  only high ambient washes out. Relative night-glow comes from the
+  scene itself being dark, not from amplifying the panel.
+- **`GAZE.sensitivity` became `GAZE.speed`, doubled to 2** (user,
+  same session): one knob for how quickly mouse movement drives both
+  modifier gestures — Option gaze and Option+Shift reposition (it
+  scales the shared deltas, so both inherit it by construction). The
+  200 ms gaze ease is a separate feel and was left untouched.
+- **Click-drag resize inside reposition mode** (user spec): while
+  Option+Shift is held, holding the mouse button turns the drag into
+  a resize — LEFT grows, right shrinks (direction inverted by user
+  correction the same session); the single width param keeps the
+  ratio by construction. On exiting reposition the panel group
+  regenerates so the size fader shows what the gesture wrote
+  (verified pre-inversion: +150px drag → 0.22 → 0.5267, exactly
+  150/978 × speed 2 `[measured]`).
+- **Reposition view refinements** (user spec, same session): the
+  field mask fades to `PANEL.repositionSeeThru` (0.5) while placing —
+  drawn post-mix like the border, so the moving panel stays visible
+  through the dead ring; the scroll wheel drives panel zoom
+  (`GAZE.wheelZoom` per delta unit, scroll up = in); the zoom fader
+  gained its own hover hint.
+- **Pointer lock while Option is held** (user spec: "the screen
+  boundary should be ignored"). Without lock the OS cursor pins at
+  the screen edge and movement events stop; the canvas takes pointer
+  lock on Alt keydown and releases it with the key (Esc also breaks
+  it — degrades to bounded deltas, nothing worse). The earlier
+  delta-only rewrite is what makes lock a drop-in.
+- **Discoverability**: the size fader carries a hover ⓘ (schema
+  params gained an optional `hint` the generator renders), and the
+  AR aid tab gained a short "Moving the panel" help section.
+- **"Ideal display" became "Display transparency", inverted** — 1 =
+  maximum see-through, 0 = opaque display; default 1 (glasses
+  realism). At full transparency the panel must not vanish: a
+  presence floor `PANEL.minOpacity` (0.12 → halved to 0.06 on user
+  correction "max should be twice as transparent"; a device property
+  beside `aspect` — config, never a fader) keeps a faint ghost of
+  the rect even over a dark feed. The shader mix is untouched; all
+  changes live in the schema and the JS uniform computation.
+
 ## 2026-08-28 — G3 revised mid-step: relative input, AR-aid tab, reposition mode (user spec)
 
 Five user corrections at the G3 review, folded into the step before

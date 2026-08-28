@@ -27,7 +27,11 @@ uniform vec2 uPanelPos;     // glance panel centre (screen fractions, y up)
 uniform float uPanelW;      // glance panel width (screen fractions)
 uniform float uPanelAspect; // panel's fixed on-screen width : height ratio
 uniform float uPanelZoom;   // glance panel magnification of the feed centre
+uniform float uPanelGain;   // panel light per feed unit: 1 / ambient
+uniform float uPanelOpaque; // replace-mix: minOpacity floor .. 1 = opaque display
 uniform float uPanelHi;     // 1 = reposition mode: draw the boundary highlight
+uniform float uPanelSee;    // reposition mode: how transparent the field mask
+                            // goes so the moving panel stays visible
 
 // -- small value-noise helpers ------------------------------------
 float hash(vec2 p) {

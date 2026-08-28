@@ -97,6 +97,17 @@ canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
 #adv, #aid { margin-top: 4px; }
 .gen .group { margin-bottom: 6px; }
 #panel .ghead { margin: 10px 0 0; font-weight: 600; color: #8f97a5; }
+#panel .hint { margin: 6px 0 0; font-size: 12px; line-height: 1.45; color: #8f97a5; }
+/* ⓘ hover tooltip on generated faders (schema `hint`) */
+#panel .tipdot { cursor: help; position: relative; }
+#panel .tipdot:hover::after {
+  content: attr(data-tip);
+  position: absolute; left: 0; bottom: 130%;
+  width: 210px; padding: 6px 8px;
+  background: #14171c; border: 1px solid #2a2f38; border-radius: 6px;
+  font-size: 11px; font-weight: 400; line-height: 1.4; color: #cfd6e2;
+  z-index: 10; pointer-events: none;
+}
 /* quale row: name left, switch right */
 .gen .qrow {
   display: flex; justify-content: space-between; align-items: center;

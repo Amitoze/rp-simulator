@@ -97,6 +97,15 @@ function applyDefaults() {
 function addFader(parent, label, p, index) {
   const lab = document.createElement('label');
   lab.textContent = label;
+  // optional schema hint → an ⓘ with a CSS tooltip (instant on
+  // hover; the native title on the slider is the fallback)
+  if (p.hint) {
+    const dot = document.createElement('span');
+    dot.className = 'tipdot';
+    dot.textContent = ' ⓘ';
+    dot.dataset.tip = p.hint;
+    lab.append(dot);
+  }
   const s = document.createElement('input');
   s.type = 'range';
   s.min = p.min;
@@ -105,6 +114,7 @@ function addFader(parent, label, p, index) {
   // to a nearby grid point and misreport the schema's true value
   s.step = 'any';
   s.value = index === null ? p.value : p.value[index];
+  if (p.hint) s.title = p.hint; // native-tooltip fallback
   // a drag only writes the schema; the frame loop reads it next frame
   s.addEventListener('input', () => {
     if (index === null) p.value = parseFloat(s.value);
@@ -309,6 +319,26 @@ function initGaze() {
     if (GAZE.springBack) state.gazeTarget = [0, 0];
   };
 
+  // While Option is held the canvas takes POINTER LOCK: the OS cursor
+  // (which would pin at the screen edge and stop reporting movement)
+  // disappears, and raw mouse deltas keep flowing at any excursion —
+  // the screen boundary is ignored for every modifier gesture (user
+  // spec 2026-08-28). Lock is released with the key; Esc also breaks
+  // it (browser built-in), which merely degrades to bounded deltas.
+  const lockPointer = () => {
+    if (!document.pointerLockElement)
+      document.getElementById('gl').requestPointerLock()?.catch?.(() => {});
+  };
+  const unlockPointer = () => {
+    if (document.pointerLockElement) document.exitPointerLock();
+  };
+
+  // While repositioning, holding the mouse button switches the drag
+  // to RESIZE: left = bigger, right = smaller (one width param, so
+  // the ratio keeps itself); releasing the button resumes placing.
+  // The scroll wheel drives the panel's zoom in the same mode.
+  let resizing = false;
+
   // masked view for reposition mode — derived, never mutating QUALIA:
   // the user's toggles come back untouched on exit
   const maskedQualia = () => Object.fromEntries(Object.entries(QUALIA)
@@ -316,30 +346,62 @@ function initGaze() {
   const setReposition = on => {
     if (state.repositionMode === on) return;
     state.repositionMode = on;
+    if (!on) {
+      resizing = false;
+      // a gesture resize wrote the schema behind the size fader's
+      // back — regenerate the group so the slider shows the truth
+      buildPanelGroup();
+    }
     restitch(on ? maskedQualia() : QUALIA, FIELD, PANEL);
   };
   const syncMode = e =>
     setReposition(e.altKey && e.shiftKey && PANEL.enabled);
 
-  addEventListener('keydown', syncMode);
+  addEventListener('keydown', e => {
+    syncMode(e);
+    if (e.altKey) lockPointer(); // a keydown is gesture enough to lock
+  });
   addEventListener('keyup', e => {
     syncMode(e);
-    if (e.key === 'Alt') release();
+    if (e.key === 'Alt') { release(); unlockPointer(); }
   });
-  // Cmd-Tab must not strand the eye or the mode
-  addEventListener('blur', () => { setReposition(false); release(); });
+  // Cmd-Tab must not strand the eye, the mode, or the lock
+  addEventListener('blur', () => { setReposition(false); release(); unlockPointer(); });
+
+  addEventListener('mousedown', () => { if (state.repositionMode) resizing = true; });
+  addEventListener('mouseup', () => { resizing = false; });
+
+  // wheel = panel zoom while repositioning (scroll up = zoom in);
+  // passive:false so preventDefault can stop the browser's own
+  // pinch-zoom/scroll handling of the gesture
+  addEventListener('wheel', e => {
+    if (!state.repositionMode) return;
+    e.preventDefault();
+    // Shift is held in this mode, and macOS remaps a shifted wheel's
+    // vertical delta onto deltaX — read whichever axis carries it
+    const d = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+    const z = PANEL.params.zoom;
+    z.value = Math.min(z.max, Math.max(z.min,
+      z.value - d * GAZE.wheelZoom));
+  }, { passive: false });
 
   addEventListener('mousemove', e => {
     // moving without Option is not a release: the glance holds until
     // the key lifts
     if (!e.altKey) return;
     syncMode(e); // catches Shift changing between key events
-    const dx = e.movementX / innerWidth * GAZE.sensitivity;
-    const dy = -e.movementY / innerHeight * GAZE.sensitivity; // GL y up
+    const dx = e.movementX / innerWidth * GAZE.speed;
+    const dy = -e.movementY / innerHeight * GAZE.speed; // GL y up
     if (state.repositionMode) {
-      const p = PANEL.params.position;
-      p.value[0] = Math.min(p.max, Math.max(p.min, p.value[0] + dx));
-      p.value[1] = Math.min(p.max, Math.max(p.min, p.value[1] + dy));
+      // button held = resize (drag LEFT = bigger — user correction
+      // 2026-08-28 inverting the first spec); otherwise place
+      const p = resizing ? PANEL.params.size : PANEL.params.position;
+      if (resizing) {
+        p.value = Math.min(p.max, Math.max(p.min, p.value - dx));
+      } else {
+        p.value[0] = Math.min(p.max, Math.max(p.min, p.value[0] + dx));
+        p.value[1] = Math.min(p.max, Math.max(p.min, p.value[1] + dy));
+      }
     } else {
       const t = [state.gazeTarget[0] + dx, state.gazeTarget[1] + dy];
       const len = Math.hypot(t[0], t[1]);

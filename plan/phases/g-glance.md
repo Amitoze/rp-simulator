@@ -148,18 +148,31 @@ in every step that touches it.
   boundary glows, mouse movement places the pane, release restores
   symptoms and keeps the position; toggle off → gone; side-by-side →
   the reference pane never shows the panel.
-- [ ] **4 · Glasses optics.** Additive compositing:
-  `lit = mix(scene + feed × gain, feed, opaqueness)` with
-  `gain = displayBrightness ÷ ambient`; `ambient` slider (schema
-  min > 0) and `opaqueness` slider (0 = glasses, 1 = ideal — step 3's
-  look). SAFETY named in the chunk header: **no time-varying term in
-  this chunk, ever** — a pulsing panel must route through addLight
-  and inherit ADD_CAP (DECISIONS 2026-08-28).
+- [x] **4 · Glasses optics.** ✅ user by-eye pass 2026-08-28, heavily
+  amended in flight (all user-specced, DECISIONS "G4 revised"):
+  source-brightness display capped at gain 1, transparency knob with
+  0.06 ghost floor, GAZE.speed 2, pointer lock kills the screen
+  boundary, click-drag resize (left grows) + wheel zoom + half-
+  transparent field in reposition mode, ⓘ CSS tooltips + help
+  section. Measured en route: resize/zoom gestures exact to
+  arithmetic; shift-remapped wheel deltaX handled. Additive
+  compositing:
+  `lit = mix(scene + feed × gain, feed, opaque)`. AMENDED mid-step
+  (user spec, DECISIONS 2026-08-28 "G4 revised"): the display
+  replicates SOURCE brightness and never exceeds it — no brightness
+  knob, `gain = min(1, 1 ÷ ambient)` (slider 0.2–2, default 1; low
+  ambient is not a boost, only high ambient washes out); "Display
+  transparency" slider (1 = max see-through, 0 = opaque display),
+  floored by `PANEL.minOpacity` (0.06) so full transparency keeps a
+  faint ghost.
+  SAFETY named in the chunk header: **no time-varying term in this
+  chunk, ever** — a pulsing panel must route through addLight and
+  inherit ADD_CAP (DECISIONS 2026-08-28).
   **Check (user, by eye, desktop):** at low ambient the panel glows
-  and dark feed pixels vanish (black is transparent); raising ambient
-  washes the panel out; opaqueness at 1 reproduces step 3 exactly;
-  point the panel crop at a dark scene region → nothing visible
-  (additive honesty).
+  relative to the world; raising ambient washes it out; transparency
+  at 1 shows the world through the panel with a faint ghost even
+  over a dark feed (never fully gone); transparency at 0 reproduces
+  step 3's opaque inset exactly.
 - [ ] **5 · The glance moment + SAFETY re-verify.** No new machinery —
   integration verification of gaze × panel: code check that
   15-glance-panel contains no `uGaze` (head-fixed by construction),

@@ -28,11 +28,17 @@ export const GAZE = {
   // (applies to both the follow and the spring back)
   easeMs: 200,
 
-  // how far the eye travels per unit of mouse travel (screen fractions
-  // of gaze per screen fraction of pointer movement). Input is RELATIVE
-  // — only movement steers, never the pointer's absolute position
-  // (user spec 2026-08-28)
-  sensitivity: 1,
+  // zoom change per wheel-delta unit while repositioning the panel
+  // (scroll up = zoom in; one notch ≈ 100 units ≈ 0.2 zoom)
+  wheelZoom: 0.002,
+
+  // how quickly movements react to the mouse: screen fractions
+  // travelled per screen fraction of pointer movement. Covers BOTH
+  // modifier gestures — Option (gaze) and Option+Shift (panel
+  // reposition). Input is RELATIVE — only movement steers, never the
+  // pointer's absolute position (user spec 2026-08-28; doubled from
+  // 1 same day)
+  speed: 2,
 };
 
 // Geometry of the visual field. Quale-shaped ({ enabled, params })
@@ -89,6 +95,18 @@ export const PANEL = {
   // never a fader
   aspect: 4 / 3,
 
+  // while repositioning, the field mask goes this transparent so the
+  // moving panel stays visible through the dead ring (0 = mask fully
+  // opaque, 1 = mask gone). A placement-view affordance, config only.
+  repositionSeeThru: 0.5,
+
+  // presence floor: at full Display transparency the panel keeps this
+  // much replace-mix, so it reads as a faint ghost rather than
+  // vanishing outright (user spec 2026-08-28: "don't make it
+  // invisible"; halved same day — max should be twice as transparent).
+  // A device property like aspect — tunable here only.
+  minOpacity: 0.06,
+
   params: {
     // centre of the panel in screen fractions (0..1, y up) — default
     // upper right, where a glance naturally lands. noUI: placed by
@@ -96,11 +114,26 @@ export const PANEL = {
     position: { value: [0.72, 0.72], min: 0, max: 1, noUI: true, label: 'Panel position' },
 
     // width of the panel, screen fractions — height follows from the
-    // fixed aspect above
-    size: { value: 0.22, min: 0.05, max: 0.6, label: 'Panel size' },
+    // fixed aspect above. hint renders as a hover ⓘ next to the fader
+    size: { value: 0.22, min: 0.05, max: 0.6, label: 'Panel size',
+            hint: 'Mouse resize: hold Option+Shift, then click and drag — left grows, right shrinks' },
 
     // how much the panel magnifies the centre of the feed
-    zoom: { value: 2, min: 1, max: 6, label: 'Panel zoom' },
+    zoom: { value: 2, min: 1, max: 6, label: 'Panel zoom',
+            hint: 'While holding Option+Shift, scroll to zoom the panel in and out' },
+
+    // ambient light estimate — the display replicates the SOURCE
+    // feed's brightness (no brightness knob of its own, user spec
+    // 2026-08-28), and can never EXCEED it (second user correction,
+    // same day: low ambient must not boost). gain = min(1, 1/ambient):
+    // at or below 1 the panel adds the feed at source strength,
+    // above 1 daylight washes it out. min stays above zero: this
+    // value divides, and the schema clamp is the guard
+    ambient: { value: 1, min: 0.2, max: 2, label: 'Ambient light' },
+
+    // 1 = maximum see-through (additive optics, floored by minOpacity
+    // above so the panel never quite vanishes) … 0 = opaque display
+    transparency: { value: 1, min: 0, max: 1, label: 'Display transparency' },
   },
 };
 
