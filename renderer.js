@@ -3,6 +3,14 @@
 import { state, video, fileVideo, sliders, initControls, IS_TOUCH } from './controls.js';
 import { FIELD, QUALIA } from './config.js';
 
+// preset engine (Q4): imported for its side effect — capturing the
+// pristine BASELINE at page load. Static imports are hoisted (the
+// browser loads and runs an imported module before the importer's own
+// code, wherever the import statement sits in the file), so this line
+// works from down here; controls.js takes over this import when the
+// preset UI lands in the next phase step.
+import './presets.js';
+
 const canvas = document.getElementById('gl');
 const gl = canvas.getContext('webgl');
 

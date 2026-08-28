@@ -95,7 +95,7 @@ files carry values only; degeneration is tier 1 and not in presets.
 
 ## Steps
 
-- [ ] 1. `config.js` + new `presets.js` — the engine, no UI. config.js
+- [x] 1. `config.js` + new `presets.js` — the engine, no UI. config.js
       exports `clampParams` (it already exists; export is the only
       change). presets.js: `BASELINE` deep-snapshot captured at import;
       `snapshot()` → plain `{ <quale>: { enabled, params } }` object;

@@ -110,7 +110,7 @@ export const QUALIA = {
 // at load, in place — a hand-edited (or, later, preset-supplied) value
 // outside [min, max] can never reach a uniform. FIELD and every
 // quale's params share the param shape, so one clamp covers all.
-function clampParams(owner, params) {
+export function clampParams(owner, params) {
   for (const [pname, p] of Object.entries(params)) {
     const vals = Array.isArray(p.value) ? p.value : [p.value];
     const clamped = vals.map(v => Math.min(p.max, Math.max(p.min, v)));
