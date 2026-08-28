@@ -1,7 +1,7 @@
 // WebGL setup and the per-frame render loop.
 
 import { state, video, fileVideo, initControls, IS_TOUCH } from './controls.js';
-import { FIELD, QUALIA, REFERENCE_PRESET } from './config.js';
+import { FIELD, QUALIA, GAZE, REFERENCE_PRESET } from './config.js';
 // cycle-safe: materialise is a hoisted function declaration in
 // presets.js, first called long after every module has evaluated
 import { materialise } from './presets.js';
@@ -90,7 +90,8 @@ function makeProgram(sources, qualia, field) {
                       'uNetDensity', 'uSeeThru', 'uFit', 'uAspect',
                       'uNetScale', 'uNetWarp', 'uNetFlicker',
                       'uOuterEdge', 'uOuterCover', 'uIslandSeed',
-                      'uSparkleFlicker', 'uSparkleBandIn', 'uSparkleBandOut']) {
+                      'uSparkleFlicker', 'uSparkleBandIn', 'uSparkleBandOut',
+                      'uGaze']) {
     U[name] = gl.getUniformLocation(prog, name);
   }
   return { prog, U };
@@ -199,6 +200,14 @@ async function main() {
 
   const t0 = performance.now();
 
+  // The eye's current direction, eased toward the input's target each
+  // frame (gaze, Phase G). Frame-rate independent: the exponential
+  // step uses real dt, so the saccade-ish snap feels the same at any
+  // fps. Lives here, not in controls — it's render state, like the
+  // clock.
+  const gazeNow = [0, 0];
+  let tPrev = t0;
+
   // One pane, one draw: clip to its rect, bind ITS program, write
   // every uniform from ITS config. fit: 0 = cover (immersive),
   // 1 = contain + letterbox (comparison halves) — today's looks.
@@ -211,6 +220,7 @@ async function main() {
     gl.uniform1f(U.uMirror, shared.mirror);
     gl.uniform1f(U.uTime, shared.time);   // SHARED clock: identical
     gl.uniform2f(U.uRes, rect[2], rect[3]); // configs = identical wobble
+    gl.uniform2f(U.uGaze, shared.gaze[0], shared.gaze[1]); // one pair of eyes
     gl.uniform1f(U.uAspect, shared.aspect);
     gl.uniform1f(U.uFit, fit);
     applyQualia(U, qualia);
@@ -229,10 +239,17 @@ async function main() {
     if (srcEl) {
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, srcEl);
     }
+    const now = performance.now();
+    const dt = (now - tPrev) / 1000;
+    tPrev = now;
+    const k = 1 - Math.exp(-dt * 1000 / GAZE.easeMs);
+    gazeNow[0] += (state.gazeTarget[0] - gazeNow[0]) * k;
+    gazeNow[1] += (state.gazeTarget[1] - gazeNow[1]) * k;
     const shared = {
       src: useVid ? 2 : (state.hasCam ? 1 : 0),
       mirror: !useVid && state.mirror ? 1 : 0,
-      time: (performance.now() - t0) / 1000,
+      time: (now - t0) / 1000,
+      gaze: gazeNow,
       aspect: srcEl && srcEl.videoWidth
         ? srcEl.videoWidth / srcEl.videoHeight : 16 / 9,
     };

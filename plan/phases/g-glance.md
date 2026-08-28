@@ -100,7 +100,9 @@ defaults, user-accepted).
 Each step ends runnable and states its check. SAFETY appears by name
 in every step that touches it.
 
-- [ ] **1 · Gaze end-to-end, desktop.** `GAZE` config block
+- [x] **1 · Gaze end-to-end, desktop.** ✅ user by-eye pass 2026-08-28
+  ("feels right") — rigid travel, clamp, spring-back, reference pane
+  inert; defaults kept (maxExcursion 0.4, easeMs 200, springBack true). `GAZE` config block
   (`maxExcursion` ~0.4, `springBack: true`, `easeMs` ~200 — tunables,
   no toggle); `uGaze` in 00-prelude + renderer's uniform list;
   `centered = cuv - 0.5 - uGaze` in 90-composite (before aspect

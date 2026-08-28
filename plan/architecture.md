@@ -104,7 +104,9 @@ filters; devices are worn over the condition, never part of it.
 │  two panes, two draw calls 🟩 (Q5, GATE     │
 │  passed 2026-08-28)                         │
 │  shared gaze offset → uGaze on BOTH panes   │
-│  (one pair of eyes, like the clock) 🟦 (G)  │◀── 🟨 FF1 gaze tracking
+│  (one pair of eyes, like the clock) 🟧 (G1  │
+│  desktop done, user by-eye 2026-08-28;      │
+│  touch = G2)                                │◀── 🟨 FF1 gaze tracking
 └────────┬────────────────────────────────────┘
          │ one fullscreen triangle
          ▼
@@ -136,9 +138,10 @@ filters; devices are worn over the condition, never part of it.
 │  preset dropdown ("Defaults" + manifest) /  │
 │  file picker / SAVE-AS-PRESET export 🟩     │
 │  (Q4, GATE passed 2026-08-28)               │
-│  gaze input: Option+mouse (desktop) /       │
-│  one-finger canvas drag (touch), spring-    │
-│  back on release 🟦 (G)                     │
+│  gaze input: Option+mouse (desktop) 🟧 (G1  │
+│  done, user by-eye 2026-08-28) / one-finger │
+│  canvas drag (touch) 🟦 (G2), spring-back   │
+│  on release                                 │
 │  PANEL group on the General tab — a device  │
 │  never appears under Adjust Symptoms 🟦 (G) │
 └─────────────────────────────────────────────┘
@@ -334,7 +337,7 @@ sliders / toggles ──▶ state + uniforms (live)
   "none" preset = every quale off = unfiltered view (feeds Q5)
 ```
 
-### Gaze + glance panel 🟦 (Phase G — ratified, not built; DECISIONS 2026-08-28 "Phase G planned")
+### Gaze + glance panel 🟧 (Phase G in progress — gaze desktop 🟧 G1 done by eye 2026-08-28, touch 🟦 G2, panel 🟦 G3–G5; DECISIONS 2026-08-28 "Phase G planned")
 
 Two coordinate frames, and the phase is the space between them: damage
 is eye-fixed (retina frame), the aid is head-fixed (screen frame).

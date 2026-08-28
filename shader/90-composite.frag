@@ -39,7 +39,13 @@ void main() {
   vec3 scene = getScene(suv);
 
   // ---- tier 1: field geometry (always on) ------------------------
-  vec2 centered = cuv - 0.5;
+  // gaze (Phase G): the retinal frame is measured from where the eye
+  // points, not the screen centre — subtracted BEFORE the aspect
+  // correction so a diagonal drag moves the island diagonally,
+  // undistorted. Everything derived from centered (r, ang, sp,
+  // survival, edges) travels rigidly with the eye; the scene samples
+  // via suv and stays put.
+  vec2 centered = cuv - 0.5 - uGaze;
   centered.x *= contAsp;                   // aspect-correct so island is round
   float r = length(centered);
   float ang = atan(centered.y, centered.x);

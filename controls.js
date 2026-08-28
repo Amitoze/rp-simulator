@@ -1,6 +1,6 @@
 // Panel UI, background sources (camera / local video), and shared state.
 
-import { DEFAULTS, FIELD, QUALIA, REFERENCE_PRESET } from './config.js';
+import { DEFAULTS, FIELD, QUALIA, GAZE, REFERENCE_PRESET } from './config.js';
 // cycle-safe: restitch/setReference are top-level function
 // declarations in renderer.js, only called from event handlers anyway
 import { restitch, setReference } from './renderer.js';
@@ -13,6 +13,9 @@ export const state = {
   videoMode: false,   // self-hosted video file as the background
   splitMode: false,   // comparison view (side-by-side / stacked)
   refName: 'reference', // the reference pane's loaded preset, for the note
+  gazeTarget: [0, 0], // where the eye is being pointed (screen fractions
+                      // from centre); written by gaze input, eased and
+                      // consumed by the frame loop — one pair of eyes
 };
 
 export const IS_TOUCH = matchMedia('(pointer: coarse)').matches;
@@ -278,7 +281,37 @@ async function initPresets() {
   });
 }
 
+// --- gaze (Phase G) --------------------------------------------------
+// Holding Option/Alt points the eye at the pointer: the target is the
+// pointer's offset from screen centre, in screen fractions, y flipped
+// into GL's up-positive frame, length-clamped to GAZE.maxExcursion so
+// the island can't be dragged half off the bezel. The frame loop eases
+// toward the target; both panes receive the same value.
+function initGaze() {
+  const setTarget = (px, py) => {
+    let gx = px / innerWidth - 0.5;
+    let gy = 0.5 - py / innerHeight;
+    const len = Math.hypot(gx, gy);
+    if (len > GAZE.maxExcursion) {
+      gx *= GAZE.maxExcursion / len;
+      gy *= GAZE.maxExcursion / len;
+    }
+    state.gazeTarget = [gx, gy];
+  };
+  const release = () => {
+    if (GAZE.springBack) state.gazeTarget = [0, 0];
+  };
+  addEventListener('mousemove', e => {
+    // moving without Option is not a release: the glance holds until
+    // the key lifts
+    if (e.altKey) setTarget(e.clientX, e.clientY);
+  });
+  addEventListener('keyup', e => { if (e.key === 'Alt') release(); });
+  addEventListener('blur', release); // Cmd-Tab must not strand the eye
+}
+
 export function initControls() {
+  initGaze();
   bindToggle('bgCam', 'bgVid', v => {
     state.videoMode = v;
     // play/pause happens inside the click handler = a user gesture,

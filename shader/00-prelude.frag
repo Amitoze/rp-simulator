@@ -21,6 +21,8 @@ uniform float uIslandSeed;  // picks the personal geography of the islands
 uniform float uSparkleFlicker; // edge sparkle flicker angular speed (2*pi*Hz)
 uniform vec2 uSparkleBandIn;   // sparkle band inside the edge: [start, end]
 uniform vec2 uSparkleBandOut;  // sparkle band outside the edge: [start, end]
+uniform vec2 uGaze;         // where the eye points: offset from straight ahead,
+                            // screen fractions (shared by both panes)
 
 // -- small value-noise helpers ------------------------------------
 float hash(vec2 p) {

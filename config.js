@@ -12,6 +12,23 @@ export const DEFAULTS = {
   menuCollapsed: false,
 };
 
+// Gaze simulation (Phase G): holding Option/Alt and moving the mouse
+// points the eye somewhere else — the field mask travels, the scene
+// stays put. Tunables only, no toggle: no input means no offset.
+export const GAZE = {
+  // how far the eye can be dragged from straight ahead, in screen
+  // fractions — keeps the island from being pulled half off the bezel
+  maxExcursion: 0.4,
+
+  // release behaviour: spring back to centre (a glance is transient);
+  // false = the gaze stays where it was left
+  springBack: true,
+
+  // easing time constant, ms — the saccade-ish snap toward the target
+  // (applies to both the follow and the spring back)
+  easeMs: 200,
+};
+
 // Geometry of the visual field. Quale-shaped ({ enabled, params })
 // since Q5 so the generated panel gives it a toggle like any symptom
 // (user's call, DECISIONS 2026-08-28 — reverses the earlier
