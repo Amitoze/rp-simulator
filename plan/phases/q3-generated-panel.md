@@ -69,7 +69,7 @@ slider; SAFETY caps stay hardcoded in chunks, never in the schema.
 
 ## Steps
 
-- [ ] 1. `config.js` + `renderer.js` — FIELD goes schema-shape: every
+- [x] 1. `config.js` + `renderer.js` — FIELD goes schema-shape: every
       value becomes `{ value, min, max, label }`; {mild, late} radii
       pairs as pair-values `[mild, late]` (min/max per element, the
       sparkle-band pattern); the load-time clamp generalises to run
@@ -78,7 +78,7 @@ slider; SAFETY caps stay hardcoded in chunks, never in the schema.
       (islandSeed e.g. 0–20); nothing new invented. Check: sim
       by-eye identical at defaults; temporarily set erosion to 999 →
       console warns + clamps; revert, console clean.
-- [ ] 2. `renderer.js` (+ two-line `controls.js` shim) — schema
+- [x] 2. `renderer.js` (+ two-line `controls.js` shim) — schema
       becomes live state: `applyQualia(U, qualia)` and
       `applyField(U, field, degen)` write ALL schema-derived uniforms
       every frame (the set-once block dies); both take config objects,
@@ -88,7 +88,7 @@ slider; SAFETY caps stay hardcoded in chunks, never in the schema.
       one-line writes into the schema (temporary shim — dies in step
       3). Check: by-eye identical at defaults; all three existing
       sliders still work live.
-- [ ] 3. `controls.js` + `sim.html` + `style.css` — the generator:
+- [x] 3. `controls.js` + `sim.html` + `style.css` — the generator:
       expandable "Adjust Symptoms" section at the BOTTOM of the menu
       body; FIELD group FIRST, faders only, no toggle; then one toggle
       row per quale, its faders rendered only while enabled (pair
@@ -101,7 +101,11 @@ slider; SAFETY caps stay hardcoded in chunks, never in the schema.
       outerCoverage reshapes islands); each toggle round-trips with
       only the expected blink; FIELD group shows no toggle; panel
       fits and scrolls on a phone-width viewport.
-- [ ] 4. GATE Q3 payoff (user's call, never self-certified): each of
+Steps 1–3 built in one pass (commit `2bb6812`, 2026-08-24); checks
+verified by eye, desktop and phone (user, recorded at plan-sync
+2026-08-28). GATE Q3 passed 2026-08-28 — phase closed.
+
+- [x] 4. GATE Q3 payoff (user's call, never self-certified): each of
       the five qualia toggled off→on in turn, plus all-off and all-on
       — no residue, no glitch beyond the expected blink, desktop AND
       phone. SAFETY re-verify through the new UI: all-on/all-max set
@@ -112,13 +116,16 @@ slider; SAFETY caps stay hardcoded in chunks, never in the schema.
 ## Gate (copied from GATE Q, staged)
 
 ```
-[ ] Q3: toggling any quale on/off round-trips cleanly (no residue,
+[x] Q3: toggling any quale on/off round-trips cleanly (no residue,
     no recompile glitch beyond the expected blink)
-[ ] SAFETY (cross-cutting): per-quale caps + global clamp untouched by
+    — PASSED 2026-08-28 (user by-eye, desktop + phone)
+[x] SAFETY (cross-cutting): per-quale caps + global clamp untouched by
     Q3's edits, re-verified through the new UI — net effect can only
     be darker than today, never brighter
-[ ] Baseline fps on a phone (GATE Q running item — the generated
+    — PASSED 2026-08-28 (user by-eye through the generated panel)
+[x] Baseline fps on a phone (GATE Q running item — the generated
     panel must not cost frame time; it only writes ~12 floats/frame)
+    — PASSED 2026-08-28 (user, phone check with the panel live)
 ```
 
 Whose call: **the user's, by eye, desktop and phone** — presented,

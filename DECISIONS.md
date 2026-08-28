@@ -3,6 +3,23 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-28 — GATE Q3 passed; Q3 closed
+
+- **GATE Q3 passed on the user's by-eye call, desktop and phone
+  (2026-08-28):** all gate items declared good — qualia toggles
+  round-trip cleanly through the generated panel (no residue, nothing
+  beyond the expected recompile blink), and the SAFETY re-verify
+  through the new UI holds (all-on/all-max reachable by finger stays
+  within the ADD_CAP 0.65 ceiling — busier, not brighter). Never
+  self-certified; recorded here on the user's declaration at close-out.
+- **Q3 steps 1–3 had landed in one commit** (`2bb6812`, 2026-08-24)
+  without per-step verification notes; checks were confirmed by eye
+  (desktop + phone) at the 2026-08-28 plan-sync. Noted so the gap in
+  the commit trail isn't read as unverified work later.
+- **Generated faders are continuous (`step='any'`).** A stepped grid
+  would snap schema defaults (e.g. inner-late 13° of 0–90) to a nearby
+  grid point and misreport the schema's true value.
+
 ## 2026-08-20 — Q3 planned: live-state home and FIELD faders ratified
 
 - **The schema is the live UI state** (ratified). Slider drags write

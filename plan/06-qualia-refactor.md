@@ -82,14 +82,16 @@ at fixed settings before anything else lands on top.
 ## Q3. Generated advanced panel (`controls.js`)
 
 ```
-[ ] Advanced section renders FROM the schema: one toggle per quale;
+[x] Advanced section renders FROM the schema: one toggle per quale;
     its sliders appear when toggled on — zero per-quale UI code, so
-    Phase C/D qualia get their UI for free
-[ ] Toggle flips → renderer restitches; slider moves → uniform update
-[ ] UX (specced 2026-08-20, user request): expandable "Adjust
+    Phase C/D qualia get their UI for free (2026-08-24, gated 08-28)
+[x] Toggle flips → renderer restitches; slider moves → uniform update
+    (2026-08-24, gated 08-28)
+[x] UX (specced 2026-08-20, user request): expandable "Adjust
     Symptoms" section at the BOTTOM of the menu. FIELD listed FIRST
     with faders only — no toggle, tier 1 is not removable (DECISIONS
     2026-08-18); each quale below it gets toggle → faders on enable
+    (2026-08-24, gated 08-28)
 ```
 
 ## Q4. Preset files (`presets/`)
@@ -149,8 +151,10 @@ at fixed settings before anything else lands on top.
     ceiling (clamp observed doing its job) — PASSED 2026-08-20 (user
     by-eye, main worktree sliders-maxed vs torture config: busier,
     not brighter; ADD_CAP 0.65 measured, see q2-config-schema.md)
-[ ] Q3: toggling any quale on/off round-trips cleanly (no residue,
+[x] Q3: toggling any quale on/off round-trips cleanly (no residue,
     no recompile glitch beyond the expected blink)
+    — PASSED 2026-08-28 (user by-eye, desktop + phone; SAFETY
+    re-verified through the new panel — see q3-generated-panel.md)
 [ ] Q4: save-as-preset → reload → load preset reproduces the exact
     tuned state
 [ ] Q5: comparison view with "none" left / tuned preset right matches
