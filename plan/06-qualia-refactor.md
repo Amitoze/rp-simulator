@@ -96,17 +96,32 @@ at fixed settings before anything else lands on top.
 
 ## Q4. Preset files (`presets/`)
 
+*Amended 2026-08-28 (DECISIONS "Q4 planned"): sparse presets rejected —
+a sparse preset silently changes look when defaults are retuned, a
+correctness bug for portraits. Plan of record:
+[phases/q4-presets.md](phases/q4-presets.md).*
+
 ```
-[ ] Preset = sparse JSON: only values that differ from schema defaults
-    (unknown keys: warn in console, ignore — old presets survive
-    schema evolution)
-[ ] config.js names the default preset; presets/index.json is the
-    manifest (a browser cannot list a directory)
-[ ] Load: manifest dropdown + file picker for ad-hoc files
-[ ] SAVE AS PRESET (export current state as downloadable JSON) — the
-    tune → save → compare → iterate loop does not close without this;
-    export is required, not polish
-[ ] A "none" preset: every quale off — becomes the unfiltered view (Q5)
+[x] Preset = FULL value snapshot in a named envelope
+    { name, saved, qualia } — frozen-snapshot semantics; loading rule
+    (defaults → overlay → warn unknown keys → clamp) is what lets old
+    presets survive schema evolution; new qualia default enabled:false
+    so old presets keep their look (2026-08-28)
+[x] Boot from the schema — config.js's values ARE the default look, no
+    default preset file; presets/index.json is the manifest (a browser
+    cannot list a directory), dropdown = computed "Defaults" entry +
+    manifest entries (2026-08-28)
+[x] Load: manifest dropdown + file picker for ad-hoc files; picker
+    loads name an ad-hoc dropdown entry (2026-08-28)
+[x] SAVE AS PRESET (export current state as downloadable JSON) — the
+    tune → save → compare → iterate loop closed; iOS download/Files
+    path proven at the gate (2026-08-28)
+[x] A "none" preset: every quale off (2026-08-28) — NOTE: renders the
+    dead ring BLACK, not the unfiltered view; Q5 ⚠ below
+[x] Menu tabs (user UX spec 2026-08-28): panel splits into General
+    (degeneration slider, background, view) and Adjust Symptoms
+    (load presets above configure symptoms) — tabs horizontal at top,
+    text-styled (2026-08-28)
 ```
 
 ## Q5. Per-pane configs (`renderer.js`, `controls.js`)
@@ -120,6 +135,10 @@ at fixed settings before anything else lands on top.
 [ ] Split-layout arithmetic moves out of GLSL into viewport math;
     the hardcoded rawScene override dies — the clean half is just the
     "none" preset
+    ⚠ found 2026-08-28 (Q4 step 2): all-qualia-off is NOT the raw
+    scene — tier 1 always masks, and with no fill qualia the dead
+    ring renders black. "None = unfiltered" needs a design answer at
+    Q5 phase-plan (see phases/q4-presets.md step 2 note)
 [ ] Reference pane (left / top in stacked) frozen at its loaded
     preset's values; sliders edit only the active pane (right / bottom)
 [ ] Both panes share camera texture and clock — identical configs
@@ -155,8 +174,10 @@ at fixed settings before anything else lands on top.
     no recompile glitch beyond the expected blink)
     — PASSED 2026-08-28 (user by-eye, desktop + phone; SAFETY
     re-verified through the new panel — see q3-generated-panel.md)
-[ ] Q4: save-as-preset → reload → load preset reproduces the exact
-    tuned state
+[x] Q4: save-as-preset → reload → load preset reproduces the exact
+    tuned state — PASSED 2026-08-28 (user by-eye, desktop + phone;
+    SAFETY re-verified through the preset input channel — torture
+    file warned, clamped, busier not brighter)
 [ ] Q5: comparison view with "none" left / tuned preset right matches
     today's comparison view; two different presets render honestly
     side by side

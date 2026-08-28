@@ -3,6 +3,93 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-28 — GATE Q4 passed; Q4 closed
+
+- **GATE Q4 passed on the user's by-eye call, desktop and phone
+  (2026-08-28):** save-as-preset → page reload → load-file reproduces
+  the exact tuned state on both platforms (the phone run proving the
+  iOS download/Files path); SAFETY holds through the new preset input
+  channel (torture file via picker: unknown keys warned, out-of-range
+  values clamped, busier not brighter); baseline fps clean on the
+  phone with the tabbed panel live. Never self-certified; recorded on
+  the user's declaration.
+- **En-route findings this phase:** all-qualia-off renders the dead
+  ring BLACK, not the unfiltered scene — Q5's "clean half is just the
+  none preset" needs a design answer at Q5 phase-plan (⚠ noted on the
+  Q5 card). The step-3 one-way-loader shortcut was half-revised on
+  user request: picker loads now select an ad-hoc dropdown entry named
+  from the file; slider drags still don't flip the dropdown to
+  "Custom" (deliberate — dirty tracking deferred until wanted).
+- **Menu UX (user spec, 2026-08-28):** panel tabbed — General |
+  Adjust Symptoms (load presets above configure symptoms), tabs
+  text-styled, minimalist 4px scrollbar pill; #adv id kept on the tab
+  pane so the generator and its styling survived the move untouched.
+
+## 2026-08-28 — Q4 planned: preset semantics amended and ratified
+
+- **Presets are FULL value snapshots, not sparse diffs** (ratified —
+  amends the 2026-08-19 "Presets: schema in code, values in files"
+  entry's sparse clause; the rest of that entry stands). The user
+  caught the flaw: a sparse preset means "this look relative to
+  whatever the defaults are today" — retune a default and every saved
+  portrait that omitted that value silently changes appearance, which
+  for a portrait project is a correctness bug, not a nuisance. The
+  recorded rationale for sparsity ("old presets survive schema
+  evolution") was mis-attributed: survival comes from the LOADING RULE
+  (start from schema defaults → overlay file → warn-and-ignore unknown
+  keys → clamp to ranges), which full presets share identically.
+  Consequence accepted knowingly: full presets are FROZEN SNAPSHOTS —
+  a later improvement to a default does NOT propagate into saved
+  presets; for portraits, pinned is the honest semantics. Export
+  becomes simpler, not harder (serialise the live schema; no diffing).
+  Speed: preset surface is 5 enabled flags + 8 params today (~30 after
+  C/D), ≤2 KB JSON, one fetch + parse at load/switch, zero per-frame
+  cost `[measured]` (param count counted from config.js; timing check:
+  console.time around the load path, expect sub-ms). Rejected: sparse
+  diffs (the drift bug above) and a separate defaults FILE alongside
+  full presets (redundant once presets are full — the coupling is
+  already severed — and it splits the schema: values in a file,
+  ranges/labels/caps in code — the two-structures-to-align smell
+  rejected 2026-08-20; a committed default-look snapshot, if ever
+  wanted, is just an ordinary exported preset, a snapshot of defaults
+  rather than their owner). `[my-synthesis]`, but the drift argument
+  is structural.
+- **New qualia ship `enabled: false` by default** (ratified). Full
+  snapshots cannot pin a quale that didn't exist when they were saved,
+  so a new quale defaulting ON would change every saved portrait's
+  appearance the day it merges. Rule: a preset's rendered look changes
+  only when the preset file changes. Phase C's fill-in quale is the
+  first test. (Murk's replacement is the one sanctioned exception
+  class: C deletes murk and substitutes fill-in as the new default
+  look — that swap is a deliberate portrait revision, gated by eye,
+  not silent drift.) `[my-synthesis]`.
+- **Preset file shape: named envelope** (ratified) —
+  `{ name, saved, qualia: { <quale>: { enabled, params: {<p>: value} } } }`.
+  `name` makes ad-hoc files loaded via the picker self-describing
+  (filenames get renamed; the manifest only covers shipped presets);
+  `saved` documents when the snapshot froze — honest metadata under
+  frozen-snapshot semantics. Rejected: bare mirror (anonymous files)
+  and schemaVersion field (YAGNI — unknown-key-warn + missing-key-
+  default + clamp already absorb schema evolution; a version number
+  with no migration code is dead weight). Confidence medium-high.
+- **Boot from the schema; no default preset file** (ratified — amends
+  the Q4 card line "config.js names the default preset", which was
+  written for the sparse design). config.js's schema values ARE the
+  default look: no boot fetch, single owner of defaults. The preset
+  dropdown lists a computed "Defaults" entry (reset = re-apply schema
+  defaults) plus the manifest entries from `presets/index.json` (a
+  browser cannot list a directory; manifest is a bare filename list —
+  labels come from each file's `name`). Rejected: always-boot-from-
+  preset-file (reintroduces the dual-ownership drift this whole
+  amendment kills, plus a blocking fetch) and no-manifest/picker-only
+  (clumsy on the phone, the primary audience; "none" loses its one-tap
+  affordance, which Q5's comparison pane wants). Confidence high.
+- Below-the-filter choices left to steps (one commit to reverse):
+  new `presets.js` module; panel rebuild after load rather than
+  per-slider sync; Blob + `<a download>` export with `<input
+  type="file">` ad-hoc load (phone half of the gate proves it on iOS);
+  dropdown as one-way load action, no dirty-state tracking.
+
 ## 2026-08-28 — GATE Q3 passed; Q3 closed
 
 - **GATE Q3 passed on the user's by-eye call, desktop and phone

@@ -35,6 +35,25 @@ canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
   max-height: calc(100dvh - 100px);
   overflow-y: auto;
 }
+/* minimalist scrollbar: no track, no buttons — just a slim pill
+   showing position, in the panel's text colour at low opacity.
+   (iOS overlays its own transient indicator and ignores this.) */
+#panel .body::-webkit-scrollbar { width: 4px; }
+#panel .body::-webkit-scrollbar-track { background: transparent; }
+#panel .body::-webkit-scrollbar-thumb {
+  background: rgba(223,227,234,.28); border-radius: 2px;
+}
+#panel .body::-webkit-scrollbar-thumb:hover {
+  background: rgba(223,227,234,.45);
+}
+/* Firefox path only — setting scrollbar-color in Chrome would disable
+   the finer pseudo-element styling above */
+@supports not selector(::-webkit-scrollbar) {
+  #panel .body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(223,227,234,.28) transparent;
+  }
+}
 #panel.min .body { display: none; }
 /* collapsed: shrink to a lone semi-transparent hamburger button */
 #panel.min {
@@ -65,11 +84,17 @@ canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
 #panel input[type=range] { accent-color: #2b62c9; }
 
 /* generated "Adjust symptoms" section (controls.js, from the schema) */
-#adv { margin-top: 14px; border-top: 1px solid rgba(255,255,255,.12); }
-#adv summary {
-  padding: 10px 0 4px; cursor: pointer;
-  font-weight: 600; color: #aeb6c4;
+/* tabs read as text, not buttons: chrome stripped, active = underline */
+#panel .tabs { margin-bottom: 10px; gap: 14px; }
+#panel .tabs button {
+  flex: none; background: none; border: none; border-radius: 0;
+  padding: 4px 0; font-weight: 600; color: #8f97a5;
+  border-bottom: 2px solid transparent;
 }
+#panel .tabs button.on {
+  background: none; color: #fff; border-bottom-color: #2b62c9;
+}
+#adv { margin-top: 4px; }
 #adv .group { margin-bottom: 6px; }
 #adv .ghead { margin: 10px 0 0; font-weight: 600; color: #8f97a5; }
 /* quale row: name left, switch right */

@@ -2,10 +2,11 @@
 
 Maintained by `/architecture`; derived from `plan/` + `DECISIONS.md` +
 the code — update it there, then regenerate here. **Last updated:
-2026-08-20** (Q3 design ratified, see DECISIONS 2026-08-20 "Q3
-planned": schema becomes the live UI state, FIELD goes full
-schema-shape into the generated panel — Q3 marks updated with the
-ratified shapes, still 🟦 planned; Q2 remains the latest built 🟩).
+2026-08-28** (GATE Q3 passed by eye, desktop + phone — generated
+panel and live-schema marks flip 🟦 → 🟩; Q4 design ratified, see
+DECISIONS 2026-08-28 "Q4 planned": presets become FULL value
+snapshots in a named envelope, boot stays on the schema — preset
+marks updated with the ratified shapes, 🟦 planned).
 
 ---
 
@@ -57,10 +58,20 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │    + clamp-to-range on load 🟩              │
 │    (Q2, GATE passed 2026-08-20)             │◀── 🟨 FF6 island-seed editor
 │  schema = LIVE state: UI writes values /    │
-│    enabled at runtime 🟦 (Q3)               │
+│    enabled at runtime 🟩 (Q3, GATE passed   │
+│    2026-08-28)                              │
 │  FIELD full schema-shape, same param        │
-│    pattern, still preset-proof 🟦 (Q3)      │
-│  preset files, sparse overrides 🟦 (Q4)     │
+│    pattern, still preset-proof 🟩 (Q3)      │
+│  ⇄ PRESETS presets.js + presets/ 🟩 (Q4,    │
+│    GATE passed 2026-08-28):                 │
+│    FULL value snapshots, named envelope     │
+│    {name, saved, qualia}; index.json        │
+│    manifest (browser can't ls); load =      │
+│    defaults → file → warn unknown → clamp;  │
+│    export = serialise live schema; FIELD +  │
+│    SAFETY caps out of reach; boot = schema  │
+│    defaults, never a file (DECISIONS        │
+│    2026-08-28)                              │
 └────────┬────────────────────────────────────┘
          │ enabled-flags + param values (clamped; live-edited from Q3)
          ▼
@@ -79,7 +90,8 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 │  ALL quale/field uniforms from schema each  │
 │  frame, via config-object functions;        │
 │  restitch() swaps programs, uniforms        │
-│  self-heal next frame 🟦 (Q3)               │
+│  self-heal next frame 🟩 (Q3, GATE passed   │
+│  2026-08-28)                                │
 │  two panes, two draw calls 🟦 (Q5)          │◀── 🟨 FF1 gaze tracking
 └────────┬────────────────────────────────────┘
          │ one fullscreen triangle
@@ -100,11 +112,12 @@ loss legible to sighted viewers, since honest filling-in is invisible.
 ┌─────────────────────────────────────────────┐
 │ UI  controls.js 🟩  sliders, view toggles   │
 │  generated "Adjust Symptoms" panel from     │
-│  the schema 🟦 (Q3): FIELD faders first     │
-│  (no toggle), per-quale toggle → faders;    │
-│  sliders write schema, toggles restitch     │
-│  preset dropdown / file picker / export 🟦  │
-│  (Q4)                                       │
+│  the schema 🟩 (Q3, GATE passed 2026-08-28):│
+│  FIELD faders first (no toggle), per-quale  │
+│  toggle → faders; sliders write schema,     │
+│  toggles restitch                           │
+│  preset dropdown ("Defaults" + manifest) /  │
+│  file picker / SAVE-AS-PRESET export 🟦 (Q4)│
 └─────────────────────────────────────────────┘
 ```
 
@@ -146,24 +159,28 @@ identical at defaults; out-of-range 999 → warned and capped):
 config.js
   DEFAULTS ── UI state only (degeneration, view, camera, menu)
   FIELD ───── tier 1 geometry, faders only, NEVER toggleable
-              🟦 Q3: goes full schema-shape — every value
+              🟩 full schema-shape (Q3) — every value
               { value, min, max, label }, {mild,late} radii as
               pair-values; still outside presets' reach
               (DECISIONS 2026-08-20 "Q3 planned")
   QUALIA ──── per quale { enabled, params }
               each param { value, min, max, label }   ← schema IN CODE
         │
-        ▼ loadQualia(): every value clamped into [min, max]
+        ▼ clampParams(): every value clamped into [min, max]
   clamped values ──▶ renderer (uniforms) + controls (slider positions)
 
-🟦 Q3: the schema is the LIVE state after load — sliders write
-       param values, toggles write enabled; one declared place always
-       holds "current settings" (what Q4 export serialises and Q5
-       panes read) (DECISIONS 2026-08-20 "Q3 planned")
+🟩 Q3 (GATE passed 2026-08-28): the schema is the LIVE state after
+       load — sliders write param values, toggles write enabled; one
+       declared place always holds "current settings" (what Q4 export
+       serialises and Q5 panes read) (DECISIONS 2026-08-20)
 
-presets/*.json 🟦 (Q4) ── sparse VALUE overrides only; never structure,
-                          ranges, or caps; unknown keys warn + ignore;
-                          FIELD excluded
+presets/*.json 🟦 (Q4, DECISIONS 2026-08-28) ── FULL value snapshots
+       (sparse rejected: a sparse preset drifts when defaults move —
+       frozen snapshots are the honest portrait semantics); named
+       envelope { name, saved, qualia }; values only, never structure,
+       ranges, or caps; unknown keys warn + ignore, missing keys keep
+       schema defaults, everything clamped; FIELD + SAFETY excluded;
+       new qualia default enabled:false so old presets keep their look
 ```
 
 `NET` and `SPARKLE` blocks dissolve into `QUALIA[quale].params` — one
@@ -183,7 +200,7 @@ qualia config ─────────────────────┤
     recompile on toggle ≈ tens of ms, once per settings click)
 ```
 
-### Frame loop 🟩 → touched by Q2 (schema reads), Q3 (live state 🟦), Q5 (panes 🟦)
+### Frame loop 🟩 → touched by Q2 (schema reads), Q3 (live state 🟩), Q5 (panes 🟦)
 
 ```
 each frame: video pixels ──▶ texture upload
@@ -191,7 +208,8 @@ each frame: video pixels ──▶ texture upload
             degeneration ───▶ field radii, degrees → screen   from schema
                               units (edge ≈ 90°), mild→late blend
             clock ──────────▶ uTime
-🟦 Q3: set-once/per-frame split dies — ALL quale + field uniforms
+🟩 Q3 (GATE passed 2026-08-28): set-once/per-frame split died — ALL
+       quale + field uniforms
        written from the schema every frame (~12 floats, noise next to
        the texture upload), via functions of a config OBJECT, never a
        global read (Q5 depends on this); restitch() = makeProgram
@@ -250,20 +268,34 @@ sparkle ───┴─▶ addLight (photopsia weighted        ▼
 Scene brightness is never clamped — a bright real wall is the world's
 business. Below the ceiling, output is identical to today.
 
-### UI 🟩 → grows in Q3/Q4 🟦
+### UI 🟩 (incl. generated panel, Q3 GATE passed 2026-08-28) → grows in Q4 🟦
 
 ```
 sliders / toggles ──▶ state + uniforms (live)
-🟦 Q3 (design ratified, DECISIONS 2026-08-20 "Q3 planned"):
+🟩 Q3 (GATE passed 2026-08-28, DECISIONS 2026-08-20 "Q3 planned"):
        "Adjust Symptoms" expandable section generated FROM the
        schema, at the BOTTOM of the menu — FIELD first (faders only,
        no toggle; tier 1 not removable), then one toggle per quale,
        its faders appear on enable; zero per-quale UI code.
        slider drag ──▶ writes schema value (frame loop picks it up)
        toggle flip ──▶ writes enabled + calls restitch()
-       hardcoded net/transparency slider rows die (replaced by their
+       hardcoded net/transparency slider rows died (replaced by their
        generated equivalents); degeneration stays top-level
-🟦 Q4: preset dropdown (presets/index.json manifest) + file picker
-       + SAVE AS PRESET export (required — closes the tune→save→
-       compare loop); "none" preset = unfiltered view (feeds Q5)
+
+🟩 Q4 (DECISIONS 2026-08-28 "Q4 planned" + "GATE Q4 passed";
+       gate passed by eye 2026-08-28, desktop + phone). Menu tabbed
+       (user UX spec 2026-08-28): General (degen slider, background,
+       view) | Adjust Symptoms (load presets above configure
+       symptoms); picker loads select an ad-hoc dropdown entry named
+       from the file. Built shape:
+
+  presets/index.json ──filenames──▶ dropdown ("Defaults" entry first,
+                                    computed from schema, no file)
+  dropdown pick / file picker ──JSON──▶ loadPreset():
+       schema defaults → overlay file values → warn unknown keys →
+       clamp to ranges → restitch(QUALIA) + rebuild generated panel
+  SAVE AS PRESET ──▶ exportPreset(): live schema → { name, saved,
+       qualia } JSON → Blob download  (required — closes the
+       tune→save→compare loop)
+  "none" preset = every quale off = unfiltered view (feeds Q5)
 ```

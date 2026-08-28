@@ -4,6 +4,8 @@ import { DEFAULTS, FIELD, QUALIA } from './config.js';
 // cycle-safe: restitch is a top-level function declaration in
 // renderer.js, and it's only called from event handlers anyway
 import { restitch } from './renderer.js';
+// same pattern: hoisted declarations, called from event handlers
+import { applyPreset, exportPreset } from './presets.js';
 
 export const state = {
   hasCam: false,      // camera stream is live
@@ -117,8 +119,13 @@ function addParams(parent, params) {
   }
 }
 
-function buildAdvanced() {
+// Exported for presets.js: a preset load rewrites the schema, and
+// regenerating the whole section from it is the sync — no per-slider
+// bookkeeping. Idempotent: clears before building, so every caller
+// gets exactly one panel.
+export function buildAdvanced() {
   const body = document.getElementById('advBody');
+  body.replaceChildren();
 
   const fg = document.createElement('div');
   fg.className = 'group';
@@ -161,6 +168,86 @@ function buildAdvanced() {
   }
 }
 
+// --- preset dropdown -------------------------------------------------
+// Born from presets/index.json (a browser cannot list a directory);
+// each option is labelled from the file's own "name". "Defaults" comes
+// first and is COMPUTED — applyPreset({}) resets to the BASELINE
+// captured at load — so the default look has no file to drift from
+// (DECISIONS 2026-08-28). One-way loader: picking loads; later slider
+// drags don't update the selection.
+async function initPresets() {
+  const sel = document.getElementById('presetSel');
+  sel.addEventListener('change', async () => {
+    // the ad-hoc entry only labels what the picker loaded — a local
+    // file can't be re-fetched, so re-picking it is a no-op
+    if (sel.value === '::file') return;
+    if (!sel.value) { applyPreset({}); return; }
+    try {
+      const r = await fetch(`presets/${sel.value}`, { cache: 'no-store' });
+      const preset = await r.json();
+      applyPreset(preset.qualia ?? {});
+    } catch (e) {
+      // a broken file must never half-apply: applyPreset was not
+      // reached, so the sim keeps its current state
+      console.error(`preset "${sel.value}" failed to load:`, e);
+    }
+  });
+  const opt = (value, label) => {
+    const o = document.createElement('option');
+    o.value = value;
+    o.textContent = label;
+    sel.append(o);
+  };
+  opt('', 'Defaults');
+  try {
+    const files = await (await fetch('presets/index.json', { cache: 'no-store' })).json();
+    for (const f of files) {
+      const p = await (await fetch(`presets/${f}`, { cache: 'no-store' })).json();
+      opt(f, p.name ?? f);
+    }
+  } catch (e) {
+    console.error('preset manifest failed to load:', e);
+  }
+
+  // save: the tune → save → compare loop closes here (export is
+  // required, not polish — DECISIONS 2026-08-19)
+  document.getElementById('presetSave').addEventListener('click', () => {
+    const name = prompt('Preset name:', 'portrait');
+    if (name) exportPreset(name.trim() || 'portrait');
+  });
+
+  // ad-hoc load: any preset file, not just the shipped manifest
+  const fileIn = document.getElementById('presetFile');
+  document.getElementById('presetLoad').addEventListener('click',
+    () => fileIn.click());
+  fileIn.addEventListener('change', async () => {
+    const f = fileIn.files[0];
+    if (!f) return;
+    try {
+      const preset = JSON.parse(await f.text());
+      applyPreset(preset.qualia ?? {});
+      // reflect the load in the dropdown: one reusable ad-hoc entry,
+      // labelled from the file's own name (user request 2026-08-28)
+      const sel = document.getElementById('presetSel');
+      let adhoc = sel.querySelector('option[data-adhoc]');
+      if (!adhoc) {
+        adhoc = document.createElement('option');
+        adhoc.dataset.adhoc = '1';
+        adhoc.value = '::file';
+        sel.append(adhoc);
+      }
+      adhoc.textContent = preset.name ?? f.name;
+      sel.value = '::file';
+    } catch (e) {
+      // unreadable must never half-apply: the parse fails before
+      // applyPreset is reached, so the sim keeps its current state
+      console.error(`preset file "${f.name}" unreadable:`, e);
+      note.textContent = 'preset file unreadable — see console';
+    }
+    fileIn.value = ''; // so re-picking the same file fires again
+  });
+}
+
 export function initControls() {
   bindToggle('bgCam', 'bgVid', v => {
     state.videoMode = v;
@@ -169,6 +256,15 @@ export function initControls() {
     if (v) fileVideo.play(); else fileVideo.pause();
   });
   bindToggle('vwImm', 'vwSbs', v => { state.splitMode = v; });
+
+  // menu tabs (user UX spec 2026-08-28): display-only — flipping
+  // panes touches no schema state and never restitches
+  const genPane = document.getElementById('tabGeneral');
+  const symPane = document.getElementById('adv');
+  bindToggle('tabGen', 'tabSym', sym => {
+    genPane.hidden = sym;
+    symPane.hidden = !sym;
+  });
 
   document.getElementById('panelHead').addEventListener('click', () => {
     const panel = document.getElementById('panel');
@@ -179,6 +275,7 @@ export function initControls() {
 
   applyDefaults();
   buildAdvanced();
+  initPresets(); // async: options appear when the manifest arrives
 
   document.getElementById('camFlip').addEventListener('click', () => {
     const other = facing === 'user' ? 'environment' : 'user';
