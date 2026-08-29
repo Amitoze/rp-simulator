@@ -3,6 +3,41 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-08-30 — Phase V planned: video sources; direct-URL-only ratified
+
+- **Phase V queue-jumps C** (user's call, 2026-08-30, second jump after
+  G's precedent): when Video is the background, a sub-options row
+  appears — paste a URL, drag-drop a local video, or pick a file —
+  with the stock clip remaining the default. Appetite ~0.5 day. C
+  (fill-in) stays the honesty fix and next in line after V. The phase
+  touches SOURCE only (controls.js / sim.html / config.js); renderer
+  and shader untouched — G5's parked SAFETY re-verify is NOT triggered.
+- **Remote-URL ingestion: direct video URLs only** (ratified). The URL
+  field accepts direct media links (`.mp4`/`.webm`-style), loaded with
+  `crossorigin="anonymous"` into the existing `<video id="vid">`;
+  YouTube/Vimeo PAGE urls are detected and refused with an inline
+  explanation; any load error reverts to the stock clip with a
+  message. Grounding constraint `[factual-source — browser security
+  model, high confidence]`: YouTube offers only a cross-origin iframe
+  (zero pixel access — unfilterable by construction), and raw
+  googlevideo stream URLs are signed, expiring, and not CORS-enabled;
+  a cross-origin video without CORS approval taints the GL pipeline
+  (texImage2D throws). Setting `crossorigin` makes non-CORS hosts fail
+  cleanly at LOAD (an `error` event) instead of at texture upload — so
+  the failure mode is a message, never a dead frame loop. Rejected:
+  B — YouTube via `getDisplayMedia` tab-capture (double permission
+  dance; unsupported on iOS Safari, the primary audience; fragile);
+  C — server-side proxy/yt-dlp (turns a static page into a service,
+  YouTube ToS grey area, far over appetite). Local files never hit
+  CORS (object URLs are same-origin) and deliver the underlying want —
+  own footage through the filter — with no walls.
+- **Below-filter calls left to steps** (one commit to reverse):
+  `state.videoMode` growing into a source enum; whether the drop
+  target is video-mode-only or global-and-switches; stock clip path +
+  credit string moving from markup/updateNote into config (the
+  config-never-constants rule says they should); object-URL revocation
+  on source switch.
+
 ## 2026-08-28 — Phase G merged early: G2 + G5 parked (user's call)
 
 - **Merged without the formal gate.** G1, G3, G4 each passed the
