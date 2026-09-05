@@ -34,7 +34,9 @@ export const sliders = {
 
 function updateNote() {
   const bg = state.videoMode
-    ? (state.videoSource === 'local' ? `video: ${localName}` : VIDEO.stock.credit)
+    ? (state.videoSource === 'local' ? `video: ${localName}`
+      : state.videoSource === 'url' ? `video: ${remoteHost}`
+      : VIDEO.stock.credit)
     : (state.hasCam ? 'live camera' : 'no camera — showing sample scene');
   note.textContent = bg + ' · simulated RP visual field' +
     (state.splitMode ? ` · comparison (left/top: ${state.refName})` : '');
@@ -47,10 +49,17 @@ function updateNote() {
 // renderer's texture path is untouched. An object URL pins the picked
 // file in memory — revoked on every source switch, never leaked.
 let objectUrl = null;
-let localName = ''; // the picked file's name, for the note
+let localName = '';  // the picked file's name, for the note
+let remoteHost = ''; // the URL source's host, for the note
+
+// watch-page shapes that can never render client-side (standing
+// constraint: cross-origin iframe = zero pixel access; raw stream
+// URLs signed + non-CORS — DECISIONS 2026-08-30, option A)
+const PAGE_URL = /(^|\.|\/\/)(youtube\.com|youtu\.be|vimeo\.com)/i;
 
 // the seg highlight follows the enum, not the click — so the
-// error→revert path (V4) repaints it for free
+// error→revert path repaints it for free; a URL source lights
+// neither button (the note names its host instead)
 function markSource() {
   document.getElementById('srcStock').classList.toggle('on', state.videoSource === 'stock');
   document.getElementById('srcLocal').classList.toggle('on', state.videoSource === 'local');
@@ -62,6 +71,7 @@ function useLocalVideo(file) {
   objectUrl = URL.createObjectURL(file);
   localName = file.name;
   state.videoSource = 'local';
+  fileVideo.crossOrigin = null; // blob: is same-origin — needs none
   fileVideo.src = objectUrl;
   fileVideo.play(); // muted, so autoplay policy never blocks it
   markSource();
@@ -72,7 +82,35 @@ function useStock() {
   if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; }
   localName = '';
   state.videoSource = 'stock';
+  fileVideo.crossOrigin = null; // same-origin — needs none
   fileVideo.src = VIDEO.stock.src;
+  fileVideo.play();
+  markSource();
+  updateNote();
+}
+
+function useUrlVideo(raw) {
+  const url = raw.trim();
+  if (!url) return;
+  if (PAGE_URL.test(url)) {
+    note.textContent = 'watch-page links can’t be filtered (the page '
+      + 'gives no pixel access) — paste a direct video-file URL (.mp4/.webm)';
+    return; // refused before any load: current source keeps playing
+  }
+  let host;
+  try { host = new URL(url).host; }
+  catch {
+    note.textContent = 'that doesn’t parse as a URL — source unchanged';
+    return;
+  }
+  if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; }
+  localName = '';
+  remoteHost = host;
+  state.videoSource = 'url';
+  // order matters: crossorigin BEFORE src — set after, and the fetch
+  // has already gone out without CORS, tainting the texture
+  fileVideo.crossOrigin = 'anonymous';
+  fileVideo.src = url;
   fileVideo.play();
   markSource();
   updateNote();
@@ -474,6 +512,20 @@ export function initControls() {
     vidFile.value = ''; // so re-picking the same file fires again
   });
   document.getElementById('srcStock').addEventListener('click', useStock);
+  // direct URL (V4): refusal/parse checks live in useUrlVideo
+  const vidUrl = document.getElementById('vidUrl');
+  document.getElementById('srcUrl').addEventListener('click',
+    () => useUrlVideo(vidUrl.value));
+  // honest failure: a source that can't decode reverts to stock — the
+  // enum resets with it, so the UI can't show "URL" while stock plays.
+  // Guarded on stock itself failing: reverting to stock again would
+  // loop error→useStock→error forever.
+  fileVideo.addEventListener('error', () => {
+    if (state.videoSource === 'stock') return;
+    const failed = state.videoSource === 'url' ? remoteHost : localName;
+    useStock(); // repaints note + seg; the message then overwrites it
+    note.textContent = `"${failed}" failed to load (CORS or format) — back to the stock clip`;
+  });
   // drag-drop (V3): the whole window is the target, feeding the same
   // load path as the picker. preventDefault on BOTH events, or the
   // browser navigates away to open the file itself.

@@ -126,7 +126,7 @@ ratified; B/C rejected; below-filter calls listed there).
   the browser's default open-file navigation (preventDefault on both
   events).
 
-- [ ] **V4 — direct URL + honest failure.** URL text field + Load
+- [x] **V4 — direct URL + honest failure.** URL text field + Load
   button. Page-URL shapes (youtube.com / youtu.be / vimeo.com watch
   pages) refused before any load, with a one-line explanation of why
   (unfilterable, direct file links only). Otherwise: set
