@@ -106,7 +106,7 @@ ratified; B/C rejected; below-filter calls listed there).
   plays on Video, credit line in #note unchanged; the sub-row appears
   only in video mode. Preview: flip the toggle both ways, watch #note.
 
-- [ ] **V2 — local file via picker.** "Choose video…" button →
+- [x] **V2 — local file via picker.** "Choose video…" button →
   `<input type="file" accept="video/*">` → object URL into fileVideo,
   previous object URL revoked; #note shows the filename; a "Stock
   clip" affordance returns to default (enum → `'stock'`, credit line

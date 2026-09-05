@@ -33,12 +33,49 @@ export const sliders = {
 };
 
 function updateNote() {
-  const bg = state.videoMode ? VIDEO.stock.credit
+  const bg = state.videoMode
+    ? (state.videoSource === 'local' ? `video: ${localName}` : VIDEO.stock.credit)
     : (state.hasCam ? 'live camera' : 'no camera — showing sample scene');
   note.textContent = bg + ' · simulated RP visual field' +
     (state.splitMode ? ` · comparison (left/top: ${state.refName})` : '');
   const flip = document.getElementById('camFlip');
   flip.hidden = state.videoMode || !state.hasCam;
+}
+
+// --- video sources (Phase V) ----------------------------------------
+// Every source funnels into the one <video id="vid"> element, so the
+// renderer's texture path is untouched. An object URL pins the picked
+// file in memory — revoked on every source switch, never leaked.
+let objectUrl = null;
+let localName = ''; // the picked file's name, for the note
+
+// the seg highlight follows the enum, not the click — so the
+// error→revert path (V4) repaints it for free
+function markSource() {
+  document.getElementById('srcStock').classList.toggle('on', state.videoSource === 'stock');
+  document.getElementById('srcLocal').classList.toggle('on', state.videoSource === 'local');
+}
+
+// V3's drag-drop feeds this same path — one function, two entries
+function useLocalVideo(file) {
+  if (objectUrl) URL.revokeObjectURL(objectUrl);
+  objectUrl = URL.createObjectURL(file);
+  localName = file.name;
+  state.videoSource = 'local';
+  fileVideo.src = objectUrl;
+  fileVideo.play(); // muted, so autoplay policy never blocks it
+  markSource();
+  updateNote();
+}
+
+function useStock() {
+  if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; }
+  localName = '';
+  state.videoSource = 'stock';
+  fileVideo.src = VIDEO.stock.src;
+  fileVideo.play();
+  markSource();
+  updateNote();
 }
 
 // --- camera ---------------------------------------------------------
@@ -429,6 +466,14 @@ export function initControls() {
     // so playback is never blocked by autoplay policy
     if (v) fileVideo.play(); else fileVideo.pause();
   });
+  // local-file source (V2): the visible button proxies the hidden input
+  const vidFile = document.getElementById('vidFile');
+  document.getElementById('srcLocal').addEventListener('click', () => vidFile.click());
+  vidFile.addEventListener('change', () => {
+    if (vidFile.files[0]) useLocalVideo(vidFile.files[0]);
+    vidFile.value = ''; // so re-picking the same file fires again
+  });
+  document.getElementById('srcStock').addEventListener('click', useStock);
   // the reference selector only means something in comparison view —
   // shown exactly then (user revision 2026-08-28 of the three-tab
   // spec: reference controls live under View, not in their own tab)
