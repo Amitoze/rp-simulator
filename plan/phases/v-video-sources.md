@@ -95,7 +95,7 @@ ratified; B/C rejected; below-filter calls listed there).
 
 ## Steps
 
-- [ ] **V1 — source enum + sub-options skeleton.** Extend controls
+- [x] **V1 — source enum + sub-options skeleton.** Extend controls
   state with `videoSource: 'stock' | 'local' | 'url'` (default
   `'stock'`); add the sub-options row to sim.html inside the General
   tab, hidden unless video mode; move the stock path + credit string

@@ -1,6 +1,6 @@
 // Panel UI, background sources (camera / local video), and shared state.
 
-import { DEFAULTS, FIELD, QUALIA, GAZE, PANEL, REFERENCE_PRESET } from './config.js';
+import { DEFAULTS, VIDEO, FIELD, QUALIA, GAZE, PANEL, REFERENCE_PRESET } from './config.js';
 // cycle-safe: restitch/setReference are top-level function
 // declarations in renderer.js, only called from event handlers anyway
 import { restitch, setReference } from './renderer.js';
@@ -10,7 +10,9 @@ import { applyPreset, exportPreset, materialise } from './presets.js';
 export const state = {
   hasCam: false,      // camera stream is live
   mirror: false,      // mirror the camera image (front camera only)
-  videoMode: false,   // self-hosted video file as the background
+  videoMode: false,   // a video file as the background (vs the camera)
+  videoSource: 'stock', // which video plays in video mode — 'stock'
+                        // today; 'local' | 'url' join in V2–V4
   splitMode: false,   // comparison view (side-by-side / stacked)
   refName: 'reference', // the reference pane's loaded preset, for the note
   gazeTarget: [0, 0], // where the eye is being pointed (screen fractions
@@ -31,7 +33,7 @@ export const sliders = {
 };
 
 function updateNote() {
-  const bg = state.videoMode ? 'video: Shanghai city walk, LOVE SHANGHAI, CC BY 4.0'
+  const bg = state.videoMode ? VIDEO.stock.credit
     : (state.hasCam ? 'live camera' : 'no camera — showing sample scene');
   note.textContent = bg + ' · simulated RP visual field' +
     (state.splitMode ? ` · comparison (left/top: ${state.refName})` : '');
@@ -416,8 +418,13 @@ function initGaze() {
 
 export function initControls() {
   initGaze();
+  // config owns the stock clip's path (markup carries no src) — the
+  // one assignment every later source switch will route back through
+  fileVideo.src = VIDEO.stock.src;
+  const vidRow = document.getElementById('vidRow');
   bindToggle('bgCam', 'bgVid', v => {
     state.videoMode = v;
+    vidRow.hidden = !v; // the source sub-options only mean video mode
     // play/pause happens inside the click handler = a user gesture,
     // so playback is never blocked by autoplay policy
     if (v) fileVideo.play(); else fileVideo.pause();

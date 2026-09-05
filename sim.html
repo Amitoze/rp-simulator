@@ -28,6 +28,12 @@
         <button id="bgVid">Video</button>
       </div>
       <button id="camFlip" hidden>⟲ Flip camera</button>
+      <!-- video source sub-options (Phase V) — shown only while Video
+           is the background. Skeleton in V1: local file / drag-drop /
+           URL controls land in V2–V4; stock stays the default. -->
+      <div id="vidRow" hidden>
+        <div class="ghead">Video source</div>
+      </div>
       <label>View</label>
       <div class="seg">
         <button id="vwImm" class="on">Immersive</button>
@@ -76,8 +82,8 @@
 </div>
 <div id="note">starting…</div>
 <video id="cam" autoplay playsinline muted style="display:none"></video>
-<!-- openly licensed footage, self-hosted: see assets/CREDITS.md -->
-<video id="vid" src="assets/shanghai-walk.mp4" loop muted playsinline
+<!-- src assigned at init from config's VIDEO.stock (Phase V) -->
+<video id="vid" loop muted playsinline
        preload="metadata" style="display:none"></video>
 <script type="module" src="renderer.js"></script>
 </body>

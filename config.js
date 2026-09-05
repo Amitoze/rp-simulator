@@ -12,6 +12,18 @@ export const DEFAULTS = {
   menuCollapsed: false,
 };
 
+// Background video sources (Phase V). The stock clip is the default —
+// UI state only, never part of presets: a portrait is the condition,
+// not the footage. Local file / drag-drop / direct URL arrive V2–V4.
+export const VIDEO = {
+  // the shipped clip and the credit line #note shows while it plays
+  // (openly licensed, self-hosted — see assets/CREDITS.md)
+  stock: {
+    src: 'assets/shanghai-walk.mp4',
+    credit: 'video: Shanghai city walk, LOVE SHANGHAI, CC BY 4.0',
+  },
+};
+
 // Gaze simulation (Phase G): holding Option/Alt and moving the mouse
 // points the eye somewhere else — the field mask travels, the scene
 // stays put. Tunables only, no toggle: no input means no offset.
