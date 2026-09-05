@@ -116,7 +116,7 @@ ratified; B/C rejected; below-filter calls listed there).
   after the first → no console errors (revocation path). Phone
   (deferred to gate): iOS picker offers the camera roll.
 
-- [ ] **V3 — drag-and-drop.** `dragover`/`drop` on the window feed the
+- [x] **V3 — drag-and-drop.** `dragover`/`drop` on the window feed the
   same load path as V2 (one function, two entries). Non-video drops →
   #note message, current source kept. Whether a drop outside video
   mode switches to video mode is decided in-step (below filter — one

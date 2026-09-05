@@ -474,6 +474,24 @@ export function initControls() {
     vidFile.value = ''; // so re-picking the same file fires again
   });
   document.getElementById('srcStock').addEventListener('click', useStock);
+  // drag-drop (V3): the whole window is the target, feeding the same
+  // load path as the picker. preventDefault on BOTH events, or the
+  // browser navigates away to open the file itself.
+  addEventListener('dragover', e => e.preventDefault());
+  addEventListener('drop', e => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (!file) return; // e.g. dragged text — nothing to do
+    if (!file.type.startsWith('video/')) {
+      note.textContent = `"${file.name}" is not a video — source unchanged`;
+      return;
+    }
+    // a dropped video is intent enough: switch to video mode if the
+    // camera is up (below-filter call, V3) — via the seg button, so
+    // highlight, sub-row, and pause/play stay consistent
+    if (!state.videoMode) document.getElementById('bgVid').click();
+    useLocalVideo(file);
+  });
   // the reference selector only means something in comparison view —
   // shown exactly then (user revision 2026-08-28 of the three-tab
   // spec: reference controls live under View, not in their own tab)
