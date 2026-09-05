@@ -143,16 +143,18 @@ ratified; B/C rejected; below-filter calls listed there).
 
 ## Gate — Phase V (the user's call, by eye, desktop + phone; never self-certified)
 
-- [ ] Default behaviour: selecting **Video** plays the stock clip
+**PASSED 2026-09-05** — all items confirmed by the user, desktop + phone.
+
+- [x] Default behaviour: selecting **Video** plays the stock clip
   exactly as before this phase; Camera path untouched.
-- [ ] A local video (picker on both platforms; drag-drop desktop-only
+- [x] A local video (picker on both platforms; drag-drop desktop-only
   by nature) renders through the filter — comparison view and glance
   panel behave normally over it.
-- [ ] A CORS-friendly direct URL renders; a YouTube URL produces the
+- [x] A CORS-friendly direct URL renders; a YouTube URL produces the
   explanatory message with stock still playing; a broken URL reverts
   cleanly.
-- [ ] Object-URL hygiene: several source switches in a row leave no
+- [x] Object-URL hygiene: several source switches in a row leave no
   console errors and no growing memory (spot-check, not a formal
   profile).
-- [ ] Phone: picker + URL paths work on iOS Safari; layout of the
+- [x] Phone: picker + URL paths work on iOS Safari; layout of the
   sub-options row holds in the panel.

@@ -1,7 +1,7 @@
 # RP Visual Field Simulator — Context
 
 **Status:** Iteration 2 — the messy donut
-**Last updated:** 2026-08-28
+**Last updated:** 2026-09-05
 
 This file is the high-level context: what the project is, the decisions
 already made, and the cross-cutting rules. The numbered files in this folder
@@ -13,8 +13,8 @@ are the task breakdown:
 | [02-donut-field.md](02-donut-field.md) | B — messy-donut field geometry | 0.5 day | ✅ done 2026-08-18 (gate passed by eye) |
 | [06-qualia-refactor.md](06-qualia-refactor.md) | Q — qualia refactor: toggleable qualia + toggleable field, preset files, per-pane configs | 1–1.5 days | ✅ **COMPLETE 2026-08-28** — Q1–Q5 all gated by eye, desktop + phone (Q5: per-pane rendering, field toggle, envelope v2; the none≠unfiltered ⚠ dissolved via field-off) |
 | [phases/g-glance.md](phases/g-glance.md) | G — gaze simulation + AR glance panel (queue-jumped ahead of C/D, user's call — DECISIONS 2026-08-28) | 1–1.5 days | merged 2026-08-28, G1/G3/G4 gated by eye; **G2 (touch gaze) + G5 (formal gate incl. SAFETY by-eye) PARKED** — gate not formally passed, user's call |
-| [phases/v-video-sources.md](phases/v-video-sources.md) | V — video sources: stock default / local file (picker + drag-drop) / direct media URL (queue-jumped ahead of C, user's call — DECISIONS 2026-08-30) | 0.5 day | |
-| [03-fill-in.md](03-fill-in.md) | C — fill-in replaces transparency; photopsias confined to the scotoma | 0.5 day | |
+| [phases/v-video-sources.md](phases/v-video-sources.md) | V — video sources: stock default / local file (picker + drag-drop) / direct media URL (queue-jumped ahead of C, user's call — DECISIONS 2026-08-30) | 0.5 day | ✅ done 2026-09-05 — V1–V4 built, gate passed by eye, desktop + phone |
+| [03-fill-in.md](03-fill-in.md) | C — fill-in replaces transparency; photopsias confined to the scotoma | 0.5 day | **next up** |
 | [04-peripheral-rendering.md](04-peripheral-rendering.md) | D — how the preserved outer islands look | 0.5–1 day | |
 | [05-fast-follow.md](05-fast-follow.md) | Register of work deferred off the critical path | deferred | FF1–FF6 registered |
 
