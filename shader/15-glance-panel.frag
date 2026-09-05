@@ -10,15 +10,19 @@
 // panel feature must route through addLight and inherit ADD_CAP.
 
 // One width knob; height follows from the fixed on-screen aspect
-// ratio, converted through the pane's pixel aspect so the panel's
-// shape never changes with the window (user spec 2026-08-28).
-vec2 panelSize() {
-  return vec2(uPanelW, uPanelW * uRes.x / (uRes.y * uPanelAspect));
+// ratio, converted through the aspect of the space cuv lives in —
+// the whole pane under cover fit, the letterboxed CONTENT rect under
+// contain fit (the compositor's contAsp) — so the panel's shape never
+// changes with the window OR the view mode (user spec 2026-08-28;
+// converting through uRes assumed cuv ≡ pane, wrong in comparison
+// view: the panel drew at ~2× its width:height there).
+vec2 panelSize(float contAsp) {
+  return vec2(uPanelW, uPanelW * contAsp / uPanelAspect);
 }
 
-vec3 panelQuale(vec3 scene, vec2 cuv) {
+vec3 panelQuale(vec3 scene, vec2 cuv, float contAsp) {
   // 0..1 inside the panel rect; outside means no panel at this pixel
-  vec2 local = (cuv - uPanelPos) / panelSize() + 0.5;
+  vec2 local = (cuv - uPanelPos) / panelSize(contAsp) + 0.5;
   if (local.x < 0.0 || local.x > 1.0 || local.y < 0.0 || local.y > 1.0)
     return scene;
   // zoomed crop about the feed's centre; getScene owns the flip and
@@ -41,8 +45,8 @@ vec3 panelQuale(vec3 scene, vec2 cuv) {
 // The compositor draws it AFTER the survival mix: it is a UI
 // affordance, not world light, and must stay visible over the dead
 // ring while the pane is being placed.
-float panelBorder(vec2 cuv) {
-  vec2 q = abs(cuv - uPanelPos) - panelSize() * 0.5;
+float panelBorder(vec2 cuv, float contAsp) {
+  vec2 q = abs(cuv - uPanelPos) - panelSize(contAsp) * 0.5;
   float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0);
   return exp(-abs(d) * 120.0);
 }

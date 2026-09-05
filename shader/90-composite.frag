@@ -43,7 +43,7 @@ void main() {
   // never gaze-shifted), burned into the scene so the field mask and
   // rim greying composite over it (DECISIONS 2026-08-28)
 #ifdef Q_PANEL
-  scene = panelQuale(scene, cuv);
+  scene = panelQuale(scene, cuv, contAsp);
 #endif
 
   // ---- tier 1: field geometry (always on) ------------------------
@@ -120,7 +120,7 @@ void main() {
   // (the panel chunk's no-flicker SAFETY rule extends here).
 #ifdef Q_PANEL
   col = mix(col, scene, uPanelHi * uPanelSee);
-  col = mix(col, vec3(1.0, 0.85, 0.2), panelBorder(cuv) * uPanelHi);
+  col = mix(col, vec3(1.0, 0.85, 0.2), panelBorder(cuv, contAsp) * uPanelHi);
 #endif
 
   if (bars > 0.5) col = vec3(0.0); // letterbox
