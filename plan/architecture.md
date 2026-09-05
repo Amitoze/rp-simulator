@@ -2,11 +2,11 @@
 
 Maintained by `/architecture`; derived from `plan/` + `DECISIONS.md` +
 the code — update it there, then regenerate here. **Last updated:
-2026-08-28** (Phase G planned — gaze simulation + AR glance panel,
-queue-jumped ahead of C/D on the user's call: GAZE input, PANEL block,
-15-glance-panel chunk all 🟦. See DECISIONS 2026-08-28 "Phase G
-planned". Same day, earlier: PHASE Q COMPLETE, all Q1–Q5 gates passed
-by eye desktop + phone.)
+2026-08-30** (Phase V planned — video source picker on the SOURCE
+stage: stock clip default / local file via picker or drag-drop /
+direct CORS-gated media URL, all 🟦. Queue-jumps C, user's call —
+see DECISIONS 2026-08-30 "Phase V planned". Prior update 2026-08-28:
+Phase G merged early, G1/G3/G4 by-eye; G2 + G5 parked.)
 
 ---
 
@@ -50,6 +50,11 @@ filters; devices are worn over the condition, never part of it.
 ┌────────────────────────┐
 │ SOURCE  controls.js 🟩 │◀── 🟨 FF7 HTTPS dev serving (phone camera on LAN)
 │ + mediaDevices guard 🟩│
+│ video source picker 🟦 │
+│  (V: stock default /   │
+│  local file / direct   │
+│  URL — DECISIONS       │
+│  2026-08-30)           │
 └────────┬───────────────┘
          │ video texture
          ▼
@@ -174,7 +179,7 @@ filters; devices are worn over the condition, never part of it.
 🟩 Built   🟧 In progress   ◐ Scaffolded   🟦 Planned   🟨 Proposed
 ```
 
-### Source 🟩
+### Source 🟩 → grows in V 🟦 (video source picker — DECISIONS 2026-08-30, not built)
 
 ```
 getUserMedia ──camera frames──▶┐
@@ -182,6 +187,18 @@ file <video> ──decoded frames─▶├──▶ one GL texture, re-uploaded 
 absent/denied ─────────────────┘    (fallback: procedural scene in-shader,
  (mediaDevices guard: insecure       uSrc = 0)
   origins get fallback, not a crash)
+
+🟦 Phase V — every source funnels into the SAME <video id="vid">
+   element, so renderer / panes / gaze / panel need zero changes:
+
+Background: Video ──▶ sub-options row (revealed only in video mode)
+  ├─ stock clip — DEFAULT, plays as today (path + credit → config)
+  ├─ local file: picker or drag-drop ──▶ object URL (same-origin,
+  │    never CORS-gated; previous object URL revoked on switch)
+  └─ pasted direct media URL ──▶ crossorigin="anonymous" src
+       (non-CORS host fails cleanly at LOAD → message + revert to
+        stock; YouTube/Vimeo PAGE urls refused with an explanation —
+        cross-origin iframes have zero pixel access, unfilterable)
 ```
 
 ### Config & schema 🟩 (Q2, GATE passed 2026-08-20) (DECISIONS 2026-08-20)

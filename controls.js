@@ -1,6 +1,6 @@
 // Panel UI, background sources (camera / local video), and shared state.
 
-import { DEFAULTS, FIELD, QUALIA, GAZE, PANEL, REFERENCE_PRESET } from './config.js';
+import { DEFAULTS, VIDEO, FIELD, QUALIA, GAZE, PANEL, REFERENCE_PRESET } from './config.js';
 // cycle-safe: restitch/setReference are top-level function
 // declarations in renderer.js, only called from event handlers anyway
 import { restitch, setReference } from './renderer.js';
@@ -10,7 +10,9 @@ import { applyPreset, exportPreset, materialise } from './presets.js';
 export const state = {
   hasCam: false,      // camera stream is live
   mirror: false,      // mirror the camera image (front camera only)
-  videoMode: false,   // self-hosted video file as the background
+  videoMode: false,   // a video file as the background (vs the camera)
+  videoSource: 'stock', // which video plays in video mode — 'stock'
+                        // today; 'local' | 'url' join in V2–V4
   splitMode: false,   // comparison view (side-by-side / stacked)
   refName: 'reference', // the reference pane's loaded preset, for the note
   gazeTarget: [0, 0], // where the eye is being pointed (screen fractions
@@ -31,12 +33,87 @@ export const sliders = {
 };
 
 function updateNote() {
-  const bg = state.videoMode ? 'video: Shanghai city walk, LOVE SHANGHAI, CC BY 4.0'
+  const bg = state.videoMode
+    ? (state.videoSource === 'local' ? `video: ${localName}`
+      : state.videoSource === 'url' ? `video: ${remoteHost}`
+      : VIDEO.stock.credit)
     : (state.hasCam ? 'live camera' : 'no camera — showing sample scene');
   note.textContent = bg + ' · simulated RP visual field' +
     (state.splitMode ? ` · comparison (left/top: ${state.refName})` : '');
   const flip = document.getElementById('camFlip');
   flip.hidden = state.videoMode || !state.hasCam;
+}
+
+// --- video sources (Phase V) ----------------------------------------
+// Every source funnels into the one <video id="vid"> element, so the
+// renderer's texture path is untouched. An object URL pins the picked
+// file in memory — revoked on every source switch, never leaked.
+let objectUrl = null;
+let localName = '';  // the picked file's name, for the note
+let remoteHost = ''; // the URL source's host, for the note
+
+// watch-page shapes that can never render client-side (standing
+// constraint: cross-origin iframe = zero pixel access; raw stream
+// URLs signed + non-CORS — DECISIONS 2026-08-30, option A)
+const PAGE_URL = /(^|\.|\/\/)(youtube\.com|youtu\.be|vimeo\.com)/i;
+
+// the seg highlight follows the enum, not the click — so the
+// error→revert path repaints it for free; a URL source lights
+// neither button (the note names its host instead)
+function markSource() {
+  document.getElementById('srcStock').classList.toggle('on', state.videoSource === 'stock');
+  document.getElementById('srcLocal').classList.toggle('on', state.videoSource === 'local');
+}
+
+// V3's drag-drop feeds this same path — one function, two entries
+function useLocalVideo(file) {
+  if (objectUrl) URL.revokeObjectURL(objectUrl);
+  objectUrl = URL.createObjectURL(file);
+  localName = file.name;
+  state.videoSource = 'local';
+  fileVideo.crossOrigin = null; // blob: is same-origin — needs none
+  fileVideo.src = objectUrl;
+  fileVideo.play(); // muted, so autoplay policy never blocks it
+  markSource();
+  updateNote();
+}
+
+function useStock() {
+  if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; }
+  localName = '';
+  state.videoSource = 'stock';
+  fileVideo.crossOrigin = null; // same-origin — needs none
+  fileVideo.src = VIDEO.stock.src;
+  fileVideo.play();
+  markSource();
+  updateNote();
+}
+
+function useUrlVideo(raw) {
+  const url = raw.trim();
+  if (!url) return;
+  if (PAGE_URL.test(url)) {
+    note.textContent = 'watch-page links can’t be filtered (the page '
+      + 'gives no pixel access) — paste a direct video-file URL (.mp4/.webm)';
+    return; // refused before any load: current source keeps playing
+  }
+  let host;
+  try { host = new URL(url).host; }
+  catch {
+    note.textContent = 'that doesn’t parse as a URL — source unchanged';
+    return;
+  }
+  if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; }
+  localName = '';
+  remoteHost = host;
+  state.videoSource = 'url';
+  // order matters: crossorigin BEFORE src — set after, and the fetch
+  // has already gone out without CORS, tainting the texture
+  fileVideo.crossOrigin = 'anonymous';
+  fileVideo.src = url;
+  fileVideo.play();
+  markSource();
+  updateNote();
 }
 
 // --- camera ---------------------------------------------------------
@@ -416,11 +493,56 @@ function initGaze() {
 
 export function initControls() {
   initGaze();
+  // config owns the stock clip's path (markup carries no src) — the
+  // one assignment every later source switch will route back through
+  fileVideo.src = VIDEO.stock.src;
+  const vidRow = document.getElementById('vidRow');
   bindToggle('bgCam', 'bgVid', v => {
     state.videoMode = v;
+    vidRow.hidden = !v; // the source sub-options only mean video mode
     // play/pause happens inside the click handler = a user gesture,
     // so playback is never blocked by autoplay policy
     if (v) fileVideo.play(); else fileVideo.pause();
+  });
+  // local-file source (V2): the visible button proxies the hidden input
+  const vidFile = document.getElementById('vidFile');
+  document.getElementById('srcLocal').addEventListener('click', () => vidFile.click());
+  vidFile.addEventListener('change', () => {
+    if (vidFile.files[0]) useLocalVideo(vidFile.files[0]);
+    vidFile.value = ''; // so re-picking the same file fires again
+  });
+  document.getElementById('srcStock').addEventListener('click', useStock);
+  // direct URL (V4): refusal/parse checks live in useUrlVideo
+  const vidUrl = document.getElementById('vidUrl');
+  document.getElementById('srcUrl').addEventListener('click',
+    () => useUrlVideo(vidUrl.value));
+  // honest failure: a source that can't decode reverts to stock — the
+  // enum resets with it, so the UI can't show "URL" while stock plays.
+  // Guarded on stock itself failing: reverting to stock again would
+  // loop error→useStock→error forever.
+  fileVideo.addEventListener('error', () => {
+    if (state.videoSource === 'stock') return;
+    const failed = state.videoSource === 'url' ? remoteHost : localName;
+    useStock(); // repaints note + seg; the message then overwrites it
+    note.textContent = `"${failed}" failed to load (CORS or format) — back to the stock clip`;
+  });
+  // drag-drop (V3): the whole window is the target, feeding the same
+  // load path as the picker. preventDefault on BOTH events, or the
+  // browser navigates away to open the file itself.
+  addEventListener('dragover', e => e.preventDefault());
+  addEventListener('drop', e => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (!file) return; // e.g. dragged text — nothing to do
+    if (!file.type.startsWith('video/')) {
+      note.textContent = `"${file.name}" is not a video — source unchanged`;
+      return;
+    }
+    // a dropped video is intent enough: switch to video mode if the
+    // camera is up (below-filter call, V3) — via the seg button, so
+    // highlight, sub-row, and pause/play stay consistent
+    if (!state.videoMode) document.getElementById('bgVid').click();
+    useLocalVideo(file);
   });
   // the reference selector only means something in comparison view —
   // shown exactly then (user revision 2026-08-28 of the three-tab
