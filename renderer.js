@@ -97,7 +97,7 @@ function makeProgram(sources, qualia, field, panel) {
                       'uOuterEdge', 'uOuterCover', 'uIslandSeed',
                       'uSparkleFlicker', 'uSparkleBandIn', 'uSparkleBandOut',
                       'uGaze', 'uPanelPos', 'uPanelW', 'uPanelAspect',
-                      'uPanelZoom', 'uPanelGain', 'uPanelOpaque',
+                      'uPanelZoom', 'uPanelFocus', 'uPanelGain', 'uPanelOpaque',
                       'uPanelHi', 'uPanelSee']) {
     U[name] = gl.getUniformLocation(prog, name);
   }
@@ -159,6 +159,15 @@ function applyPanel(U, panel) {
   gl.uniform1f(U.uPanelW, p.size.value);
   gl.uniform1f(U.uPanelAspect, panel.aspect);
   gl.uniform1f(U.uPanelZoom, p.zoom.value);
+  // focus is clamped HERE, against the zoom in force this frame — at
+  // zoom z the crop window is 1/z wide, so its centre may stray at
+  // most 0.5 − 0.5/z from centre. Clamping at apply time covers every
+  // writer at once; a write-side-only clamp let a second zoom writer
+  // push the crop off the feed (edge streaking, DECISIONS 2026-09-06)
+  const half = 0.5 / p.zoom.value;
+  gl.uniform2f(U.uPanelFocus,
+    Math.min(1 - half, Math.max(half, p.focus.value[0])),
+    Math.min(1 - half, Math.max(half, p.focus.value[1])));
   // the display replicates the source feed's brightness and never
   // exceeds it: gain = min(1, 1/ambient) — low ambient is not a
   // boost, only high ambient washes out (schema min keeps the
