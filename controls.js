@@ -538,6 +538,15 @@ const ACTIONS = {
   togglePanel: () => document.querySelector('#panelGroup .qtoggle').click(),
   // Visual field is always the first group buildAdvanced makes
   toggleField: () => document.querySelector('#advBody .group:first-child .qtoggle').click(),
+  // addressed by aria-label (set from the group label in addGroup):
+  // position-proof, unlike first-child above, should qualia reorder
+  toggleNight: () => document.querySelector('#advBody .qtoggle[aria-label="Nyctalopia"]').click(),
+  // Fullscreen API needs a user gesture — a real keypress is one, so
+  // this can only live here. The catch keeps a denied request (e.g.
+  // iframe policy) from surfacing as an unhandled rejection.
+  fullscreen: () => document.fullscreenElement
+    ? document.exitFullscreen()
+    : document.documentElement.requestFullscreen().catch(() => {}),
   zoomIn: () => zoomPanel(+1),
   zoomOut: () => zoomPanel(-1),
   toggleSymptoms,

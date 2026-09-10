@@ -3,6 +3,36 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-09-07 — Nyctalopia quale ratified (option C): scotopic floor now, adaptation lag backlogged
+
+- **Representation ratified** (user's call, option C): night blindness
+  is a per-pixel LUMINANCE CRUSH — scene pixels below a threshold
+  luminance are void (black, not gray, not noisy), with a soft knee.
+  Grounding: rods die first in RP and below cone range there is no
+  handoff `[factual-source — standard ophthalmology]`; the absent rod
+  branch of the dark-adaptation curve `[peer-reviewed — classic
+  psychophysics]` is the TEMPORAL half, split off as stage B
+  ("Nyctalopia stage B: adaptation lag", backlog) because it needs a
+  scene-luminance probe — new pipeline machinery.
+- **Slot order is the feature**: the crush lands on the world sample
+  BEFORE the glance panel composites (new 12-nyctalopia chunk,
+  compositor slot above Q_PANEL). A see-through display is emissive —
+  it must stay bright exactly when the world goes void; that one frame
+  is the aid's whole night story. Crushing after the panel would
+  dishonestly blind the display.
+- **Ships disabled** (breaks with every other quale's enabled:true):
+  the all-on-reproduces-the-pre-refactor-look contract predates this
+  quale; defaulting it on would darken every tuned look.
+- **Known accepted gaps**: murk samples the scene itself, so its
+  patches show uncrushed world — murk dies in Phase C, not worth
+  touching; the camera auto-gains dark scenes before the shader sees
+  them, so live-camera darkness is UNDERrepresented — stage B's probe
+  is the counterweight. Defaults (threshold 0.15, knee 0.15) are
+  untuned guesses pending by-eye on a real dim room.
+- Keyboard: plain 2 toggles it (same-day user request), addressed by
+  aria-label, not position — reordering qualia can't silently retarget
+  the shortcut.
+
 ## 2026-09-07 — Panel shortcuts: Option+Shift layer; pan retried with apply-time clamp; 0 memoryless
 
 - **All panel shortcuts moved onto Option+Shift** (user spec

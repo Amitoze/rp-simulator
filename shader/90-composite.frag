@@ -38,6 +38,13 @@ void main() {
   }
   vec3 scene = getScene(suv);
 
+  // ---- slot: nyctalopia (before the aid) -------------------------
+  // The dark eats the WORLD; the panel's display makes its own light
+  // and composites after, surviving it — the aid's night story.
+#ifdef Q_NYCTALOPIA
+  scene = nyctalopiaQuale(scene);
+#endif
+
   // ---- slot: the aid (before every symptom slot) -----------------
   // The panel is part of the WORLD — placed from cuv (head-fixed,
   // never gaze-shifted), burned into the scene so the field mask and

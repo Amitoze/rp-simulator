@@ -7,6 +7,21 @@ P3 = keep, revisit when the named condition triggers.
 
 ## Inbox
 
+### Nyctalopia stage B: adaptation lag
+`feature` · added 2026-09-07 · effort M? — scene-luminance probe (new
+pipeline machinery: downsampled frame average → uniform) + eased
+adaptation state; reference pane adapts, active pane plateaus
+Stage B of the ratified nyctalopia design (option C, 2026-09-07):
+mimic going from light to dark — a normal eye recovers over minutes,
+the RP eye plateaus at the shallow cone level. Stage A (per-pixel
+scotopic floor quale) built via walkthrough same day. Also
+counterweighs the camera auto-exposure confound: the sensor gains up
+dark scenes before the shader sees them.
+Impact: the light→dark transition is the lived first symptom of RP;
+serves the honesty outcome, and pairs with the panel night-vision
+entry below (display stays bright while the world goes void).
+Needs: stage A's nyctalopia quale (in flight).
+
 ### Night vision enhancement in panel
 `feature` · added 2026-08-28 · effort M? — shader work on the panel
 feed (gain boost, edge/contrast highlights); scope depends on how

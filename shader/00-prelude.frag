@@ -35,6 +35,8 @@ uniform float uPanelOpaque; // replace-mix: minOpacity floor .. 1 = opaque displ
 uniform float uPanelHi;     // 1 = reposition mode: draw the boundary highlight
 uniform float uPanelSee;    // reposition mode: how transparent the field mask
                             // goes so the moving panel stays visible
+uniform float uNightThresh; // nyctalopia: luminance floor — below it, void
+uniform float uNightKnee;   // width of the soft ramp above the floor
 
 // -- small value-noise helpers ------------------------------------
 float hash(vec2 p) {

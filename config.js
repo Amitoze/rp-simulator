@@ -57,6 +57,8 @@ export const SHORTCUTS = {
   keys: {
     0: 'toggleSymptoms',   // everything under Adjust Symptoms off/on
     1: 'toggleField',      // visual field on/off
+    2: 'toggleNight',      // nyctalopia (night blindness) on/off
+    f: 'fullscreen',       // chromeless fullscreen (Esc exits)
   },
 
   // the PANEL layer: these fire only while Option+Shift is held —
@@ -103,14 +105,14 @@ export const FIELD = {
     // (it IS the field's progression), but its UI is the headline
     // General-tab slider, deliberately not duplicated in the
     // generated group (DECISIONS 2026-08-20, reaffirmed 2026-08-28)
-    degeneration: { value: 0.75, min: 0, max: 1, label: 'Degeneration of central field' },
+    degeneration: { value: 0.82, min: 0, max: 1, label: 'Degeneration of central field' },
 
     // radius of the surviving central island, [mild, late]
     inner: { value: [81, 13], min: 0, max: 90, label: 'Central island radius' },
 
     // radius where far-peripheral islands can begin — the dead ring's
     // far side, [mild, late]. Widens outward as degeneration advances.
-    outer: { value: [65, 85], min: 0, max: 90, label: 'Far islands begin' },
+    outer: { value: [85, 90], min: 0, max: 90, label: 'Far islands begin' },
 
     // how much of the beyond-the-ring field survives when mild
     outerCoverage: { value: 0.65, min: 0, max: 1, label: 'Far island coverage' },
@@ -179,11 +181,11 @@ export const PANEL = {
     // at or below 1 the panel adds the feed at source strength,
     // above 1 daylight washes it out. min stays above zero: this
     // value divides, and the schema clamp is the guard
-    ambient: { value: 1, min: 0.2, max: 2, label: 'Ambient light' },
+    ambient: { value: .5, min: 0.2, max: 2, label: 'Ambient light' },
 
     // 1 = maximum see-through (additive optics, floored by minOpacity
     // above so the panel never quite vanishes) … 0 = opaque display
-    transparency: { value: 1, min: 0, max: 1, label: 'Display transparency' },
+    transparency: { value: .5, min: 0, max: 1, label: 'Display transparency' },
   },
 };
 
@@ -251,6 +253,25 @@ export const QUALIA = {
   },
 
   transition: { enabled: true, params: {} },  // toggle only — no tunables yet
+
+  // nyctalopia (night blindness — the first RP symptom): rods are
+  // gone, and below the cone threshold there is no handoff — dim
+  // regions are ABSENT: black, not gray or grainy. Ships disabled:
+  // the all-on-reproduces-the-pre-refactor-look contract predates
+  // this quale, and defaulting it on would darken every existing look.
+  nyctalopia: {
+    enabled: false,
+    params: {
+      // scene luminance below which nothing is seen (0..1 of the
+      // feed's own range — the camera has already auto-exposed)
+      threshold: { value: 0.75, min: 0, max: 0.5, label: 'Darkness threshold',
+                   hint: 'How dark a surface must be before it disappears entirely' },
+
+      // width of the soft edge above the threshold: small = a hard
+      // wall of black, larger = shadows fade gradually into void
+      knee: { value: 0.75, min: 0.01, max: 0.4, label: 'Fade softness' },
+    },
+  },
 };
 
 // Clamp every param value into its schema range, naming each clamp in

@@ -29,10 +29,11 @@ function compile(type, src) {
 // The shader lives as ordered chunks; the stitcher concatenates them.
 // Chunks not named in CHUNK_QUALE are structural (prelude, field,
 // compositor) and always included.
-const CHUNKS = ['00-prelude', '10-field', '15-glance-panel', '20-smoke',
-                '21-photopsia', '22-sparkle', '23-murk', '24-transition',
-                '90-composite'];
+const CHUNKS = ['00-prelude', '10-field', '12-nyctalopia', '15-glance-panel',
+                '20-smoke', '21-photopsia', '22-sparkle', '23-murk',
+                '24-transition', '90-composite'];
 const CHUNK_QUALE = {
+  '12-nyctalopia': 'nyctalopia',
   '20-smoke': 'smoke',
   '21-photopsia': 'photopsia',
   '22-sparkle': 'sparkle',
@@ -92,7 +93,8 @@ function makeProgram(sources, qualia, field, panel) {
   // comes back null, and gl.uniform* on null is a defined no-op
   const U = {};
   for (const name of ['uTex', 'uSrc', 'uMirror', 'uTime', 'uRes', 'uEdgeBase',
-                      'uNetDensity', 'uSeeThru', 'uFit', 'uAspect',
+                      'uNetDensity', 'uSeeThru', 'uNightThresh', 'uNightKnee',
+                      'uFit', 'uAspect',
                       'uNetScale', 'uNetWarp', 'uNetFlicker',
                       'uOuterEdge', 'uOuterCover', 'uIslandSeed',
                       'uSparkleFlicker', 'uSparkleBandIn', 'uSparkleBandOut',
@@ -147,6 +149,9 @@ function applyQualia(U, qualia) {
   gl.uniform1f(U.uSparkleFlicker, 2 * Math.PI * spk.flickerHz.value);
   gl.uniform2f(U.uSparkleBandIn, spk.bandIn.value[0], spk.bandIn.value[1]);
   gl.uniform2f(U.uSparkleBandOut, spk.bandOut.value[0], spk.bandOut.value[1]);
+  const nyc = qualia.nyctalopia.params;
+  gl.uniform1f(U.uNightThresh, nyc.threshold.value);
+  gl.uniform1f(U.uNightKnee, nyc.knee.value);
 }
 
 // The aid's uniforms — ACTIVE pane only: the reference pane draws with
