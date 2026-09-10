@@ -26,12 +26,17 @@ uniform vec2 uGaze;         // where the eye points: offset from straight ahead,
 uniform vec2 uPanelPos;     // glance panel centre (screen fractions, y up)
 uniform float uPanelW;      // glance panel width (screen fractions)
 uniform float uPanelAspect; // panel's fixed on-screen width : height ratio
-uniform float uPanelZoom;   // glance panel magnification of the feed centre
+uniform float uPanelZoom;   // glance panel magnification of the feed
+uniform vec2 uPanelFocus;   // feed point the zoomed crop is centred on
+                            // (feed fractions, y up); the renderer
+                            // clamps it so the crop stays on the feed
 uniform float uPanelGain;   // panel light per feed unit: 1 / ambient
 uniform float uPanelOpaque; // replace-mix: minOpacity floor .. 1 = opaque display
 uniform float uPanelHi;     // 1 = reposition mode: draw the boundary highlight
 uniform float uPanelSee;    // reposition mode: how transparent the field mask
                             // goes so the moving panel stays visible
+uniform float uNightThresh; // nyctalopia: luminance floor — below it, void
+uniform float uNightKnee;   // width of the soft ramp above the floor
 
 // -- small value-noise helpers ------------------------------------
 float hash(vec2 p) {

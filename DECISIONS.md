@@ -3,7 +3,89 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
-## 2026-08-30 — Phase V planned: video sources; direct-URL-only ratified
+## 2026-09-07 — Nyctalopia quale ratified (option C): scotopic floor now, adaptation lag backlogged
+
+- **Representation ratified** (user's call, option C): night blindness
+  is a per-pixel LUMINANCE CRUSH — scene pixels below a threshold
+  luminance are void (black, not gray, not noisy), with a soft knee.
+  Grounding: rods die first in RP and below cone range there is no
+  handoff `[factual-source — standard ophthalmology]`; the absent rod
+  branch of the dark-adaptation curve `[peer-reviewed — classic
+  psychophysics]` is the TEMPORAL half, split off as stage B
+  ("Nyctalopia stage B: adaptation lag", backlog) because it needs a
+  scene-luminance probe — new pipeline machinery.
+- **Slot order is the feature**: the crush lands on the world sample
+  BEFORE the glance panel composites (new 12-nyctalopia chunk,
+  compositor slot above Q_PANEL). A see-through display is emissive —
+  it must stay bright exactly when the world goes void; that one frame
+  is the aid's whole night story. Crushing after the panel would
+  dishonestly blind the display.
+- **Ships disabled** (breaks with every other quale's enabled:true):
+  the all-on-reproduces-the-pre-refactor-look contract predates this
+  quale; defaulting it on would darken every tuned look.
+- **Known accepted gaps**: murk samples the scene itself, so its
+  patches show uncrushed world — murk dies in Phase C, not worth
+  touching; the camera auto-gains dark scenes before the shader sees
+  them, so live-camera darkness is UNDERrepresented — stage B's probe
+  is the counterweight. Defaults (threshold 0.15, knee 0.15) are
+  untuned guesses pending by-eye on a real dim room.
+- Keyboard: plain 2 toggles it (same-day user request), addressed by
+  aria-label, not position — reordering qualia can't silently retarget
+  the shortcut.
+
+## 2026-09-07 — Panel shortcuts: Option+Shift layer; pan retried with apply-time clamp; 0 memoryless
+
+- **All panel shortcuts moved onto Option+Shift** (user spec
+  2026-09-07): toggle (A), zoom (+/−), and crop pan (arrows) fire only
+  while the chord is held — the same chord as the panel's mouse
+  gestures, so every way of driving the aid lives on one modifier.
+  The wheel-zoom gesture is RETIRED (and GAZE.wheelZoom with it);
+  zoom is +/− only. Plain keys keep the non-panel actions (0, 1).
+- **The panel layer matches on e.code, not e.key**
+  `[factual-source — macOS input model, verified with composed-key
+  events]`: with Option held, macOS composes e.key into another
+  character entirely (Option+Shift+A = 'Å', Option+Shift+= = '±'), so
+  key names can never match; e.code names the physical key
+  (QWERTY-labelled) regardless of modifiers.
+- **Arrow-key pan re-added with the clamp moved to APPLY time** (the
+  2026-09-06 retry, as planned): applyPanel (renderer) clamps focus
+  against the zoom in force each frame, so no writer can push the
+  crop off the feed — the wheel-path hole class is closed by
+  construction, not by chasing writers. controls.js keeps a
+  write-side clamp purely for responsiveness (no dead arrow presses
+  after a zoom-out). Verified: focus parked at the 0.083 edge at
+  zoom 6, keyboard zoom-out to 1, next press lands 0.5 exactly.
+- **0 is memoryless** (user correction 2026-09-07): any symptom on →
+  all off; none on → ALL on, regardless of prior tweaks. The
+  restore-your-set memo (my design, same week) read as "only certain
+  symptoms came back" — predictability beat cleverness.
+
+## 2026-09-06 — Arrow-key panel pan reverted: crop escaped the feed
+
+- **Tried and reverted** (user's call after by-eye check): arrow keys
+  panning the glance panel's zoomed crop via a new `PANEL.params.focus`
+  pair-param → `uPanelFocus` uniform → crop centre in
+  15-glance-panel (replacing the hardcoded feed-centre 0.5).
+  Observed: panel content smeared into vertical/horizontal streaks
+  over part of the panel (live camera, by-eye 2026-09-06) — classic
+  CLAMP_TO_EDGE stretching, i.e. the crop window sampling outside the
+  video texture.
+- **Diagnosis `[my-synthesis, medium-high confidence]`**: the focus
+  clamp (keep the window's centre within 0.5±(0.5−0.5/zoom)) ran only
+  in the KEYBOARD paths (arrow press, +/− zoom). Zoom has a second
+  writer — the Option+Shift reposition wheel in initGaze — which did
+  not re-clamp; pan toward an edge at high zoom, then wheel-zoom out,
+  and the window extends past the feed → edge streaks. Mechanism fits
+  the streak geometry (about a third of the panel at the observed
+  zoom); not reproduced step-for-step. Synthetic-key tests passed
+  because they only exercised the keyboard paths.
+- **For the retry**: clamp at APPLY time, not at write time —
+  applyPanel (renderer) computes the effective focus from the current
+  zoom every frame, so every writer (keys, wheel, future gestures) is
+  covered by one clamp and the param can never render out-of-range.
+  Alternative: a single setZoom helper both zoom writers share.
+  Everything else in the reverted design (step ÷ zoom for constant
+  apparent speed, noUI param like position, auto-repeat) held up.
 
 - **Phase V queue-jumps C** (user's call, 2026-08-30, second jump after
   G's precedent): when Video is the background, a sub-options row

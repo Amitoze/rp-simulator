@@ -1,6 +1,6 @@
 // Panel UI, background sources (camera / local video), and shared state.
 
-import { DEFAULTS, VIDEO, FIELD, QUALIA, GAZE, PANEL, REFERENCE_PRESET } from './config.js';
+import { DEFAULTS, VIDEO, FIELD, QUALIA, GAZE, PANEL, REFERENCE_PRESET, SHORTCUTS } from './config.js';
 // cycle-safe: restitch/setReference are top-level function
 // declarations in renderer.js, only called from event handlers anyway
 import { restitch, setReference } from './renderer.js';
@@ -413,7 +413,8 @@ function initGaze() {
   // While repositioning, holding the mouse button switches the drag
   // to RESIZE: left = bigger, right = smaller (one width param, so
   // the ratio keeps itself); releasing the button resumes placing.
-  // The scroll wheel drives the panel's zoom in the same mode.
+  // Zoom moved to Option+Shift + / − (the keyboard panel layer) —
+  // the wheel gesture was retired with it (user spec 2026-09-07).
   let resizing = false;
 
   // masked view for reposition mode — derived, never mutating QUALIA:
@@ -448,20 +449,6 @@ function initGaze() {
   addEventListener('mousedown', () => { if (state.repositionMode) resizing = true; });
   addEventListener('mouseup', () => { resizing = false; });
 
-  // wheel = panel zoom while repositioning (scroll up = zoom in);
-  // passive:false so preventDefault can stop the browser's own
-  // pinch-zoom/scroll handling of the gesture
-  addEventListener('wheel', e => {
-    if (!state.repositionMode) return;
-    e.preventDefault();
-    // Shift is held in this mode, and macOS remaps a shifted wheel's
-    // vertical delta onto deltaX — read whichever axis carries it
-    const d = e.deltaY !== 0 ? e.deltaY : e.deltaX;
-    const z = PANEL.params.zoom;
-    z.value = Math.min(z.max, Math.max(z.min,
-      z.value - d * GAZE.wheelZoom));
-  }, { passive: false });
-
   addEventListener('mousemove', e => {
     // moving without Option is not a release: the glance holds until
     // the key lifts
@@ -491,8 +478,115 @@ function initGaze() {
   });
 }
 
+// --- keyboard shortcuts ---------------------------------------------
+// Table-driven: SHORTCUTS.keys (config) says which key means which
+// action; ACTIONS says what an action does. Single-control actions
+// drive the EXISTING menu button via .click() — the applyDefaults
+// idiom — so state, button visuals, and restitch stay on one code
+// path. Bulk actions write the schema and regenerate the section from
+// it — the applyPreset idiom — for one restitch instead of one per
+// group.
+
+const allSymptoms = () => [FIELD, ...Object.values(QUALIA)];
+
+// all-or-nothing, deliberately memoryless: any symptom on → all off;
+// none on → ALL on, regardless of which were tweaked before (user
+// correction 2026-09-07 — the earlier restore-your-set memo read as
+// "only certain symptoms came back")
+function toggleSymptoms() {
+  const turnOn = !allSymptoms().some(s => s.enabled);
+  allSymptoms().forEach(s => { s.enabled = turnOn; });
+  buildAdvanced(); // regenerate from the schema = the sync
+  restitch(QUALIA, FIELD, PANEL);
+}
+
+// clamped schema write; the frame loop reads it next frame. Rebuild
+// the group so the zoom fader shows the truth (same reason the
+// reposition gesture rebuilds on exit).
+function zoomPanel(dir) {
+  const z = PANEL.params.zoom;
+  z.value = Math.min(z.max, Math.max(z.min,
+    z.value + dir * SHORTCUTS.panelZoomStep));
+  buildPanelGroup();
+}
+
+// write-side nudge of the focus toward legal range for the CURRENT
+// zoom. The renderer's apply-time clamp is the real guard (it covers
+// every writer); this one only keeps arrow presses responsive — after
+// a zoom-out the stored value can sit beyond the new window, and the
+// first presses back would otherwise be dead travel
+function clampFocus() {
+  const f = PANEL.params.focus;
+  const half = 0.5 / PANEL.params.zoom.value;
+  f.value = f.value.map(v => Math.min(1 - half, Math.max(half, v)));
+}
+
+// arrow-key pan of the panel's zoomed crop. The config step is in
+// panel-view fractions — dividing by zoom converts it to feed
+// fractions, so the image appears to move the same amount per press
+// at any magnification.
+function focusPanel(dx, dy) {
+  clampFocus(); // pull a stale (pre-zoom-out) value into range first
+  const f = PANEL.params.focus;
+  const s = SHORTCUTS.panelFocusStep / PANEL.params.zoom.value;
+  f.value[0] += dx * s;
+  f.value[1] += dy * s;
+  clampFocus();
+}
+
+const ACTIONS = {
+  togglePanel: () => document.querySelector('#panelGroup .qtoggle').click(),
+  // Visual field is always the first group buildAdvanced makes
+  toggleField: () => document.querySelector('#advBody .group:first-child .qtoggle').click(),
+  // addressed by aria-label (set from the group label in addGroup):
+  // position-proof, unlike first-child above, should qualia reorder
+  toggleNight: () => document.querySelector('#advBody .qtoggle[aria-label="Nyctalopia"]').click(),
+  // Fullscreen API needs a user gesture — a real keypress is one, so
+  // this can only live here. The catch keeps a denied request (e.g.
+  // iframe policy) from surfacing as an unhandled rejection.
+  fullscreen: () => document.fullscreenElement
+    ? document.exitFullscreen()
+    : document.documentElement.requestFullscreen().catch(() => {}),
+  zoomIn: () => zoomPanel(+1),
+  zoomOut: () => zoomPanel(-1),
+  toggleSymptoms,
+  // feed fractions are y-up (GL), so ArrowUp is +y
+  focusUp: () => focusPanel(0, +1),
+  focusDown: () => focusPanel(0, -1),
+  focusLeft: () => focusPanel(-1, 0),
+  focusRight: () => focusPanel(+1, 0),
+};
+
+// actions where holding the key SHOULD keep firing (auto-repeat);
+// toggles stay excluded or a held key would flicker them
+const REPEATS = new Set(['zoomIn', 'zoomOut',
+  'focusUp', 'focusDown', 'focusLeft', 'focusRight']);
+
+function initShortcuts() {
+  addEventListener('keydown', e => {
+    // typing in a field (the video-URL box) must never fire one —
+    // but a clicked SLIDER keeps keyboard focus, and blocking it
+    // would silently kill every shortcut until focus moves; only
+    // text-entry targets opt out
+    if (e.target.matches?.('textarea, select, input:not([type=range])')) return;
+    if (e.metaKey || e.ctrlKey) return; // the browser's chords stay its
+    // two layers. Option+Shift = the panel layer, matched on e.code
+    // (the physical key): with Option held, macOS composes e.key into
+    // another character entirely — Option+Shift+A is 'Å' — so key
+    // names would never match. Option alone stays the gaze gesture's.
+    const name = e.altKey
+      ? (e.shiftKey ? SHORTCUTS.panelKeys[e.code] : undefined)
+      : SHORTCUTS.keys[e.key.toLowerCase()];
+    if (!name) return;
+    if (e.repeat && !REPEATS.has(name)) return;
+    e.preventDefault(); // arrows must pan the crop, not scroll the page
+    ACTIONS[name]();
+  });
+}
+
 export function initControls() {
   initGaze();
+  initShortcuts();
   // config owns the stock clip's path (markup carries no src) — the
   // one assignment every later source switch will route back through
   fileVideo.src = VIDEO.stock.src;

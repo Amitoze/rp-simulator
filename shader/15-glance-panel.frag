@@ -25,9 +25,10 @@ vec3 panelQuale(vec3 scene, vec2 cuv, float contAsp) {
   vec2 local = (cuv - uPanelPos) / panelSize(contAsp) + 0.5;
   if (local.x < 0.0 || local.x > 1.0 || local.y < 0.0 || local.y > 1.0)
     return scene;
-  // zoomed crop about the feed's centre; getScene owns the flip and
-  // mirror, so the panel shows exactly what the main view shows
-  vec2 panelUV = 0.5 + (local - 0.5) / uPanelZoom;
+  // zoomed crop about the focus point (Option+Shift+arrows pan it;
+  // feed centre by default); getScene owns the flip and mirror, so
+  // the panel shows exactly what the main view shows
+  vec2 panelUV = uPanelFocus + (local - 0.5) / uPanelZoom;
   vec3 feed = getScene(panelUV);
   // optical see-through (G4): the display ADDS light over the world —
   // black is transparent, dim feed pixels vanish. The display has no

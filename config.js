@@ -40,10 +40,6 @@ export const GAZE = {
   // (applies to both the follow and the spring back)
   easeMs: 200,
 
-  // zoom change per wheel-delta unit while repositioning the panel
-  // (scroll up = zoom in; one notch ≈ 100 units ≈ 0.2 zoom)
-  wheelZoom: 0.002,
-
   // how quickly movements react to the mouse: screen fractions
   // travelled per screen fraction of pointer movement. Covers BOTH
   // modifier gestures — Option (gaze) and Option+Shift (panel
@@ -51,6 +47,43 @@ export const GAZE = {
   // pointer's absolute position (user spec 2026-08-28; doubled from
   // 1 same day)
   speed: 2,
+};
+
+// Keyboard shortcuts. Two layers; what each action DOES lives in
+// controls.js (the ACTIONS table).
+export const SHORTCUTS = {
+  // plain unmodified keys (matched on e.key); Cmd/Ctrl combos belong
+  // to the browser, Option alone to the gaze gesture
+  keys: {
+    0: 'toggleSymptoms',   // everything under Adjust Symptoms off/on
+    1: 'toggleField',      // visual field on/off
+    2: 'toggleNight',      // nyctalopia (night blindness) on/off
+    f: 'fullscreen',       // chromeless fullscreen (Esc exits)
+  },
+
+  // the PANEL layer: these fire only while Option+Shift is held —
+  // the same chord as the panel's mouse gestures, so every way of
+  // driving the aid lives on one modifier (user spec 2026-09-07).
+  // Matched on e.code (physical key, QWERTY names) because with
+  // Option held, macOS composes e.key into another character
+  // entirely (Option+Shift+A = 'Å') — key names would never match.
+  panelKeys: {
+    KeyA: 'togglePanel',     // glance panel (AR aid) on/off
+    Minus: 'zoomOut',        // panel zoom out
+    Equal: 'zoomIn',         // panel zoom in (the +/= key)
+    ArrowUp: 'focusUp',      // pan the panel's zoomed crop — change
+    ArrowDown: 'focusDown',  //   where in the feed it looks
+    ArrowLeft: 'focusLeft',
+    ArrowRight: 'focusRight',
+  },
+
+  // panel zoom change per +/− press (and per auto-repeat while held)
+  panelZoomStep: 0.2,
+
+  // crop pan per arrow press, as a fraction of the PANEL'S VIEW (not
+  // of the feed): controls.js divides by zoom, so the image appears
+  // to move the same amount per press at any magnification
+  panelFocusStep: 0.05,
 };
 
 // Geometry of the visual field. Quale-shaped ({ enabled, params })
@@ -72,14 +105,14 @@ export const FIELD = {
     // (it IS the field's progression), but its UI is the headline
     // General-tab slider, deliberately not duplicated in the
     // generated group (DECISIONS 2026-08-20, reaffirmed 2026-08-28)
-    degeneration: { value: 0.75, min: 0, max: 1, label: 'Degeneration of central field' },
+    degeneration: { value: 0.82, min: 0, max: 1, label: 'Degeneration of central field' },
 
     // radius of the surviving central island, [mild, late]
     inner: { value: [81, 13], min: 0, max: 90, label: 'Central island radius' },
 
     // radius where far-peripheral islands can begin — the dead ring's
     // far side, [mild, late]. Widens outward as degeneration advances.
-    outer: { value: [65, 85], min: 0, max: 90, label: 'Far islands begin' },
+    outer: { value: [85, 90], min: 0, max: 90, label: 'Far islands begin' },
 
     // how much of the beyond-the-ring field survives when mild
     outerCoverage: { value: 0.65, min: 0, max: 1, label: 'Far island coverage' },
@@ -130,9 +163,16 @@ export const PANEL = {
     size: { value: 0.22, min: 0.05, max: 0.6, label: 'Panel size',
             hint: 'Mouse resize: hold Option+Shift, then click and drag — left grows, right shrinks' },
 
-    // how much the panel magnifies the centre of the feed
+    // how much the panel magnifies the feed around the focus point
     zoom: { value: 2, min: 1, max: 6, label: 'Panel zoom',
-            hint: 'While holding Option+Shift, scroll to zoom the panel in and out' },
+            hint: 'Hold Option+Shift and press + / − to zoom the panel in and out' },
+
+    // where in the feed the zoomed crop is centred (feed fractions,
+    // y up; [0.5, 0.5] = centre). noUI like position: driven by
+    // Option+Shift + arrow keys. The RENDERER clamps it against the
+    // current zoom at apply time, so no writer can push the crop off
+    // the feed (the 2026-09-06 wheel-path streaking, DECISIONS)
+    focus: { value: [0.5, 0.5], min: 0, max: 1, noUI: true, label: 'Panel focus' },
 
     // ambient light estimate — the display replicates the SOURCE
     // feed's brightness (no brightness knob of its own, user spec
@@ -141,11 +181,11 @@ export const PANEL = {
     // at or below 1 the panel adds the feed at source strength,
     // above 1 daylight washes it out. min stays above zero: this
     // value divides, and the schema clamp is the guard
-    ambient: { value: 1, min: 0.2, max: 2, label: 'Ambient light' },
+    ambient: { value: .5, min: 0.2, max: 2, label: 'Ambient light' },
 
     // 1 = maximum see-through (additive optics, floored by minOpacity
     // above so the panel never quite vanishes) … 0 = opaque display
-    transparency: { value: 1, min: 0, max: 1, label: 'Display transparency' },
+    transparency: { value: .5, min: 0, max: 1, label: 'Display transparency' },
   },
 };
 
@@ -213,6 +253,25 @@ export const QUALIA = {
   },
 
   transition: { enabled: true, params: {} },  // toggle only — no tunables yet
+
+  // nyctalopia (night blindness — the first RP symptom): rods are
+  // gone, and below the cone threshold there is no handoff — dim
+  // regions are ABSENT: black, not gray or grainy. Ships disabled:
+  // the all-on-reproduces-the-pre-refactor-look contract predates
+  // this quale, and defaulting it on would darken every existing look.
+  nyctalopia: {
+    enabled: false,
+    params: {
+      // scene luminance below which nothing is seen (0..1 of the
+      // feed's own range — the camera has already auto-exposed)
+      threshold: { value: 0.75, min: 0, max: 0.5, label: 'Darkness threshold',
+                   hint: 'How dark a surface must be before it disappears entirely' },
+
+      // width of the soft edge above the threshold: small = a hard
+      // wall of black, larger = shadows fade gradually into void
+      knee: { value: 0.75, min: 0.01, max: 0.4, label: 'Fade softness' },
+    },
+  },
 };
 
 // Clamp every param value into its schema range, naming each clamp in

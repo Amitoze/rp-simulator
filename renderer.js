@@ -29,10 +29,11 @@ function compile(type, src) {
 // The shader lives as ordered chunks; the stitcher concatenates them.
 // Chunks not named in CHUNK_QUALE are structural (prelude, field,
 // compositor) and always included.
-const CHUNKS = ['00-prelude', '10-field', '15-glance-panel', '20-smoke',
-                '21-photopsia', '22-sparkle', '23-murk', '24-transition',
-                '90-composite'];
+const CHUNKS = ['00-prelude', '10-field', '12-nyctalopia', '15-glance-panel',
+                '20-smoke', '21-photopsia', '22-sparkle', '23-murk',
+                '24-transition', '90-composite'];
 const CHUNK_QUALE = {
+  '12-nyctalopia': 'nyctalopia',
   '20-smoke': 'smoke',
   '21-photopsia': 'photopsia',
   '22-sparkle': 'sparkle',
@@ -92,12 +93,13 @@ function makeProgram(sources, qualia, field, panel) {
   // comes back null, and gl.uniform* on null is a defined no-op
   const U = {};
   for (const name of ['uTex', 'uSrc', 'uMirror', 'uTime', 'uRes', 'uEdgeBase',
-                      'uNetDensity', 'uSeeThru', 'uFit', 'uAspect',
+                      'uNetDensity', 'uSeeThru', 'uNightThresh', 'uNightKnee',
+                      'uFit', 'uAspect',
                       'uNetScale', 'uNetWarp', 'uNetFlicker',
                       'uOuterEdge', 'uOuterCover', 'uIslandSeed',
                       'uSparkleFlicker', 'uSparkleBandIn', 'uSparkleBandOut',
                       'uGaze', 'uPanelPos', 'uPanelW', 'uPanelAspect',
-                      'uPanelZoom', 'uPanelGain', 'uPanelOpaque',
+                      'uPanelZoom', 'uPanelFocus', 'uPanelGain', 'uPanelOpaque',
                       'uPanelHi', 'uPanelSee']) {
     U[name] = gl.getUniformLocation(prog, name);
   }
@@ -147,6 +149,9 @@ function applyQualia(U, qualia) {
   gl.uniform1f(U.uSparkleFlicker, 2 * Math.PI * spk.flickerHz.value);
   gl.uniform2f(U.uSparkleBandIn, spk.bandIn.value[0], spk.bandIn.value[1]);
   gl.uniform2f(U.uSparkleBandOut, spk.bandOut.value[0], spk.bandOut.value[1]);
+  const nyc = qualia.nyctalopia.params;
+  gl.uniform1f(U.uNightThresh, nyc.threshold.value);
+  gl.uniform1f(U.uNightKnee, nyc.knee.value);
 }
 
 // The aid's uniforms — ACTIVE pane only: the reference pane draws with
@@ -159,6 +164,15 @@ function applyPanel(U, panel) {
   gl.uniform1f(U.uPanelW, p.size.value);
   gl.uniform1f(U.uPanelAspect, panel.aspect);
   gl.uniform1f(U.uPanelZoom, p.zoom.value);
+  // focus is clamped HERE, against the zoom in force this frame — at
+  // zoom z the crop window is 1/z wide, so its centre may stray at
+  // most 0.5 − 0.5/z from centre. Clamping at apply time covers every
+  // writer at once; a write-side-only clamp let a second zoom writer
+  // push the crop off the feed (edge streaking, DECISIONS 2026-09-06)
+  const half = 0.5 / p.zoom.value;
+  gl.uniform2f(U.uPanelFocus,
+    Math.min(1 - half, Math.max(half, p.focus.value[0])),
+    Math.min(1 - half, Math.max(half, p.focus.value[1])));
   // the display replicates the source feed's brightness and never
   // exceeds it: gain = min(1, 1/ambient) — low ambient is not a
   // boost, only high ambient washes out (schema min keeps the
