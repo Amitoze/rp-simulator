@@ -40,6 +40,17 @@ export const EXPERIENCES = {
   glance: { background: 'video', view: 'immersive', panel: true },
 };
 
+// SAFETY — the photosensitivity gate (Phase L). The warning used to
+// live on the landing page only; shareable experience links bypass
+// that page, so the gate now lives in sim.html as an opaque, static
+// overlay. Tunables only: the overlay's text and look are markup/CSS.
+export const WARNING = {
+  // once acknowledged, stay quiet for the rest of the browser session
+  // (hopping between the three links asks once); false = every load
+  rememberForSession: true,
+  storageKey: 'rp-sim-warning-ack',
+};
+
 // Background video sources (Phase V). The stock clip is the default —
 // UI state only, never part of presets: a portrait is the condition,
 // not the footage. Local file / drag-drop / direct URL arrive V2–V4.

@@ -133,7 +133,7 @@ make are stated; the by-eye calls are the user's.
   boots immersive with the degeneration fader at 1 (far right) and the
   field visibly tighter than plain `sim.html`; the preset dropdown's
   Defaults still returns the fader to 0.82.
-- [ ] **3 · SAFETY gate overlay in sim.html.** `#gate` markup (warning
+- [x] **3 · SAFETY gate overlay in sim.html.** ✅ 2026-11-12 served-preview checks passed (computed: opacity 1, transition none, animation none, opaque #0b0d10, z 100, button focused; overlay covers the full 375×812 viewport, no horizontal scroll; ack hides it and persists for the session — a second link in the same tab does not ask; clearing the ack asks again). Phone by-eye for edge leakage still the user's. `#gate` markup (warning
   text, "I understand — start" button), opaque static CSS, `WARNING`
   config, wiring in controls.js: shown at boot unless the session ack
   exists; the button hides it and stores the ack. No transition, no

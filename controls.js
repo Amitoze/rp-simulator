@@ -1,6 +1,6 @@
 // Panel UI, background sources (camera / local video), and shared state.
 
-import { VIDEO, FIELD, QUALIA, GAZE, PANEL, TOUCH, REFERENCE_PRESET, SHORTCUTS } from './config.js';
+import { VIDEO, FIELD, QUALIA, GAZE, PANEL, TOUCH, REFERENCE_PRESET, SHORTCUTS, WARNING } from './config.js';
 // the resolved entry state: DEFAULTS, or the link's experience over it
 import { LAUNCH } from './launch.js';
 // cycle-safe: restitch/setReference are top-level function
@@ -745,7 +745,29 @@ function initShortcuts() {
   });
 }
 
+// SAFETY — the photosensitivity gate (Phase L, DECISIONS 2026-11-12 D).
+// The markup shows the opaque overlay; this only decides whether the
+// session has already acknowledged it, and records the click. Storage
+// can throw (private windows, blocked site data): a failure to read
+// means ask, a failure to write means ask again next load.
+function initGate() {
+  const gate = document.getElementById('gate');
+  const read = () => {
+    try { return WARNING.rememberForSession && sessionStorage.getItem(WARNING.storageKey); }
+    catch { return false; }
+  };
+  if (read()) { gate.hidden = true; return; }
+  const ok = document.getElementById('gateOk');
+  ok.addEventListener('click', () => {
+    gate.hidden = true;
+    try { if (WARNING.rememberForSession) sessionStorage.setItem(WARNING.storageKey, '1'); }
+    catch { /* ask again next load */ }
+  });
+  ok.focus();
+}
+
 export function initControls() {
+  initGate();
   // lets the markup show the touch or the desktop hint, never both
   document.body.classList.toggle('touch', IS_TOUCH);
   initGaze();
