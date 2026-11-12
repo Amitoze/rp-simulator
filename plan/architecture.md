@@ -2,7 +2,11 @@
 
 Maintained by `/architecture`; derived from `plan/` + `DECISIONS.md` +
 the code — update it there, then regenerate here. **Last updated:
-2026-08-30** (Phase V planned — video source picker on the SOURCE
+2026-11-12** (Phase L planned — deinops landing page replaces
+index.html; LAUNCH stage ahead of SOURCE: `sim.html?experience=<name>`
+→ EXPERIENCES block → schema + UI boot; SAFETY gate overlay moves into
+sim.html, all 🟦. Queue-jumps C, user's call — see DECISIONS
+2026-11-12 "Phase L planned". Prior update 2026-08-30: Phase V planned — video source picker on the SOURCE
 stage: stock clip default / local file via picker or drag-drop /
 direct CORS-gated media URL, all 🟦. Queue-jumps C, user's call —
 see DECISIONS 2026-08-30 "Phase V planned". Prior update 2026-08-28:
@@ -44,6 +48,26 @@ filters; devices are worn over the condition, never part of it.
 ```
 
 ```
+ deinops landing page  index.html 🟦 (L — the company home; one
+   card per experience, each a plain link naming it; no simulator
+   JavaScript; "contains rapid flashing" stated, not gated here)
+        │ sim.html?experience=<name>   (slugs severe / compare / glance)
+        ▼
+┌─────────────────────────────────────────────┐
+│ LAUNCH  launch.js 🟦 (L)                     │
+│  EXPERIENCES block (config.js): named entry  │
+│  states shaped like DEFAULTS + degeneration  │
+│  + panel; DEFAULTS = the unnamed one; unknown│
+│  or absent name → defaults (+ console warn)  │
+│  writes degeneration + PANEL.enabled into    │
+│  the schema BEFORE stitch; hands background /│
+│  view / menu to the UI's boot                │
+│  SAFETY gate overlay (sim.html): opaque,     │
+│  static, "I understand" → start; remembered  │
+│  for the browser session                     │
+└────────┬────────────────────────────────────┘
+         │ entry state, once
+         ▼
  camera / video file / procedural fallback
         │ pixels, once per frame
         ▼
@@ -398,3 +422,41 @@ transition ──▶ survival mix ──▶ … (unchanged downstream)
 
 Active pane only — the reference pane stays the bare condition, so
 the comparison reads "with aid" vs "without".
+
+### Launch + landing 🟦 (Phase L planned 2026-11-12 — DECISIONS "Phase L planned")
+
+```
+index.html (deinops)                 any shared link (slide, email)
+   │ card click                            │ pasted URL
+   └──────────────┬─────────────────────────┘
+                  │ sim.html?experience=<name>
+                  ▼
+launch.js: read the name once at module load
+   name ∈ EXPERIENCES ──▶ { ...DEFAULTS, ...EXPERIENCES[name] }
+   absent / unknown ─────▶ DEFAULTS (unknown also warns in the console)
+                  │ one resolved entry state
+       ┌──────────┴──────────────┐
+       ▼                         ▼
+ schema writes                 UI boot (controls.js applyDefaults
+ (renderer main, BEFORE        reads the resolved state, not DEFAULTS)
+  restitch):                     background → bgVid click
+   degeneration → FIELD          view       → vwSbs click
+     (clamped to its range)      menu       → panelHead click
+   panel → PANEL.enabled
+       │
+       ▼
+ restitch(QUALIA, FIELD, PANEL) compiles the panel in iff enabled
+ initControls draws the degeneration slider FROM the schema (so the
+ fader and the field agree without a second write)
+
+SAFETY gate (sim.html #gate): opaque, static overlay over everything;
+ the sim runs beneath but nothing shows until "I understand"; the
+ acknowledgement is kept in sessionStorage so hopping between the
+ three links in one session asks once. Config: WARNING block.
+```
+
+Why a stage of its own: an experience is neither the condition (a
+preset — DECISIONS 2026-08-28 keeps the device and UI state out of
+those) nor render state; it is the answer to "what should this link
+open?", and it must be applied before the shader is stitched, which
+nothing else in the boot path does.

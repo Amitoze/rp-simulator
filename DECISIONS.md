@@ -3,6 +3,62 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-11-12 — Phase L planned: deinops landing page + launch experiences
+
+Context: deinops is the company (assistive tech for low vision,
+specialising in RP); the simulator becomes one product among several.
+The landing page replaces the simulator's own front page and links to
+three pre-configured experiences. Queue-jumps C again (user's call —
+the links serve the outreach critical path, 00-context). Appetite 0.5
+day. Ratified as recommended, user's call 2026-11-12 ("build phase L").
+
+- **A · A link selects an experience by query string**
+  (`sim.html?experience=glance`); one sim.html, unknown or absent
+  names fall back to today's defaults so plain `sim.html` is
+  unchanged. Rejected: one page per experience (three copies of the
+  sim markup to keep in sync); hash fragment (conventionally in-page
+  navigation, easily rewritten by browsers). The URL is what gets
+  printed in slides and emails, so the slugs `severe` / `compare` /
+  `glance` are stable names — display names may change, slugs don't.
+- **B · Experiences live in a new `EXPERIENCES` block in config.js**,
+  each entry the shape of `DEFAULTS` (background, view, menu) plus the
+  condition's headline (degeneration) and the aid's switch (panel).
+  `DEFAULTS` is the unnamed experience. Rejected: putting view / panel
+  fields into preset JSON — relitigates 2026-08-28 (presets are the
+  condition, never the device or UI state); encoding settings in the
+  link (`?view=sbs&panel=1`) — tunables leak into URLs and every
+  rename breaks printed links. All three experiences boot on the
+  stock video, not the camera, so a link works without a permission
+  prompt; camera stays one tap away `[my-synthesis]` — the by-eye
+  gate decides.
+- **C · The deinops page replaces index.html in this repo, written to
+  lift out later**: no simulator JavaScript on the page, relative
+  links to the sim, its own style block. Keeps the published URL the
+  README and outreach notes already carry; one deploy. Rejected for
+  now: a separate deinops site repo (two deploys, nothing else to put
+  there yet, over the appetite). **Deferred:** moving the company
+  home to its own domain — reopens when a second product ships or a
+  domain is bought.
+- **D · SAFETY — the photosensitivity gate moves INTO sim.html** as an
+  opaque first-launch overlay with the warning and an "I understand"
+  button, remembered for the browser session. Reason: the shareable
+  links bypass the landing page entirely, so a gate that lives only
+  there is no gate. The overlay is static — no animation, no
+  transition — and fully opaque, so nothing flashes behind it. The
+  landing cards state "contains rapid flashing" as information, not
+  as the gate. Rejected: landing-only (bypassed); both (redundant on
+  the landing path).
+- **Names.** Side-by-side = "What you see, what I see" (user asked for
+  a name; keeps the first-person voice of the portrait; alternatives
+  offered: "Side by side", "Sighted vs RP"). First-person severe =
+  "Through my eyes"; AR = "The glance aid". The former landing page's
+  narrative and caveats are shortened into the first-person card's
+  copy; the footage credit stays in the simulator's status line.
+- **Branch base:** `phase-l-landing` cut from `phase-c-fill-in` after
+  committing G2, so the glance link exercises the touch gestures on a
+  phone. L's PR into main therefore carries G2 + the keyboard
+  shortcuts; G2's phone by-eye remains open and is not L's gate.
+
 ## 2026-09-15 — G2 reopened: touch gestures, double-tap = 0, nyctalopia exempt from the bulk toggle
 
 - **G2 reopened** (user's call — its own reopening condition was
