@@ -82,6 +82,13 @@ The interviews feed both the product (what to build beyond the sim) and
 the portraits themselves — other people's experiences becoming qualia
 presets, at which point FF6 stops being polish and becomes load-bearing.
 
+**Outreach (2026-09-14):** collaborators, funding and network strategy in
+[outreach/strategy.md](outreach/strategy.md), evidence in
+[research/outreach/](research/outreach/). Critical path: Monash MATS /
+CERA calls → MATS scholarship decision 31 Oct 2026 → AATC Nov 2026 →
+Vision 2027 abstract (5 Feb 2027) → Kenneth Myer EOI (Aug 2027) →
+Vision 2027, Melbourne (Sep 2027).
+
 ## Architecture decisions already made
 
 | Layer | Choice | Reasoning |

@@ -7,7 +7,7 @@ recruitment channel for the two interview cohorts
 **open evidence request 6**: "Are Vision Australia / Guide Dogs
 services gradient-capable? Ask the providers").
 
-**Status:** drafted 2026-08-22, nothing sent yet.
+**Status:** drafted 2026-08-22, nothing sent yet. **2026-09-14:** sequencing superseded by [strategy.md](strategy.md) — send after the Monash/CERA calls, cut to the ≤60-word opener template there; keep the draft below as talking points for the call.
 
 ## Channel map
 
