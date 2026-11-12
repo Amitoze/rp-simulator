@@ -12,6 +12,27 @@ export const DEFAULTS = {
   menuCollapsed: false,
 };
 
+// Launch experiences (Phase L): the named entry states the deinops
+// landing page links to — sim.html?experience=<name>. Each entry is
+// shaped like DEFAULTS (background / view / menuCollapsed, every key
+// optional, missing keys fall back to DEFAULTS) plus the condition's
+// headline and the aid's switch:
+//   degeneration — FIELD.params.degeneration.value at boot (clamped
+//                  to the schema range)
+//   panel        — PANEL.enabled at boot (compiled in before stitch)
+// DEFAULTS IS the unnamed experience: no name, or an unknown one,
+// boots exactly as before (unknown also warns in the console). The
+// slugs are printed in slides and emails — rename a display name
+// freely, never a slug (DECISIONS 2026-11-12).
+// All three boot on the stock video rather than the camera so a
+// shared link works without a permission prompt; camera stays one
+// tap away. By-eye tunables, not code.
+export const EXPERIENCE_PARAM = 'experience';
+export const EXPERIENCES = {
+  // "The glance aid": immersive, the panel on at its default placement
+  glance: { background: 'video', view: 'immersive', panel: true },
+};
+
 // Background video sources (Phase V). The stock clip is the default —
 // UI state only, never part of presets: a portrait is the condition,
 // not the footage. Local file / drag-drop / direct URL arrive V2–V4.

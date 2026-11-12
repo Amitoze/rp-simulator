@@ -1,6 +1,8 @@
 // Panel UI, background sources (camera / local video), and shared state.
 
-import { DEFAULTS, VIDEO, FIELD, QUALIA, GAZE, PANEL, TOUCH, REFERENCE_PRESET, SHORTCUTS } from './config.js';
+import { VIDEO, FIELD, QUALIA, GAZE, PANEL, TOUCH, REFERENCE_PRESET, SHORTCUTS } from './config.js';
+// the resolved entry state: DEFAULTS, or the link's experience over it
+import { LAUNCH } from './launch.js';
 // cycle-safe: restitch/setReference are top-level function
 // declarations in renderer.js, only called from event handlers anyway
 import { restitch, setReference } from './renderer.js';
@@ -160,11 +162,14 @@ function bindToggle(idA, idB, setState) {
   });
 }
 
+// Boot UI state from LAUNCH (DEFAULTS, or the link's experience laid
+// over it — launch.js). The schema side (degeneration, panel) was
+// written before the stitch; the fader just reads it.
 function applyDefaults() {
   sliders.degen.value = FIELD.params.degeneration.value;
-  if (DEFAULTS.background === 'video') document.getElementById('bgVid').click();
-  if (DEFAULTS.view === 'sideBySide') document.getElementById('vwSbs').click();
-  if (DEFAULTS.menuCollapsed) document.getElementById('panelHead').click();
+  if (LAUNCH.background === 'video') document.getElementById('bgVid').click();
+  if (LAUNCH.view === 'sideBySide') document.getElementById('vwSbs').click();
+  if (LAUNCH.menuCollapsed) document.getElementById('panelHead').click();
 }
 
 // --- generated "Adjust symptoms" section ----------------------------

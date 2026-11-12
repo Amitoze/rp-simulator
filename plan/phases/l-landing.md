@@ -117,7 +117,7 @@ WARNING = { rememberForSession: true, storageKey: 'rp-sim-warning-ack' }
 Each ends with something observable. Checks the served preview can
 make are stated; the by-eye calls are the user's.
 
-- [ ] **1 · LAUNCH stage + the glance experience.** `EXPERIENCES`,
+- [x] **1 · LAUNCH stage + the glance experience.** ✅ 2026-11-12 served-preview checks passed (glance: PANEL.enabled true, aid toggle on, Video on, immersive; plain sim.html: camera, panel off, degeneration 0.82; `?experience=typo`: as plain + one console warning). `EXPERIENCES`,
   `EXPERIENCE_PARAM` in config.js; `launch.js` resolves `LAUNCH` and
   exports `applyLaunchSchema()`; renderer `main()` calls it before
   `restitch`; controls `applyDefaults()` reads `LAUNCH`. Only `glance`
