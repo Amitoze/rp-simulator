@@ -1,6 +1,6 @@
 # Phase L — deinops landing page + launch experiences
 
-**Status:** planned 2026-11-12 · appetite 0.5 day · branch `phase-l-landing`
+**Status:** built 2026-11-12, steps 1–5 served-preview checked; GATE (by eye, desktop + phone) open — user's call · appetite 0.5 day · branch `phase-l-landing`
 (cut from `phase-c-fill-in` after committing G2). Ratified design:
 DECISIONS 2026-11-12 "Phase L planned" (A link mechanism, B experience
 home, C landing location, D SAFETY gate, names). Queue-jumps C on the
@@ -154,7 +154,7 @@ make are stated; the by-eye calls are the user's.
   resolve to the three experiences; no horizontal scroll at phone
   width; keyboard focus visible on every card. **Check (user, by eye):**
   the page reads as a company home, not a simulator splash.
-- [ ] **5 · README, plan sync, PR.** README's live link and the "How it
+- [x] **5 · README, plan sync, PR.** ✅ 2026-11-12 — README carries the three links; sim.html titled for the company; PR opened (carries G2 + shortcuts, stated in the body). README's live link and the "How it
   works" paragraph mention the landing page and the three links; plan
   row updated; push; PR into main (carries G2 + shortcuts — stated in
   the PR body).
