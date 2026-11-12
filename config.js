@@ -12,6 +12,45 @@ export const DEFAULTS = {
   menuCollapsed: false,
 };
 
+// Launch experiences (Phase L): the named entry states the deinops
+// landing page links to — sim.html?experience=<name>. Each entry is
+// shaped like DEFAULTS (background / view / menuCollapsed, every key
+// optional, missing keys fall back to DEFAULTS) plus the condition's
+// headline and the aid's switch:
+//   degeneration — FIELD.params.degeneration.value at boot (clamped
+//                  to the schema range)
+//   panel        — PANEL.enabled at boot (compiled in before stitch)
+// DEFAULTS IS the unnamed experience: no name, or an unknown one,
+// boots exactly as before (unknown also warns in the console). The
+// slugs are printed in slides and emails — rename a display name
+// freely, never a slug (DECISIONS 2026-11-12).
+// All three boot on the stock video rather than the camera so a
+// shared link works without a permission prompt; camera stays one
+// tap away. By-eye tunables, not code.
+export const EXPERIENCE_PARAM = 'experience';
+export const EXPERIENCES = {
+  // "Through my eyes": first person, degeneration at its far end
+  severe: { background: 'video', view: 'immersive', degeneration: 1.0, panel: false },
+
+  // "What you see, what I see": the comparison view; the reference
+  // (left/top) pane boots on REFERENCE_PRESET — the unfiltered view
+  compare: { background: 'video', view: 'sideBySide', panel: false },
+
+  // "The glance aid": immersive, the panel on at its default placement
+  glance: { background: 'video', view: 'immersive', panel: true },
+};
+
+// SAFETY — the photosensitivity gate (Phase L). The warning used to
+// live on the landing page only; shareable experience links bypass
+// that page, so the gate now lives in sim.html as an opaque, static
+// overlay. Tunables only: the overlay's text and look are markup/CSS.
+export const WARNING = {
+  // once acknowledged, stay quiet for the rest of the browser session
+  // (hopping between the three links asks once); false = every load
+  rememberForSession: true,
+  storageKey: 'rp-sim-warning-ack',
+};
+
 // Background video sources (Phase V). The stock clip is the default —
 // UI state only, never part of presets: a portrait is the condition,
 // not the footage. Local file / drag-drop / direct URL arrive V2–V4.
@@ -47,6 +86,27 @@ export const GAZE = {
   // pointer's absolute position (user spec 2026-08-28; doubled from
   // 1 same day)
   speed: 2,
+};
+
+// Touch gestures (G2): the phone's input for everything the desktop
+// drives with modifier chords. Canvas only, touch/pen pointers only —
+// the mouse keeps its chords. Tunables only, no toggle.
+export const TOUCH = {
+  // gaze: screen fractions travelled per screen fraction of finger
+  // travel. A finger already spans the screen, so 1:1 — unlike the
+  // mouse's GAZE.speed, which compensates for a small mouse mat
+  gazeSpeed: 1,
+
+  // move-panel mode: placement speed, same units as gazeSpeed
+  placeSpeed: 1,
+
+  // a double-tap fires shortcut 0 (all symptoms off / on) when the
+  // second tap lands within this many ms and this many px of the first
+  doubleTapMs: 300,
+  doubleTapSlop: 30,
+
+  // a touch that travels further than this (px) is a drag, not a tap
+  tapSlop: 12,
 };
 
 // Keyboard shortcuts. Two layers; what each action DOES lives in
@@ -261,6 +321,11 @@ export const QUALIA = {
   // this quale, and defaulting it on would darken every existing look.
   nyctalopia: {
     enabled: false,
+    // the bulk toggle (plain 0 / double-tap) leaves this quale alone in
+    // BOTH directions: night is a condition of the scene, not part of
+    // the "all symptoms" look (user's call, DECISIONS 2026-09-15).
+    // Only plain 2 or the quale's own switch change it.
+    bulkExempt: true,
     params: {
       // scene luminance below which nothing is seen (0..1 of the
       // feed's own range — the camera has already auto-exposed)

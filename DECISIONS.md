@@ -3,6 +3,116 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-11-12 — Phase L built and gated
+
+- **Gate passed** by eye (user, desktop + phone): each landing card
+  opens its named state, the warning shows once per session with
+  nothing flashing before it, the page reads as the company home.
+  Values shipped as planned: all three experiences on the stock video,
+  severe = degeneration 1.0, glance panel at its default placement —
+  none needed tuning at the gate. `[measured]` served-preview checks
+  per step are in the commit messages.
+- **Carried, not gated:** G2's phone by-eye (g-glance.md step 2)
+  remains open; it rides in PR #19 because the branch was cut from
+  `phase-c-fill-in`.
+
+## 2026-11-12 — Phase L planned: deinops landing page + launch experiences
+
+Context: deinops is the company (assistive tech for low vision,
+specialising in RP); the simulator becomes one product among several.
+The landing page replaces the simulator's own front page and links to
+three pre-configured experiences. Queue-jumps C again (user's call —
+the links serve the outreach critical path, 00-context). Appetite 0.5
+day. Ratified as recommended, user's call 2026-11-12 ("build phase L").
+
+- **A · A link selects an experience by query string**
+  (`sim.html?experience=glance`); one sim.html, unknown or absent
+  names fall back to today's defaults so plain `sim.html` is
+  unchanged. Rejected: one page per experience (three copies of the
+  sim markup to keep in sync); hash fragment (conventionally in-page
+  navigation, easily rewritten by browsers). The URL is what gets
+  printed in slides and emails, so the slugs `severe` / `compare` /
+  `glance` are stable names — display names may change, slugs don't.
+- **B · Experiences live in a new `EXPERIENCES` block in config.js**,
+  each entry the shape of `DEFAULTS` (background, view, menu) plus the
+  condition's headline (degeneration) and the aid's switch (panel).
+  `DEFAULTS` is the unnamed experience. Rejected: putting view / panel
+  fields into preset JSON — relitigates 2026-08-28 (presets are the
+  condition, never the device or UI state); encoding settings in the
+  link (`?view=sbs&panel=1`) — tunables leak into URLs and every
+  rename breaks printed links. All three experiences boot on the
+  stock video, not the camera, so a link works without a permission
+  prompt; camera stays one tap away `[my-synthesis]` — the by-eye
+  gate decides.
+- **C · The deinops page replaces index.html in this repo, written to
+  lift out later**: no simulator JavaScript on the page, relative
+  links to the sim, its own style block. Keeps the published URL the
+  README and outreach notes already carry; one deploy. Rejected for
+  now: a separate deinops site repo (two deploys, nothing else to put
+  there yet, over the appetite). **Deferred:** moving the company
+  home to its own domain — reopens when a second product ships or a
+  domain is bought.
+- **D · SAFETY — the photosensitivity gate moves INTO sim.html** as an
+  opaque first-launch overlay with the warning and an "I understand"
+  button, remembered for the browser session. Reason: the shareable
+  links bypass the landing page entirely, so a gate that lives only
+  there is no gate. The overlay is static — no animation, no
+  transition — and fully opaque, so nothing flashes behind it. The
+  landing cards state "contains rapid flashing" as information, not
+  as the gate. Rejected: landing-only (bypassed); both (redundant on
+  the landing path).
+- **Names.** Side-by-side = "What you see, what I see" (user asked for
+  a name; keeps the first-person voice of the portrait; alternatives
+  offered: "Side by side", "Sighted vs RP"). First-person severe =
+  "Through my eyes"; AR = "The glance aid". The former landing page's
+  narrative and caveats are shortened into the first-person card's
+  copy; the footage credit stays in the simulator's status line.
+- **Branch base:** `phase-l-landing` cut from `phase-c-fill-in` after
+  committing G2, so the glance link exercises the touch gestures on a
+  phone. L's PR into main therefore carries G2 + the keyboard
+  shortcuts; G2's phone by-eye remains open and is not L's gate.
+
+## 2026-09-15 — G2 reopened: touch gestures, double-tap = 0, nyctalopia exempt from the bulk toggle
+
+- **G2 reopened** (user's call — its own reopening condition was
+  "before any phone-audience demo", and the primary audience is
+  mobile). Scope widened beyond the parked one-liner: gaze drag,
+  double-tap, and a move-panel mode. Fullscreen-on-mobile was
+  considered and DISCARDED (user's call, same day): the button route
+  is dead on iPhone Safari (no page-content Fullscreen API) and the
+  home-screen manifest is a separate concern.
+- **Touch input is its own layer, canvas-only, touch/pen pointers
+  only.** The mouse keeps the Option / Option+Shift chords untouched
+  — a click-drag on the desktop steering the gaze would break the
+  "pointer position never yanks the eye" spec of 2026-08-28. Chrome
+  device mode counts as touch (it emits touch pointers and reports
+  `pointer: coarse`), so the desktop can rehearse; the phone is the
+  gate.
+- **Gesture map** (`[my-synthesis]` — no user testing yet; the phone
+  by-eye is what would change it): one finger = gaze (or place, in
+  move mode); pinch = panel SIZE, not zoom (zoom keeps its fader —
+  one pinch meaning, no ambiguity); two-finger drag = crop pan,
+  content follows the fingers (map convention — the arrow keys keep
+  their look-that-way sense; the two coexist because nobody uses
+  both on one device). Finger speed 1:1 (`TOUCH.gazeSpeed`), not the
+  mouse's ×2 — a finger already covers the screen.
+- **Move-panel mode has no modifier to hold**, so it is a state with
+  an explicit enter and exit: the button in the AR aid tab enters
+  (visible only on touch AND with the panel on — a dead button for a
+  panel that is off is noise), collapsing the menu so the canvas is
+  reachable; a floating "Done moving" pill exits. It rides the SAME
+  `setReposition` as the chord (masked qualia, boundary highlight,
+  fader rebuild on exit), so the two paths cannot drift.
+- **Bulk toggle (0 / double-tap) now skips nyctalopia in BOTH
+  directions** (user's call — reported as a bug): night is a
+  condition of the scene, not part of the "all symptoms" look, and
+  the all-on-reproduces-the-pre-refactor-look contract (2026-09-07)
+  was already being broken by the bulk on. Config-driven:
+  `bulkExempt: true` on the quale's schema, read by the toggle — no
+  name hardcoded. Only plain 2 or the quale's own switch change it.
+  Assumption stated: "should not toggle" read as leave-alone in both
+  directions, so an on nyctalopia survives a bulk off.
+
 ## 2026-09-07 — Nyctalopia quale ratified (option C): scotopic floor now, adaptation lag backlogged
 
 - **Representation ratified** (user's call, option C): night blindness

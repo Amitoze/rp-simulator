@@ -1,5 +1,24 @@
 html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; z-index: 1; }
+/* touch-action: none — a finger on the canvas is a gesture (G2), never
+   a page scroll, pinch-zoom, or double-tap zoom; the callout kill stops
+   iOS offering to save the frame on a long press */
+canvas {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; z-index: 1;
+  touch-action: none; -webkit-touch-callout: none; user-select: none;
+}
+/* platform hints: the markup carries both, the body class picks one */
+.tap { display: none; }
+body.touch .tap { display: block; }
+body.touch .desk { display: none; }
+/* the move-panel exit, floating clear of the collapsed menu */
+#moveDone {
+  /* sits above the #note credit line, which it would otherwise overlap */
+  position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
+  z-index: 10; padding: 12px 22px; border-radius: 22px;
+  background: rgba(12, 14, 18, .82); color: #fff;
+  border: 1px solid rgba(255,255,255,.25);
+  font: 600 15px -apple-system, sans-serif;
+}
 #note {
   position: fixed; bottom: 10px; left: 10px; color: #888;
   font: 13px -apple-system, sans-serif; background: rgba(0,0,0,.55);
@@ -80,7 +99,7 @@ canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
   border: 1px solid rgba(255,255,255,.18); border-radius: 4px;
   padding: 6px 12px; font: 12px -apple-system, sans-serif;
 }
-#camFlip { width: 100%; margin-top: 8px; }
+#camFlip, #panelMove { width: 100%; margin-top: 8px; }
 #panel input[type=range] { accent-color: #2b62c9; }
 
 /* generated "Adjust symptoms" section (controls.js, from the schema) */
@@ -151,4 +170,38 @@ canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
   .gen .qtoggle { width: 50px; height: 28px; padding: 0; border-radius: 14px; }
   .gen .qtoggle::after { width: 22px; height: 22px; }
   .gen .qtoggle.on::after { transform: translateX(22px); }
+}
+
+/* SAFETY — the photosensitivity gate (Phase L). Opaque and static:
+   NO transition and NO animation on anything inside, ever — the ~9 Hz
+   net must not show through or fade in behind it. Above the menu
+   (z 10), the Done-moving pill (z 10) and the note. */
+#gate {
+  position: fixed; inset: 0; z-index: 100;
+  background: #0b0d10; color: #e6e9ee;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; overflow: auto;
+  font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: none; animation: none;
+}
+#gate[hidden] { display: none; }
+#gate .card { max-width: 32rem; }
+#gate .eyebrow {
+  margin: 0 0 12px; font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .22em; color: #d9a441;
+}
+#gate h1 {
+  margin: 0 0 16px; font: 500 clamp(26px, 6vw, 36px)/1.15 Charter, Georgia, serif;
+}
+#gate p { margin: 0 0 14px; }
+#gate .muted { color: #9aa3b2; font-size: 15px; }
+#gate button {
+  display: inline-block; margin: 14px 0 0; padding: 14px 26px;
+  background: transparent; color: #e6e9ee;
+  border: 1px solid #7b9fe8; border-radius: 6px;
+  font: 600 15px -apple-system, sans-serif; cursor: pointer;
+}
+#gate button:hover, #gate button:focus-visible { background: #7b9fe8; color: #0b0d10; outline: none; }
+#gate .back {
+  display: block; margin-top: 22px; color: #9aa3b2; font-size: 14px;
 }

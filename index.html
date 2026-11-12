@@ -3,7 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Retinitis Pigmentosa, as I See It</title>
+<title>deinops — assistive technology for low vision</title>
+<meta name="description" content="deinops builds assistive technology for low vision, specialising in retinitis pigmentosa. Try the RP simulator: first person, side by side, or with an AR glance aid.">
+<!-- The company page (Phase L). Written to lift out to its own site
+     later: no simulator JavaScript, relative links into the sim, its
+     own style block. The experience links name stable slugs —
+     config.js EXPERIENCES — never settings (DECISIONS 2026-11-12). -->
 <style>
   :root {
     --bg: #0b0d10;
@@ -13,11 +18,12 @@
     --accent: #7b9fe8;
     --warn: #d9a441;
     --hairline: rgba(255, 255, 255, 0.10);
+    --card: rgba(255, 255, 255, 0.03);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { font-size: 17px; }
   body {
-    /* faint tunnel: light center fading to dark edges */
+    /* faint tunnel: light centre fading to dark edges */
     background: radial-gradient(ellipse 120% 90% at 50% 35%, #14171c 0%, var(--bg) 70%);
     color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -26,9 +32,9 @@
     min-height: 100vh;
   }
   main {
-    max-width: 40rem;
+    max-width: 44rem;
     margin: 0 auto;
-    padding: clamp(3rem, 12vh, 7rem) 1.5rem 5rem;
+    padding: clamp(3rem, 12vh, 7rem) 1rem 5rem;
   }
   .eyebrow {
     font-size: 0.76rem;
@@ -40,14 +46,15 @@
   h1 {
     font-family: Charter, Georgia, "Times New Roman", serif;
     font-weight: 500;
-    font-size: clamp(2rem, 6vw, 3.1rem);
-    line-height: 1.15;
-    letter-spacing: 0;
+    font-size: clamp(2.4rem, 7vw, 3.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
     margin-bottom: 1rem;
   }
   .lede {
     font-size: 1.12rem;
     color: var(--muted);
+    max-width: 36rem;
     margin-bottom: 4rem;
   }
   h2 {
@@ -58,43 +65,76 @@
     color: var(--faint);
     margin: 3.2rem 0 1rem;
   }
-  p { margin-bottom: 1.1rem; }
-  p + p { text-indent: 0; }
-  em { color: var(--muted); font-style: italic; }
-  .warning {
-    margin: 3.5rem 0 0;
-    padding: 1.3rem 1.4rem;
-    border: 1px solid rgba(217, 164, 65, 0.35);
-    border-radius: 6px;
-  }
-  .warning strong {
-    display: block;
-    color: var(--warn);
-    font-size: 0.76rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.22em;
+  h3 {
+    font-family: Charter, Georgia, "Times New Roman", serif;
+    font-weight: 500;
+    font-size: 1.55rem;
+    line-height: 1.2;
     margin-bottom: 0.6rem;
   }
-  .warning p { margin: 0; color: var(--muted); font-size: 0.95rem; }
-  .enter {
-    display: inline-block;
-    margin-top: 2.2rem;
-    padding: 0.85rem 2.2rem;
-    color: var(--ink);
-    background: transparent;
-    border: 1px solid var(--accent);
-    border-radius: 6px;
-    font: 600 0.95rem/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    letter-spacing: 0.03em;
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s;
+  p { margin-bottom: 1.1rem; }
+  em { color: var(--muted); font-style: italic; }
+  a { color: var(--accent); }
+
+  /* the product's experiences: one link per card, the whole card is
+     the target (a big tap on a phone, one Tab stop on a keyboard) */
+  .experiences {
+    list-style: none;
+    display: grid;
+    gap: 0.9rem;
+    margin: 1.4rem 0 0;
   }
-  .enter:hover, .enter:focus-visible {
-    background: var(--accent);
-    color: #0b0d10;
+  .experiences a {
+    display: block;
+    padding: 1.2rem 1.3rem 1.1rem;
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--ink);
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .experiences a:hover, .experiences a:focus-visible {
+    border-color: var(--accent);
+    background: rgba(123, 159, 232, 0.08);
     outline: none;
   }
+  .experiences a:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+  .experiences .name {
+    display: block;
+    font-family: Charter, Georgia, "Times New Roman", serif;
+    font-size: 1.3rem;
+    line-height: 1.25;
+    margin-bottom: 0.35rem;
+  }
+  .experiences .what {
+    display: block;
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+  }
+  .experiences .go {
+    display: block;
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .flash {
+    display: block;
+    margin-top: 0.9rem;
+    font-size: 0.8rem;
+    color: var(--warn);
+    letter-spacing: 0.03em;
+  }
+  .caveat {
+    margin-top: 1.2rem;
+    padding: 1.1rem 1.3rem;
+    border-left: 2px solid var(--hairline);
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .caveat p:last-child { margin-bottom: 0; }
   footer {
     margin-top: 5rem;
     padding-top: 1.4rem;
@@ -104,43 +144,80 @@
   }
   footer a { color: var(--faint); }
   footer a:hover { color: var(--muted); }
+  footer p { margin-bottom: 0.5rem; }
   ::selection { background: var(--accent); color: #0b0d10; }
 </style>
 </head>
 <body>
 <main>
-  <p class="eyebrow">An interactive simulation</p>
-  <h1>Retinitis pigmentosa</h1>
-  <p class="lede">An artistic representation of my experience of
-  retinitis pigmentosa.</p>
+  <p class="eyebrow">Assistive technology for low vision</p>
+  <h1>deinops</h1>
+  <p class="lede">Products for life with retinitis pigmentosa, built by
+  someone who lives with it. The first is a simulator that shows the
+  condition from the inside; aids for independent activity follow.</p>
 
-  <p>Retinitis pigmentosa is an inherited eye condition in which the
-  light-sensing cells of the retina slowly die, usually from the edges of
-  vision inward. Clinical descriptions and simulations describe symptoms of tunnel vision and night
-  blindness. What they rarely describe is what the lost field actually
-  looks like from the inside. This is my attempt at capturing my actual experience.</p>
+  <h2>Products</h2>
 
-  <h2>Caveats</h2>
+  <section aria-labelledby="sim">
+    <h3 id="sim">RP Simulator</h3>
+    <p>Retinitis pigmentosa is an inherited condition in which the
+    light-sensing cells of the retina slowly die, usually from the
+    edges of vision inward. Clinical descriptions say <em>tunnel
+    vision</em> and <em>night blindness</em>. They rarely say what the
+    lost field actually looks like. This simulator filters live camera
+    or street footage through one person's visual field, including the
+    part other simulators leave out: the dead region is not black, it is
+    filled in, and it flashes.</p>
 
-  <p>RP varies enormously between people (it is an umbrella term for thousands of different genetic conditions that lead to similar patterns of vision loss); a
-  different person would draw a different picture of their own experience.</p>
+    <ul class="experiences">
+      <li>
+        <a href="sim.html?experience=severe">
+          <span class="name">Through my eyes</span>
+          <span class="what">First person, at a late stage: a small
+          surviving centre, a flickering dead ring, and a few far
+          islands of sight. Drag to look around.</span>
+          <span class="go">Open the experience →</span>
+        </a>
+      </li>
+      <li>
+        <a href="sim.html?experience=compare">
+          <span class="name">What you see, what I see</span>
+          <span class="what">Normal vision beside the simulated field,
+          same footage, same moment. The clearest way to show a sighted
+          person what is missing.</span>
+          <span class="go">Open the comparison →</span>
+        </a>
+      </li>
+      <li>
+        <a href="sim.html?experience=glance">
+          <span class="name">The glance aid</span>
+          <span class="what">A head-worn display drawn into the scene,
+          then seen through the condition: a preview of what an AR aid
+          could put inside the surviving field.</span>
+          <span class="go">Open the AR preview →</span>
+        </a>
+      </li>
+    </ul>
+    <span class="flash">All three contain continuous rapid flashing at
+    around 9 Hz. The simulator asks you to confirm before it starts.</span>
 
-  <div class="warning">
-    <strong>Photosensitivity warning</strong>
-    <p>The simulation contains continuous rapid flashing at around 9&nbsp;Hz.
-    If you have photosensitive epilepsy or are sensitive to flickering
-    light, please do not continue.</p>
-  </div>
-
-  <a class="enter" href="sim.html">I understand — enter the simulation</a>
+    <div class="caveat">
+      <p>This is a portrait, not an average and not a medical model. RP
+      is an umbrella term for thousands of genetic conditions with
+      similar patterns of loss; another person would draw a different
+      picture of their own experience. The imagery is checked against
+      the clinical literature where it exists, and follows the person
+      where it diverges.</p>
+    </div>
+  </section>
 
   <footer>
-    Built with WebGL.
-    Street footage: excerpt from
+    <p>Built with WebGL. <a href="https://github.com/Amitoze/rp-simulator">Source on GitHub</a>.</p>
+    <p>Street footage: excerpt from
     <a href="https://commons.wikimedia.org/wiki/File:Shanghai_March_2026_%E2%80%93_Magical_City_Spring_Walk_-_4K_HDR.webm">"Shanghai
     March 2026 – Magical City Spring Walk"</a> by LOVE SHANGHAI,
     <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>,
-    trimmed and re-encoded.
+    trimmed and re-encoded.</p>
   </footer>
 </main>
 </body>

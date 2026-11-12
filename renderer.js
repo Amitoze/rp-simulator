@@ -2,6 +2,7 @@
 
 import { state, video, fileVideo, initControls, IS_TOUCH } from './controls.js';
 import { FIELD, QUALIA, GAZE, PANEL, REFERENCE_PRESET } from './config.js';
+import { applyLaunchSchema } from './launch.js';
 // cycle-safe: materialise is a hoisted function declaration in
 // presets.js, first called long after every module has evaluated
 import { materialise } from './presets.js';
@@ -211,6 +212,10 @@ async function main() {
     sources[c] = await (await fetch(`shader/${c}.frag`, { cache: 'no-store' })).text();
   }));
 
+  // the launch experience's schema writes (degeneration, panel) land
+  // here — before the stitch compiles the panel in or out, and before
+  // initControls draws the fader from the schema (Phase L)
+  applyLaunchSchema();
   restitch(QUALIA, FIELD, PANEL);
 
   // reference pane boots on the configured default (none = the honest

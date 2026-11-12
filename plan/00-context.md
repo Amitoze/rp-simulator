@@ -1,7 +1,7 @@
 # RP Visual Field Simulator — Context
 
 **Status:** Iteration 2 — the messy donut
-**Last updated:** 2026-09-05
+**Last updated:** 2026-11-12
 
 This file is the high-level context: what the project is, the decisions
 already made, and the cross-cutting rules. The numbered files in this folder
@@ -12,8 +12,9 @@ are the task breakdown:
 | [01-foundation.md](01-foundation.md) | A — landing page, WebGL sim, camera/video, mobile, config | — | ✅ done 2026-08-13 (built 2026-08-12/13, pre-plan) |
 | [02-donut-field.md](02-donut-field.md) | B — messy-donut field geometry | 0.5 day | ✅ done 2026-08-18 (gate passed by eye) |
 | [06-qualia-refactor.md](06-qualia-refactor.md) | Q — qualia refactor: toggleable qualia + toggleable field, preset files, per-pane configs | 1–1.5 days | ✅ **COMPLETE 2026-08-28** — Q1–Q5 all gated by eye, desktop + phone (Q5: per-pane rendering, field toggle, envelope v2; the none≠unfiltered ⚠ dissolved via field-off) |
-| [phases/g-glance.md](phases/g-glance.md) | G — gaze simulation + AR glance panel (queue-jumped ahead of C/D, user's call — DECISIONS 2026-08-28) | 1–1.5 days | merged 2026-08-28, G1/G3/G4 gated by eye; **G2 (touch gaze) + G5 (formal gate incl. SAFETY by-eye) PARKED** — gate not formally passed, user's call |
+| [phases/g-glance.md](phases/g-glance.md) | G — gaze simulation + AR glance panel (queue-jumped ahead of C/D, user's call — DECISIONS 2026-08-28) | 1–1.5 days | merged 2026-08-28, G1/G3/G4 gated by eye; **G2 REOPENED 2026-09-15** (touch gestures + double-tap + move-panel mode, built on `phase-c-fill-in`, awaiting phone by-eye); **G5 (formal gate incl. SAFETY by-eye) PARKED** — gate not formally passed, user's call |
 | [phases/v-video-sources.md](phases/v-video-sources.md) | V — video sources: stock default / local file (picker + drag-drop) / direct media URL (queue-jumped ahead of C, user's call — DECISIONS 2026-08-30) | 0.5 day | ✅ done 2026-09-05 — V1–V4 built, gate passed by eye, desktop + phone |
+| [phases/l-landing.md](phases/l-landing.md) | L — deinops landing page + launch experiences (`sim.html?experience=…`); gate overlay moves into the sim (queue-jumped ahead of C, user's call — DECISIONS 2026-11-12) | 0.5 day | ✅ done 2026-11-12 — L1–L5 built, gate passed by eye (desktop + phone); PR #19 `phase-l-landing` → main |
 | [03-fill-in.md](03-fill-in.md) | C — fill-in replaces transparency; photopsias confined to the scotoma | 0.5 day | **next up** |
 | [04-peripheral-rendering.md](04-peripheral-rendering.md) | D — how the preserved outer islands look | 0.5–1 day | |
 | [05-fast-follow.md](05-fast-follow.md) | Register of work deferred off the critical path | deferred | FF1–FF6 registered |
@@ -81,6 +82,13 @@ content shaped by what people with RP say they actually needed.
 The interviews feed both the product (what to build beyond the sim) and
 the portraits themselves — other people's experiences becoming qualia
 presets, at which point FF6 stops being polish and becomes load-bearing.
+
+**Outreach (2026-09-14):** collaborators, funding and network strategy in
+[outreach/strategy.md](outreach/strategy.md), evidence in
+[research/outreach/](research/outreach/). Critical path: Monash MATS /
+CERA calls → MATS scholarship decision 31 Oct 2026 → AATC Nov 2026 →
+Vision 2027 abstract (5 Feb 2027) → Kenneth Myer EOI (Aug 2027) →
+Vision 2027, Melbourne (Sep 2027).
 
 ## Architecture decisions already made
 

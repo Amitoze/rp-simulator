@@ -1,6 +1,14 @@
 # Retinitis pigmentosa, as I see it
 
-**Live: https://amitoze.github.io/rp-simulator/**
+**Live: https://amitoze.github.io/rp-simulator/** — the [deinops](https://amitoze.github.io/rp-simulator/) landing page, with three ready-made experiences:
+
+| Experience | Link | What opens |
+|---|---|---|
+| Through my eyes | [`sim.html?experience=severe`](https://amitoze.github.io/rp-simulator/sim.html?experience=severe) | first person, degeneration at its far end |
+| What you see, what I see | [`sim.html?experience=compare`](https://amitoze.github.io/rp-simulator/sim.html?experience=compare) | normal vision beside the simulated field |
+| The glance aid | [`sim.html?experience=glance`](https://amitoze.github.io/rp-simulator/sim.html?experience=glance) | immersive, with the simulated AR glance panel on |
+
+Plain `sim.html` opens with the defaults. Experiences are named entry states in `config.js` (`EXPERIENCES`); the photosensitivity warning is shown by the simulator itself before anything flashes.
 
 An artistic representation of one person's experience of retinitis pigmentosa (RP) — an inherited condition in which the retina's light-sensing cells slowly die, usually from the edges of vision inward.
 
@@ -30,7 +38,7 @@ flowchart LR
 - **Shader** (`shader.frag`) — per pixel: field mask, smokey periphery, flashing net, edge ring
 - **Screen** — immersive view, or a normal-vision comparison
 
-Sliders control the size of the surviving field, the density of the flashing net, and how much shows through the periphery. Camera mode uses the rear camera on phones; comparison view shows normal vision alongside the simulation.
+Sliders control the size of the surviving field, the density of the flashing net, and how much shows through the periphery. Camera mode uses the rear camera on phones; comparison view shows normal vision alongside the simulation. The experience links above boot on the bundled street video so they work without a camera permission prompt.
 
 ## Running locally
 
