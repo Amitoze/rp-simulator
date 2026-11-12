@@ -117,14 +117,39 @@ in every step that touches it.
   drag moves the island diagonally without stretching; release springs
   back to centre; in side-by-side, the None reference shows no change
   (field off — nothing to move) while the symptom pane moves.
-- [ ] **2 · Gaze on touch.** PARKED (user's call, 2026-08-28 — merged
-  without it). Gaze has NO phone input until this lands; reopens
-  before any phone-audience demo of the glance experience. One-finger
-  drag on the canvas drives the same gaze target (pointer events; the
-  DOM menu is unaffected); same clamp and spring-back.
+- [ ] **2 · Gaze on touch + phone gestures.** REOPENED 2026-09-15
+  (user's call — the primary audience is mobile; DECISIONS 2026-09-15).
+  Pointer events on the CANVAS only, touch/pen pointers only — the
+  mouse keeps its modifier chords, the DOM menu is untouched. New
+  `TOUCH` config block (speed, tap timing, slop); `touch-action: none`
+  on the canvas so no drag fights the page scroll or pinch-zoom.
+  Three sub-steps, each gated by eye on the phone (Chrome device
+  mode is an acceptable rehearsal — it emits touch pointers and
+  reports `pointer: coarse`):
+  - [ ] **2a · Gaze drag.** One-finger drag steers the same gaze
+    target through the same clamp (relative deltas ×
+    `TOUCH.gazeSpeed`); lifting the finger springs back exactly as
+    releasing Option does.
+  - [ ] **2b · Double-tap = shortcut 0** (all symptoms off / on).
+    Bug fixed en route: the bulk toggle no longer drives nyctalopia
+    in either direction — schema flag `bulkExempt: true` on the
+    quale; only plain 2 or its own switch change it.
+  - [ ] **2c · Move-panel mode.** "Move panel…" button in the AR aid
+    tab, shown only on a touch device AND while the panel is on.
+    Tapping it collapses the menu, enters the existing reposition
+    view (field-only, yellow boundary — `setReposition`, one code
+    path with the chord), and floats a "Done moving" pill over the
+    canvas. One-finger drag places; pinch resizes (size follows the
+    pinch ratio); two-finger drag pans the zoomed crop (content
+    follows the fingers). Done, toggling the panel off, or losing
+    focus exits and restores the live schema; the size fader shows
+    the truth on exit (same rebuild as the chord).
   **Check (user, by eye, phone):** finger-drag moves the mask, no
-  page scroll/zoom interference, spring-back on lift, baseline fps
-  holds.
+  page scroll/zoom interference, spring-back on lift; double-tap
+  drops every symptom, double-tap again restores all — nyctalopia
+  stays wherever it was; Move panel… appears only with the panel on,
+  drag places, pinch resizes, two-finger drag pans, Done restores the
+  symptoms and keeps the placement; baseline fps holds.
 - [x] **3 · Panel skeleton, ideal mode.** ✅ user by-eye pass
   2026-08-28 ("works as expected"), as amended — relative gaze, AR
   aid tab, single fixed-ratio size, Option+Shift reposition mode all

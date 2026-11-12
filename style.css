@@ -1,5 +1,24 @@
 html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; z-index: 1; }
+/* touch-action: none — a finger on the canvas is a gesture (G2), never
+   a page scroll, pinch-zoom, or double-tap zoom; the callout kill stops
+   iOS offering to save the frame on a long press */
+canvas {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; z-index: 1;
+  touch-action: none; -webkit-touch-callout: none; user-select: none;
+}
+/* platform hints: the markup carries both, the body class picks one */
+.tap { display: none; }
+body.touch .tap { display: block; }
+body.touch .desk { display: none; }
+/* the move-panel exit, floating clear of the collapsed menu */
+#moveDone {
+  /* sits above the #note credit line, which it would otherwise overlap */
+  position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
+  z-index: 10; padding: 12px 22px; border-radius: 22px;
+  background: rgba(12, 14, 18, .82); color: #fff;
+  border: 1px solid rgba(255,255,255,.25);
+  font: 600 15px -apple-system, sans-serif;
+}
 #note {
   position: fixed; bottom: 10px; left: 10px; color: #888;
   font: 13px -apple-system, sans-serif; background: rgba(0,0,0,.55);
@@ -80,7 +99,7 @@ canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
   border: 1px solid rgba(255,255,255,.18); border-radius: 4px;
   padding: 6px 12px; font: 12px -apple-system, sans-serif;
 }
-#camFlip { width: 100%; margin-top: 8px; }
+#camFlip, #panelMove { width: 100%; margin-top: 8px; }
 #panel input[type=range] { accent-color: #2b62c9; }
 
 /* generated "Adjust symptoms" section (controls.js, from the schema) */

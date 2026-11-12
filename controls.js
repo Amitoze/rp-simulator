@@ -1,6 +1,6 @@
 // Panel UI, background sources (camera / local video), and shared state.
 
-import { DEFAULTS, VIDEO, FIELD, QUALIA, GAZE, PANEL, REFERENCE_PRESET, SHORTCUTS } from './config.js';
+import { DEFAULTS, VIDEO, FIELD, QUALIA, GAZE, PANEL, TOUCH, REFERENCE_PRESET, SHORTCUTS } from './config.js';
 // cycle-safe: restitch/setReference are top-level function
 // declarations in renderer.js, only called from event handlers anyway
 import { restitch, setReference } from './renderer.js';
@@ -20,6 +20,8 @@ export const state = {
                       // consumed by the frame loop — one pair of eyes
   repositionMode: false, // Option+Shift held: placing the glance panel
                          // (field-only view + boundary highlight)
+  touchReposition: false, // the touch flavour of the above: entered by
+                          // the Move panel button, left by Done (G2)
 };
 
 export const IS_TOUCH = matchMedia('(pointer: coarse)').matches;
@@ -272,6 +274,18 @@ function buildPanelGroup() {
   const holder = document.getElementById('panelGroup');
   holder.replaceChildren();
   addGroup(holder, 'Glance panel (AR aid)', PANEL);
+  // the Move panel button follows the switch (registered after the
+  // toggle's own listener, so it reads the flipped state)
+  holder.querySelector('.qtoggle').addEventListener('click', syncMoveButton);
+  syncMoveButton();
+}
+
+// "Move panel…" exists only where it can do something: a touch
+// device (the mouse has its chord) with the panel on (user spec
+// 2026-09-15). Toggling the panel off mid-move ends the move.
+function syncMoveButton() {
+  document.getElementById('panelMove').hidden = !(IS_TOUCH && PANEL.enabled);
+  if (!PANEL.enabled && state.touchReposition) setReposition(false);
 }
 
 // --- preset dropdown -------------------------------------------------
@@ -391,10 +405,65 @@ async function initPresets() {
 // off, panel kept) so pane and field are all that shows while
 // placing, the boundary highlight lights up, and deltas write the
 // panel's position; releasing either key restores the live schema.
+// shared by the mouse chord (initGaze) and the touch layer (initTouch):
+// one clamp, one spring-back, one reposition mode — the two inputs
+// cannot drift apart.
+function releaseGaze() {
+  if (GAZE.springBack) state.gazeTarget = [0, 0];
+}
+
+// dx/dy already in screen fractions (GL y up); length-clamped
+function steerGaze(dx, dy) {
+  const t = [state.gazeTarget[0] + dx, state.gazeTarget[1] + dy];
+  const len = Math.hypot(t[0], t[1]);
+  if (len > GAZE.maxExcursion) {
+    t[0] *= GAZE.maxExcursion / len;
+    t[1] *= GAZE.maxExcursion / len;
+  }
+  state.gazeTarget = t;
+}
+
+function placePanel(dx, dy) {
+  const p = PANEL.params.position;
+  p.value[0] = Math.min(p.max, Math.max(p.min, p.value[0] + dx));
+  p.value[1] = Math.min(p.max, Math.max(p.min, p.value[1] + dy));
+}
+
+function sizePanel(v) {
+  const p = PANEL.params.size;
+  p.value = Math.min(p.max, Math.max(p.min, v));
+}
+
+// While repositioning with the mouse, holding the button switches the
+// drag to RESIZE: left = bigger, right = smaller (one width param, so
+// the ratio keeps itself); releasing the button resumes placing.
+// Zoom moved to Option+Shift + / − (the keyboard panel layer) —
+// the wheel gesture was retired with it (user spec 2026-09-07).
+let resizing = false;
+
+// masked view for reposition mode — derived, never mutating QUALIA:
+// the user's toggles come back untouched on exit
+const maskedQualia = () => Object.fromEntries(Object.entries(QUALIA)
+  .map(([qname, quale]) => [qname, { ...quale, enabled: false }]));
+
+function setReposition(on) {
+  if (state.repositionMode === on) return;
+  state.repositionMode = on;
+  if (!on) {
+    resizing = false;
+    // leaving by ANY route (Done, chord release, panel off, blur)
+    // ends the touch flavour too and takes its pill with it
+    state.touchReposition = false;
+    document.getElementById('moveDone').hidden = true;
+    // a gesture resize wrote the schema behind the size fader's
+    // back — regenerate the group so the slider shows the truth
+    buildPanelGroup();
+  }
+  restitch(on ? maskedQualia() : QUALIA, FIELD, PANEL);
+}
+
 function initGaze() {
-  const release = () => {
-    if (GAZE.springBack) state.gazeTarget = [0, 0];
-  };
+  const release = releaseGaze;
 
   // While Option is held the canvas takes POINTER LOCK: the OS cursor
   // (which would pin at the screen edge and stop reporting movement)
@@ -410,30 +479,9 @@ function initGaze() {
     if (document.pointerLockElement) document.exitPointerLock();
   };
 
-  // While repositioning, holding the mouse button switches the drag
-  // to RESIZE: left = bigger, right = smaller (one width param, so
-  // the ratio keeps itself); releasing the button resumes placing.
-  // Zoom moved to Option+Shift + / − (the keyboard panel layer) —
-  // the wheel gesture was retired with it (user spec 2026-09-07).
-  let resizing = false;
-
-  // masked view for reposition mode — derived, never mutating QUALIA:
-  // the user's toggles come back untouched on exit
-  const maskedQualia = () => Object.fromEntries(Object.entries(QUALIA)
-    .map(([qname, quale]) => [qname, { ...quale, enabled: false }]));
-  const setReposition = on => {
-    if (state.repositionMode === on) return;
-    state.repositionMode = on;
-    if (!on) {
-      resizing = false;
-      // a gesture resize wrote the schema behind the size fader's
-      // back — regenerate the group so the slider shows the truth
-      buildPanelGroup();
-    }
-    restitch(on ? maskedQualia() : QUALIA, FIELD, PANEL);
-  };
+  // a stray key while in touch move mode must not end it
   const syncMode = e =>
-    setReposition(e.altKey && e.shiftKey && PANEL.enabled);
+    setReposition((e.altKey && e.shiftKey && PANEL.enabled) || state.touchReposition);
 
   addEventListener('keydown', e => {
     syncMode(e);
@@ -459,23 +507,125 @@ function initGaze() {
     if (state.repositionMode) {
       // button held = resize (drag LEFT = bigger — user correction
       // 2026-08-28 inverting the first spec); otherwise place
-      const p = resizing ? PANEL.params.size : PANEL.params.position;
-      if (resizing) {
-        p.value = Math.min(p.max, Math.max(p.min, p.value - dx));
-      } else {
-        p.value[0] = Math.min(p.max, Math.max(p.min, p.value[0] + dx));
-        p.value[1] = Math.min(p.max, Math.max(p.min, p.value[1] + dy));
-      }
+      if (resizing) sizePanel(PANEL.params.size.value - dx);
+      else placePanel(dx, dy);
     } else {
-      const t = [state.gazeTarget[0] + dx, state.gazeTarget[1] + dy];
-      const len = Math.hypot(t[0], t[1]);
-      if (len > GAZE.maxExcursion) {
-        t[0] *= GAZE.maxExcursion / len;
-        t[1] *= GAZE.maxExcursion / len;
-      }
-      state.gazeTarget = t;
+      steerGaze(dx, dy);
     }
   });
+}
+
+// --- touch gestures (G2) --------------------------------------------
+// The phone's whole input, on the CANVAS only (the menu is DOM and
+// never sees these) and for touch/pen pointers only — the mouse keeps
+// its chords, so a desktop click-drag can never steer the eye.
+//   one finger        gaze (spring-back on lift)  |  place (move mode)
+//   double-tap        shortcut 0: all symptoms off / on
+//   pinch             panel size                   (move mode only)
+//   two-finger drag   crop pan, content follows    (move mode only)
+// Deltas are between successive events (movementX is unreliable for
+// touch), converted to screen fractions like the mouse path.
+function initTouch() {
+  const canvas = document.getElementById('gl');
+  const pts = new Map(); // pointerId → last {x, y}
+  let down = null;       // first finger's touch-down point
+  let fingers = 0;       // most fingers seen during this touch
+  let moved = false;     // travelled beyond tapSlop → not a tap
+  let lastTap = null;    // {t, x, y} of the previous lone tap
+  let pinch = null;      // {dist, size} at two-finger start
+
+  const two = () => [...pts.values()].slice(0, 2);
+  const dist = ([a, b]) => Math.hypot(b.x - a.x, b.y - a.y);
+  const mid = ([a, b]) => [(a.x + b.x) / 2, (a.y + b.y) / 2];
+
+  canvas.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse') return;
+    // capture keeps a finger that slides off the canvas reporting;
+    // synthetic pointers (tests) have nothing to capture — not fatal
+    try { canvas.setPointerCapture(e.pointerId); } catch {}
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size === 1) {
+      down = { x: e.clientX, y: e.clientY };
+      fingers = 1; moved = false;
+    }
+    fingers = Math.max(fingers, pts.size);
+    if (pts.size === 2) {
+      pinch = { dist: dist(two()), size: PANEL.params.size.value, mid: mid(two()) };
+    }
+  });
+
+  canvas.addEventListener('pointermove', e => {
+    const p = pts.get(e.pointerId);
+    if (!p) return;
+    const dx = (e.clientX - p.x) / innerWidth;
+    const dy = -(e.clientY - p.y) / innerHeight; // GL y up
+    p.x = e.clientX; p.y = e.clientY;
+    if (!moved && down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > TOUCH.tapSlop)
+      moved = true;
+
+    if (pts.size >= 2) {
+      // two fingers mean something only while placing the panel
+      if (!state.touchReposition || !pinch) return;
+      const pair = two();
+      sizePanel(pinch.size * dist(pair) / pinch.dist);
+      // centroid travel pans the crop: content follows the fingers,
+      // so the crop centre moves against the drag; view fractions ÷
+      // zoom = feed fractions (same conversion as focusPanel)
+      const m = mid(pair);
+      const z = PANEL.params.zoom.value;
+      const f = PANEL.params.focus;
+      f.value[0] -= (m[0] - pinch.mid[0]) / innerWidth / z;
+      f.value[1] += (m[1] - pinch.mid[1]) / innerHeight / z;
+      pinch.mid = m;
+      clampFocus();
+      return;
+    }
+    if (state.touchReposition) placePanel(dx * TOUCH.placeSpeed, dy * TOUCH.placeSpeed);
+    else steerGaze(dx * TOUCH.gazeSpeed, dy * TOUCH.gazeSpeed);
+  });
+
+  const lift = e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.delete(e.pointerId);
+    pinch = null;
+    if (pts.size) return; // a finger is still down — its drag goes on
+    // a lone, still finger is a tap; two of them quickly = shortcut 0
+    if (e.type === 'pointerup' && fingers === 1 && !moved) {
+      const tap = { t: e.timeStamp, x: e.clientX, y: e.clientY };
+      if (lastTap && tap.t - lastTap.t < TOUCH.doubleTapMs
+          && Math.hypot(tap.x - lastTap.x, tap.y - lastTap.y) < TOUCH.doubleTapSlop) {
+        lastTap = null;
+        ACTIONS.toggleSymptoms();
+      } else {
+        lastTap = tap;
+      }
+    }
+    down = null;
+    if (!state.touchReposition) releaseGaze(); // the glance was a glance
+  };
+  canvas.addEventListener('pointerup', lift);
+  canvas.addEventListener('pointercancel', lift);
+
+  // move-panel mode: the button enters, the floating pill leaves.
+  // Entering collapses the menu so the canvas is reachable; leaving
+  // reopens it so the rebuilt size fader is in view.
+  const done = document.getElementById('moveDone');
+  document.getElementById('panelMove').addEventListener('click', () => {
+    state.touchReposition = true;
+    setReposition(true);
+    setMenuCollapsed(true);
+    done.hidden = false;
+  });
+  done.addEventListener('click', () => {
+    setReposition(false); // clears the touch flag and hides the pill
+    setMenuCollapsed(false);
+  });
+}
+
+function setMenuCollapsed(min) {
+  const panel = document.getElementById('panel');
+  panel.classList.toggle('min', min);
+  panel.querySelector('.chev').textContent = min ? '☰' : 'Done';
 }
 
 // --- keyboard shortcuts ---------------------------------------------
@@ -487,15 +637,21 @@ function initGaze() {
 // it — the applyPreset idiom — for one restitch instead of one per
 // group.
 
-const allSymptoms = () => [FIELD, ...Object.values(QUALIA)];
+// the bulk toggle's set: every symptom except those the schema exempts
+// (nyctalopia — night is a condition of the scene, not part of the
+// "all symptoms" look; only plain 2 or its own switch drive it. User's
+// call, DECISIONS 2026-09-15)
+const bulkSymptoms = () =>
+  [FIELD, ...Object.values(QUALIA)].filter(s => !s.bulkExempt);
 
 // all-or-nothing, deliberately memoryless: any symptom on → all off;
 // none on → ALL on, regardless of which were tweaked before (user
 // correction 2026-09-07 — the earlier restore-your-set memo read as
-// "only certain symptoms came back")
+// "only certain symptoms came back"). Exempt qualia are neither read
+// nor written.
 function toggleSymptoms() {
-  const turnOn = !allSymptoms().some(s => s.enabled);
-  allSymptoms().forEach(s => { s.enabled = turnOn; });
+  const turnOn = !bulkSymptoms().some(s => s.enabled);
+  bulkSymptoms().forEach(s => { s.enabled = turnOn; });
   buildAdvanced(); // regenerate from the schema = the sync
   restitch(QUALIA, FIELD, PANEL);
 }
@@ -585,7 +741,10 @@ function initShortcuts() {
 }
 
 export function initControls() {
+  // lets the markup show the touch or the desktop hint, never both
+  document.body.classList.toggle('touch', IS_TOUCH);
   initGaze();
+  initTouch();
   initShortcuts();
   // config owns the stock clip's path (markup carries no src) — the
   // one assignment every later source switch will route back through
@@ -662,9 +821,7 @@ export function initControls() {
 
   document.getElementById('panelHead').addEventListener('click', () => {
     const panel = document.getElementById('panel');
-    panel.classList.toggle('min');
-    panel.querySelector('.chev').textContent =
-      panel.classList.contains('min') ? '☰' : 'Done';
+    setMenuCollapsed(!panel.classList.contains('min'));
   });
 
   // the General slider is the convenience view onto the schema's

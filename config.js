@@ -49,6 +49,27 @@ export const GAZE = {
   speed: 2,
 };
 
+// Touch gestures (G2): the phone's input for everything the desktop
+// drives with modifier chords. Canvas only, touch/pen pointers only —
+// the mouse keeps its chords. Tunables only, no toggle.
+export const TOUCH = {
+  // gaze: screen fractions travelled per screen fraction of finger
+  // travel. A finger already spans the screen, so 1:1 — unlike the
+  // mouse's GAZE.speed, which compensates for a small mouse mat
+  gazeSpeed: 1,
+
+  // move-panel mode: placement speed, same units as gazeSpeed
+  placeSpeed: 1,
+
+  // a double-tap fires shortcut 0 (all symptoms off / on) when the
+  // second tap lands within this many ms and this many px of the first
+  doubleTapMs: 300,
+  doubleTapSlop: 30,
+
+  // a touch that travels further than this (px) is a drag, not a tap
+  tapSlop: 12,
+};
+
 // Keyboard shortcuts. Two layers; what each action DOES lives in
 // controls.js (the ACTIONS table).
 export const SHORTCUTS = {
@@ -261,6 +282,11 @@ export const QUALIA = {
   // this quale, and defaulting it on would darken every existing look.
   nyctalopia: {
     enabled: false,
+    // the bulk toggle (plain 0 / double-tap) leaves this quale alone in
+    // BOTH directions: night is a condition of the scene, not part of
+    // the "all symptoms" look (user's call, DECISIONS 2026-09-15).
+    // Only plain 2 or the quale's own switch change it.
+    bulkExempt: true,
     params: {
       // scene luminance below which nothing is seen (0..1 of the
       // feed's own range — the camera has already auto-exposed)

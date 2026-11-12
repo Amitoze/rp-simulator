@@ -3,6 +3,47 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-09-15 — G2 reopened: touch gestures, double-tap = 0, nyctalopia exempt from the bulk toggle
+
+- **G2 reopened** (user's call — its own reopening condition was
+  "before any phone-audience demo", and the primary audience is
+  mobile). Scope widened beyond the parked one-liner: gaze drag,
+  double-tap, and a move-panel mode. Fullscreen-on-mobile was
+  considered and DISCARDED (user's call, same day): the button route
+  is dead on iPhone Safari (no page-content Fullscreen API) and the
+  home-screen manifest is a separate concern.
+- **Touch input is its own layer, canvas-only, touch/pen pointers
+  only.** The mouse keeps the Option / Option+Shift chords untouched
+  — a click-drag on the desktop steering the gaze would break the
+  "pointer position never yanks the eye" spec of 2026-08-28. Chrome
+  device mode counts as touch (it emits touch pointers and reports
+  `pointer: coarse`), so the desktop can rehearse; the phone is the
+  gate.
+- **Gesture map** (`[my-synthesis]` — no user testing yet; the phone
+  by-eye is what would change it): one finger = gaze (or place, in
+  move mode); pinch = panel SIZE, not zoom (zoom keeps its fader —
+  one pinch meaning, no ambiguity); two-finger drag = crop pan,
+  content follows the fingers (map convention — the arrow keys keep
+  their look-that-way sense; the two coexist because nobody uses
+  both on one device). Finger speed 1:1 (`TOUCH.gazeSpeed`), not the
+  mouse's ×2 — a finger already covers the screen.
+- **Move-panel mode has no modifier to hold**, so it is a state with
+  an explicit enter and exit: the button in the AR aid tab enters
+  (visible only on touch AND with the panel on — a dead button for a
+  panel that is off is noise), collapsing the menu so the canvas is
+  reachable; a floating "Done moving" pill exits. It rides the SAME
+  `setReposition` as the chord (masked qualia, boundary highlight,
+  fader rebuild on exit), so the two paths cannot drift.
+- **Bulk toggle (0 / double-tap) now skips nyctalopia in BOTH
+  directions** (user's call — reported as a bug): night is a
+  condition of the scene, not part of the "all symptoms" look, and
+  the all-on-reproduces-the-pre-refactor-look contract (2026-09-07)
+  was already being broken by the bulk on. Config-driven:
+  `bulkExempt: true` on the quale's schema, read by the toggle — no
+  name hardcoded. Only plain 2 or the quale's own switch change it.
+  Assumption stated: "should not toggle" read as leave-alone in both
+  directions, so an on nyctalopia survives a bulk off.
+
 ## 2026-09-07 — Nyctalopia quale ratified (option C): scotopic floor now, adaptation lag backlogged
 
 - **Representation ratified** (user's call, option C): night blindness

@@ -57,7 +57,10 @@
         <select id="refSel"></select>
       </div>
       <div class="ghead">Moving the Gaze</div>
-      <p class="hint">Hold <b>Option</b> and move the mouse to shift the gaze view.</p>
+      <p class="hint desk">Hold <b>Option</b> and move the mouse to shift the gaze view.</p>
+      <p class="hint tap">Drag one finger on the view to shift the gaze; lift to
+      let it spring back. <b>Double-tap</b> the view to switch every
+      symptom off or on.</p>
     </div>
     <!-- the aid's tab (user spec 2026-08-28): a device, not a symptom
          — its own home next to Symptoms. Position has no fader:
@@ -65,8 +68,15 @@
     <div id="aid" hidden>
       <!-- filled by controls.js from the PANEL schema -->
       <div id="panelGroup" class="gen"></div>
+      <!-- touch only, and only while the panel is on (controls.js
+           syncMoveButton) — the mouse has its chord instead -->
+      <button id="panelMove" hidden>Move panel…</button>
       <div class="ghead">Moving the panel</div>
-      <p class="hint">Hold <b>Option + Shift</b> and move the mouse to
+      <p class="hint tap">Tap <b>Move panel…</b> — the symptoms clear
+      and a yellow border marks the panel. Drag one finger to place it,
+      <b>pinch</b> to resize, drag <b>two fingers</b> to pan what it
+      shows. Tap <b>Done moving</b> to finish.</p>
+      <p class="hint desk">Hold <b>Option + Shift</b> and move the mouse to
       place the panel — the symptoms clear, the field fades to half
       strength, and a yellow border marks the panel. While holding:
       click-drag to resize (left grows, right shrinks), press
@@ -92,6 +102,8 @@
   </div>
 </div>
 <div id="note">starting…</div>
+<!-- floats over the canvas while a touch move-panel is in progress -->
+<button id="moveDone" hidden>Done moving</button>
 <video id="cam" autoplay playsinline muted style="display:none"></video>
 <!-- src assigned at init from config's VIDEO.stock (Phase V) -->
 <video id="vid" loop muted playsinline
