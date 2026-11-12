@@ -144,7 +144,7 @@ make are stated; the by-eye calls are the user's.
   same tab does not ask again; a new tab asks again. Computed style
   check: `getComputedStyle(gate).opacity === '1'` and
   `transition === 'all 0s ease 0s'` (or `none`).
-- [ ] **4 · deinops landing page.** `index.html` replaced: eyebrow
+- [x] **4 · deinops landing page.** ✅ 2026-11-12 served-preview checks passed (three cards link to severe / compare / glance by slug; zero scripts on the page; no horizontal overflow at 375 px; Tab lands on the first card with a visible 2 px ring). **By eye (user): does it read as a company home?** — still the user's call. `index.html` replaced: eyebrow
   "deinops", name, one-line lede, "Products" with the RP simulator and
   its three experience cards (each linking by slug, each stating
   "contains rapid flashing"), caveats shortened from today's page,
