@@ -126,7 +126,7 @@ make are stated; the by-eye calls are the user's.
   the AR-aid tab's toggle on, background Video; plain `sim.html` is
   pixel-for-pixel today's boot (camera, panel off); `?experience=typo`
   boots as plain with one console warning.
-- [ ] **2 · `severe` and `compare`.** Two more entries, no new code
+- [x] **2 · `severe` and `compare`.** ✅ 2026-11-12 served-preview checks passed (compare: side-by-side on, reference row shown, note names the None reference; severe: degeneration 1 in schema and fader, immersive; Defaults in the preset dropdown returns 0.82). Two more entries, no new code
   paths.
   **Check:** `?experience=compare` boots side-by-side, note reads
   "comparison (left/top: None — all symptoms off)"; `?experience=severe`

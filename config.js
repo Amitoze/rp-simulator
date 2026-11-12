@@ -29,6 +29,13 @@ export const DEFAULTS = {
 // tap away. By-eye tunables, not code.
 export const EXPERIENCE_PARAM = 'experience';
 export const EXPERIENCES = {
+  // "Through my eyes": first person, degeneration at its far end
+  severe: { background: 'video', view: 'immersive', degeneration: 1.0, panel: false },
+
+  // "What you see, what I see": the comparison view; the reference
+  // (left/top) pane boots on REFERENCE_PRESET — the unfiltered view
+  compare: { background: 'video', view: 'sideBySide', panel: false },
+
   // "The glance aid": immersive, the panel on at its default placement
   glance: { background: 'video', view: 'immersive', panel: true },
 };
