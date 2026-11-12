@@ -1,6 +1,6 @@
 # Phase L — deinops landing page + launch experiences
 
-**Status:** built 2026-11-12, steps 1–5 served-preview checked; GATE (by eye, desktop + phone) open — user's call · appetite 0.5 day · branch `phase-l-landing`
+**Status:** ✅ COMPLETE 2026-11-12 — steps 1–5 served-preview checked, GATE passed by eye (user, desktop + phone) · appetite 0.5 day · branch `phase-l-landing`
 (cut from `phase-c-fill-in` after committing G2). Ratified design:
 DECISIONS 2026-11-12 "Phase L planned" (A link mechanism, B experience
 home, C landing location, D SAFETY gate, names). Queue-jumps C on the
@@ -160,6 +160,8 @@ make are stated; the by-eye calls are the user's.
   the PR body).
 
 ## Gate (the user's call, never self-certified)
+
+**✅ PASSED 2026-11-12** — user by eye, desktop + phone ("Gate passed").
 
 On desktop and on a phone, from the deinops page: each of the three
 cards opens the simulator in the named state, the warning appears once

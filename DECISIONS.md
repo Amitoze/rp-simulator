@@ -3,6 +3,19 @@
 Running log of judgement calls, so they are not re-litigated and so future
 regressions can be traced to what changed. Newest first.
 
+## 2026-11-12 — Phase L built and gated
+
+- **Gate passed** by eye (user, desktop + phone): each landing card
+  opens its named state, the warning shows once per session with
+  nothing flashing before it, the page reads as the company home.
+  Values shipped as planned: all three experiences on the stock video,
+  severe = degeneration 1.0, glance panel at its default placement —
+  none needed tuning at the gate. `[measured]` served-preview checks
+  per step are in the commit messages.
+- **Carried, not gated:** G2's phone by-eye (g-glance.md step 2)
+  remains open; it rides in PR #19 because the branch was cut from
+  `phase-c-fill-in`.
+
 ## 2026-11-12 — Phase L planned: deinops landing page + launch experiences
 
 Context: deinops is the company (assistive tech for low vision,
